@@ -26,58 +26,6 @@ body {
     position: relative;
 }
 
-/* --------------------------------------------------
-   SPARK WALLPAPER
--------------------------------------------------- */
-
-body::before,
-body::after {
-    content:
-        "spark spark spark spark spark spark spark spark
-         spark spark spark spark spark spark spark spark
-         spark spark spark spark spark spark spark spark
-         spark spark spark spark spark spark spark spark
-         spark spark spark spark spark spark spark spark
-         spark spark spark spark spark spark spark spark
-         spark spark spark spark spark spark spark spark
-         spark spark spark spark spark spark spark spark
-         spark spark spark spark spark spark spark spark
-         spark spark spark spark spark spark spark spark
-         spark spark spark spark spark spark spark spark
-         spark spark spark spark spark spark spark spark
-         spark spark spark spark spark spark spark spark
-         spark spark spark spark spark spark spark spark
-         spark spark spark spark spark spark spark spark
-         spark spark spark spark spark spark spark spark";
-
-    position: fixed;
-    left: -100%;
-    top: -100%;
-
-    width: 300%;
-    height: 300%;
-
-    font-size: 34px;
-    font-weight: bold;
-    letter-spacing: 12px;
-    word-spacing: 28px;
-    line-height: 100px;
-
-    color: rgba(255,255,255,0.045);
-
-    white-space: pre-wrap;
-    pointer-events: none;
-}
-
-body::before {
-    transform: rotate(-45deg);
-}
-
-body::after {
-    color: rgba(255,255,255,0.025);
-    transform: rotate(45deg);
-}
-
 
 /* --------------------------------------------------
    WINDOW
@@ -89,8 +37,8 @@ body::after {
     left: 50%;
     top: 50%;
 
-    width: 720px;
-    height: 430px;
+    width: 640px;
+    height: 380px;
 
     transform: translate(-50%, -50%);
 
@@ -100,15 +48,13 @@ body::after {
     box-shadow:
         6px 6px 0 rgba(0,0,0,0.35),
         inset 1px 1px 0 rgba(255,255,255,0.25);
+
+    overflow: hidden;
 }
 
 
 /* --------------------------------------------------
    TOPBAR
-
-   This is permanently attached to the TOP of the
-   window. It does not get repositioned when the
-   window is minimized.
 -------------------------------------------------- */
 
 .titlebar {
@@ -145,7 +91,7 @@ body::after {
 
 
 /* --------------------------------------------------
-   SINGLE MIN/MAX BUTTON
+   WINDOW BUTTON
 -------------------------------------------------- */
 
 .window-button {
@@ -186,19 +132,284 @@ body::after {
     width: 100%;
     height: calc(100% - 30px);
 
-    padding: 12px;
+    padding: 8px;
 
     background: #aaa;
 }
 
 
 /* --------------------------------------------------
-   MINIMIZED
+   CONTROLS
+-------------------------------------------------- */
 
-   IMPORTANT:
-   The window itself does NOT move.
-   The topbar stays at the exact same X/Y.
-   Only the content disappears.
+.controls {
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    padding: 4px 5px;
+
+    background: #858585;
+    border: 2px solid #666;
+    border-top-color: #bdbdbd;
+    border-left-color: #bdbdbd;
+
+    box-shadow:
+        inset 1px 1px 0 rgba(255,255,255,0.15);
+
+    margin-bottom: 7px;
+}
+
+.play-button {
+    width: 58px;
+    height: 26px;
+
+    border: 2px solid #292929;
+
+    background: #555;
+    color: #eee;
+
+    font-size: 12px;
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.play-button:hover {
+    background: #666;
+}
+
+.play-button:active {
+    background: #3b3b3b;
+}
+
+.tempo-label {
+    color: #ddd;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: 3px;
+}
+
+.tempo-input {
+    width: 58px;
+    height: 26px;
+
+    border: 2px solid #444;
+    background: #d0d0d0;
+
+    color: #222;
+
+    font-size: 12px;
+    font-weight: bold;
+
+    padding: 2px 5px;
+
+    outline: none;
+}
+
+.tempo-input:focus {
+    background: #e2e2e2;
+}
+
+
+/* --------------------------------------------------
+   CHANNEL RACK
+-------------------------------------------------- */
+
+.channel-rack {
+    width: 100%;
+    height: calc(100% - 45px);
+
+    background: #858585;
+
+    border: 2px solid #666;
+    border-top-color: #bdbdbd;
+    border-left-color: #bdbdbd;
+
+    padding: 7px;
+
+    overflow: hidden;
+}
+
+
+/* --------------------------------------------------
+   CHANNEL ROW
+-------------------------------------------------- */
+
+.channel-row {
+    height: 58px;
+
+    display: flex;
+    align-items: center;
+
+    margin-bottom: 6px;
+}
+
+.channel-row:last-child {
+    margin-bottom: 0;
+}
+
+
+/* --------------------------------------------------
+   SAMPLE BOX
+-------------------------------------------------- */
+
+.sample-box {
+    flex-shrink: 0;
+
+    width: 115px;
+    height: 52px;
+
+    background: #555;
+
+    border: 2px solid #303030;
+    border-top-color: #707070;
+    border-left-color: #707070;
+
+    color: #ddd;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 8px;
+
+    cursor: pointer;
+
+    overflow: hidden;
+}
+
+.sample-box:hover {
+    background: #606060;
+}
+
+.sample-box:active {
+    background: #484848;
+}
+
+.sample-name {
+    width: 100%;
+
+    font-size: 11px;
+    font-weight: bold;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    pointer-events: none;
+}
+
+
+/* --------------------------------------------------
+   STEP AREA
+-------------------------------------------------- */
+
+.steps {
+    height: 52px;
+
+    flex: 1;
+
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+
+    gap: 3px;
+
+    margin-left: 7px;
+}
+
+
+/* --------------------------------------------------
+   STEP
+-------------------------------------------------- */
+
+.step {
+    min-width: 0;
+
+    border: 2px solid #292929;
+
+    cursor: pointer;
+
+    transition:
+        background 0.04s linear,
+        filter 0.04s linear;
+}
+
+
+/*
+    Groups:
+
+    0 = blue
+    1 = dull red
+    2 = blue
+    3 = dull red
+*/
+
+.step.group-blue {
+    background: #41647d;
+}
+
+.step.group-red {
+    background: #765050;
+}
+
+
+/* --------------------------------------------------
+   ACTIVE STEPS
+-------------------------------------------------- */
+
+.step.active.group-blue {
+    background: #e0b82f;
+
+    border-color: #9b7b15;
+}
+
+.step.active.group-red {
+    background: #e0b82f;
+
+    border-color: #9b7b15;
+}
+
+
+/* --------------------------------------------------
+   HOVER
+-------------------------------------------------- */
+
+.step:hover {
+    filter: brightness(1.15);
+}
+
+.step.active:hover {
+    filter: brightness(1.08);
+}
+
+
+/* --------------------------------------------------
+   PLAYHEAD
+-------------------------------------------------- */
+
+.step.playing {
+    filter: brightness(1.45);
+}
+
+.step.active.playing {
+    background: #f5d65a;
+    filter: brightness(1.05);
+}
+
+
+/* --------------------------------------------------
+   GROUP SEPARATION
+-------------------------------------------------- */
+
+.step.group-start {
+    margin-left: 3px;
+}
+
+
+/* --------------------------------------------------
+   MINIMIZED
 -------------------------------------------------- */
 
 .window.minimized {
@@ -240,18 +451,76 @@ body::after {
 
     </div>
 
+
     <div class="content">
-        <!-- Fruity Loops-style content -->
+
+        <!-- ------------------------------------------------
+             PLAYBACK CONTROLS
+        ------------------------------------------------- -->
+
+        <div class="controls">
+
+            <button
+                class="play-button"
+                id="playButton"
+            >Play</button>
+
+            <span class="tempo-label">
+                BPM
+            </span>
+
+            <input
+                class="tempo-input"
+                id="tempoInput"
+                type="number"
+                min="30"
+                max="300"
+                value="120"
+                step="1"
+            >
+
+        </div>
+
+
+        <!-- ------------------------------------------------
+             CHANNEL RACK
+        ------------------------------------------------- -->
+
+        <div class="channel-rack" id="channelRack">
+
+            <!-- Rows generated by JavaScript -->
+
+        </div>
+
     </div>
 
 </div>
 
 
+<!-- Hidden file selector -->
+
+<input
+    type="file"
+    id="sampleFileInput"
+    accept="audio/*"
+    style="display:none;"
+>
+
+
 <script>
 
-const windowEl = document.getElementById("rack");
-const titlebar = document.getElementById("rackTitlebar");
-const toggleButton = document.getElementById("toggleWindow");
+/* ==========================================================
+   WINDOW
+========================================================== */
+
+const windowEl =
+    document.getElementById("rack");
+
+const titlebar =
+    document.getElementById("rackTitlebar");
+
+const toggleButton =
+    document.getElementById("toggleWindow");
 
 let minimized = false;
 let dragging = false;
@@ -261,108 +530,935 @@ let offsetY = 0;
 
 
 /* --------------------------------------------------
-   MINIMIZE / RESTORE
+   KEEP WINDOW INSIDE SCREEN
 -------------------------------------------------- */
 
-toggleButton.addEventListener("click", (event) => {
+function clampWindowPosition(left, top) {
 
-    event.stopPropagation();
+    const rect =
+        windowEl.getBoundingClientRect();
 
-    minimized = !minimized;
+    const maxLeft =
+        Math.max(
+            0,
+            window.innerWidth - rect.width
+        );
 
-    windowEl.classList.toggle(
-        "minimized",
-        minimized
-    );
+    const maxTop =
+        Math.max(
+            0,
+            window.innerHeight - rect.height
+        );
 
-    toggleButton.textContent =
-        minimized ? "□" : "_";
-});
+    return {
+        left: Math.max(
+            0,
+            Math.min(left, maxLeft)
+        ),
+
+        top: Math.max(
+            0,
+            Math.min(top, maxTop)
+        )
+    };
+}
 
 
 /* --------------------------------------------------
-   DRAG BY TOPBAR
+   MINIMIZE
 -------------------------------------------------- */
 
-titlebar.addEventListener("mousedown", (event) => {
+toggleButton.addEventListener(
+    "click",
+    (event) => {
 
-    // Don't drag when pressing the button.
-    if (event.target === toggleButton) {
+        event.stopPropagation();
+
+        const rect =
+            windowEl.getBoundingClientRect();
+
+        windowEl.style.transform =
+            "none";
+
+        windowEl.style.left =
+            rect.left + "px";
+
+        windowEl.style.top =
+            rect.top + "px";
+
+        minimized = !minimized;
+
+        windowEl.classList.toggle(
+            "minimized",
+            minimized
+        );
+
+        toggleButton.textContent =
+            minimized ? "□" : "_";
+    }
+);
+
+
+/* --------------------------------------------------
+   DRAG
+-------------------------------------------------- */
+
+titlebar.addEventListener(
+    "mousedown",
+    (event) => {
+
+        if (event.target === toggleButton) {
+            return;
+        }
+
+        dragging = true;
+
+        windowEl.classList.add(
+            "dragging"
+        );
+
+        const rect =
+            windowEl.getBoundingClientRect();
+
+        windowEl.style.transform =
+            "none";
+
+        windowEl.style.left =
+            rect.left + "px";
+
+        windowEl.style.top =
+            rect.top + "px";
+
+        offsetX =
+            event.clientX - rect.left;
+
+        offsetY =
+            event.clientY - rect.top;
+
+        event.preventDefault();
+    }
+);
+
+
+document.addEventListener(
+    "mousemove",
+    (event) => {
+
+        if (!dragging) {
+            return;
+        }
+
+        const newLeft =
+            event.clientX - offsetX;
+
+        const newTop =
+            event.clientY - offsetY;
+
+        const clamped =
+            clampWindowPosition(
+                newLeft,
+                newTop
+            );
+
+        windowEl.style.left =
+            clamped.left + "px";
+
+        windowEl.style.top =
+            clamped.top + "px";
+    }
+);
+
+
+document.addEventListener(
+    "mouseup",
+    () => {
+
+        dragging = false;
+
+        windowEl.classList.remove(
+            "dragging"
+        );
+    }
+);
+
+
+/* --------------------------------------------------
+   WINDOW RESIZE
+-------------------------------------------------- */
+
+window.addEventListener(
+    "resize",
+    () => {
+
+        const rect =
+            windowEl.getBoundingClientRect();
+
+        const clamped =
+            clampWindowPosition(
+                rect.left,
+                rect.top
+            );
+
+        windowEl.style.transform =
+            "none";
+
+        windowEl.style.left =
+            clamped.left + "px";
+
+        windowEl.style.top =
+            clamped.top + "px";
+    }
+);
+
+
+/* ==========================================================
+   CHANNEL RACK
+========================================================== */
+
+const channelRack =
+    document.getElementById("channelRack");
+
+const sampleFileInput =
+    document.getElementById(
+        "sampleFileInput"
+    );
+
+
+const ROW_COUNT = 4;
+const STEP_COUNT = 16;
+
+
+/*
+    Each row has:
+
+    sample
+    active[16]
+    AudioBuffer
+*/
+
+const channels =
+    [];
+
+
+let selectedChannel = 0;
+
+
+/* --------------------------------------------------
+   CREATE CHANNELS
+-------------------------------------------------- */
+
+for (
+    let row = 0;
+    row < ROW_COUNT;
+    row++
+) {
+
+    channels.push({
+
+        name: "Sample " + (row + 1),
+
+        buffer: null,
+
+        active:
+            new Array(STEP_COUNT)
+                .fill(false)
+
+    });
+
+
+    const rowElement =
+        document.createElement(
+            "div"
+        );
+
+    rowElement.className =
+        "channel-row";
+
+
+    /* Sample selector */
+
+    const sampleBox =
+        document.createElement(
+            "div"
+        );
+
+    sampleBox.className =
+        "sample-box";
+
+    sampleBox.dataset.channel =
+        row;
+
+
+    const sampleName =
+        document.createElement(
+            "div"
+        );
+
+    sampleName.className =
+        "sample-name";
+
+    sampleName.textContent =
+        "Sample " + (row + 1);
+
+
+    sampleBox.appendChild(
+        sampleName
+    );
+
+
+    sampleBox.addEventListener(
+        "click",
+        () => {
+
+            selectedChannel =
+                Number(
+                    sampleBox.dataset.channel
+                );
+
+            sampleFileInput.value = "";
+
+            sampleFileInput.click();
+        }
+    );
+
+
+    rowElement.appendChild(
+        sampleBox
+    );
+
+
+    /* Step grid */
+
+    const steps =
+        document.createElement(
+            "div"
+        );
+
+    steps.className =
+        "steps";
+
+
+    for (
+        let step = 0;
+        step < STEP_COUNT;
+        step++
+    ) {
+
+        const cell =
+            document.createElement(
+                "div"
+            );
+
+
+        cell.className =
+            "step " +
+            (
+                Math.floor(step / 4) % 2 === 0
+                    ? "group-blue"
+                    : "group-red"
+            );
+
+
+        if (
+            step === 4 ||
+            step === 8 ||
+            step === 12
+        ) {
+            cell.classList.add(
+                "group-start"
+            );
+        }
+
+
+        cell.dataset.row =
+            row;
+
+        cell.dataset.step =
+            step;
+
+
+        cell.addEventListener(
+            "click",
+            () => {
+
+                const channel =
+                    channels[row];
+
+                channel.active[step] =
+                    !channel.active[step];
+
+                cell.classList.toggle(
+                    "active",
+                    channel.active[step]
+                );
+            }
+        );
+
+
+        steps.appendChild(
+            cell
+        );
+    }
+
+
+    rowElement.appendChild(
+        steps
+    );
+
+    channelRack.appendChild(
+        rowElement
+    );
+}
+
+
+/* ==========================================================
+   SAMPLE LOADING
+========================================================== */
+
+let audioContext = null;
+
+
+/*
+    AudioContext is created only after the user
+    interacts with the page.
+
+    This avoids browsers blocking audio automatically.
+*/
+
+function getAudioContext() {
+
+    if (!audioContext) {
+
+        const AudioContext =
+            window.AudioContext ||
+            window.webkitAudioContext;
+
+        audioContext =
+            new AudioContext({
+                latencyHint: "interactive"
+            });
+    }
+
+    return audioContext;
+}
+
+
+sampleFileInput.addEventListener(
+    "change",
+    async () => {
+
+        const file =
+            sampleFileInput.files[0];
+
+        if (!file) {
+            return;
+        }
+
+
+        const channel =
+            channels[selectedChannel];
+
+
+        const context =
+            getAudioContext();
+
+
+        try {
+
+            const arrayBuffer =
+                await file.arrayBuffer();
+
+
+            /*
+                Decode once.
+
+                Playback uses the decoded AudioBuffer
+                instead of decoding every time a step plays.
+            */
+
+            const decoded =
+                await context.decodeAudioData(
+                    arrayBuffer
+                );
+
+
+            channel.buffer =
+                decoded;
+
+
+            channel.name =
+                file.name;
+
+
+            const rowElement =
+                channelRack.children[
+                    selectedChannel
+                ];
+
+
+            const nameElement =
+                rowElement.querySelector(
+                    ".sample-name"
+                );
+
+
+            nameElement.textContent =
+                file.name;
+
+
+        } catch (error) {
+
+            console.error(
+                "Could not load audio:",
+                error
+            );
+
+            channel.buffer = null;
+        }
+    }
+);
+
+
+/* ==========================================================
+   SEQUENCER
+========================================================== */
+
+const playButton =
+    document.getElementById(
+        "playButton"
+    );
+
+const tempoInput =
+    document.getElementById(
+        "tempoInput"
+    );
+
+
+let playing = false;
+
+let currentStep = 0;
+
+let nextStepTime = 0;
+
+let schedulerTimer = null;
+
+
+/*
+    How far ahead audio is scheduled.
+
+    Scheduling slightly ahead prevents small browser
+    frame-rate delays from causing audible timing gaps.
+*/
+
+const SCHEDULE_AHEAD_TIME = 0.1;
+
+
+/*
+    Scheduler checks frequently.
+
+    The actual audio timing is handled by
+    AudioContext.currentTime rather than setTimeout
+    directly, which gives much more stable timing.
+*/
+
+const SCHEDULER_INTERVAL = 25;
+
+
+/* --------------------------------------------------
+   BPM
+-------------------------------------------------- */
+
+function getBPM() {
+
+    let bpm =
+        Number(
+            tempoInput.value
+        );
+
+
+    if (!Number.isFinite(bpm)) {
+        bpm = 120;
+    }
+
+
+    bpm =
+        Math.max(
+            30,
+            Math.min(300, bpm)
+        );
+
+
+    tempoInput.value =
+        bpm;
+
+
+    return bpm;
+}
+
+
+/*
+    One step is a sixteenth note.
+
+    60 / BPM = seconds per beat.
+
+    Divide by 4 for one 16th-note step.
+*/
+
+function getStepDuration() {
+
+    return (
+        60 / getBPM()
+    ) / 4;
+}
+
+
+/* --------------------------------------------------
+   PLAY SAMPLE
+-------------------------------------------------- */
+
+function playChannelSample(
+    channel,
+    time
+) {
+
+    if (!channel.buffer) {
         return;
     }
 
-    dragging = true;
 
-    windowEl.classList.add("dragging");
+    const context =
+        getAudioContext();
 
-    const rect = windowEl.getBoundingClientRect();
+
+    const source =
+        context.createBufferSource();
+
+
+    source.buffer =
+        channel.buffer;
+
 
     /*
-        Convert the window from its initial centered
-        position to an explicit screen position.
+        Connect directly to destination.
+
+        BufferSource playback is very lightweight
+        after the sample has already been decoded.
     */
 
-    windowEl.style.transform = "none";
-
-    windowEl.style.left =
-        rect.left + "px";
-
-    windowEl.style.top =
-        rect.top + "px";
-
-    offsetX =
-        event.clientX - rect.left;
-
-    offsetY =
-        event.clientY - rect.top;
-
-    event.preventDefault();
-});
+    source.connect(
+        context.destination
+    );
 
 
-document.addEventListener("mousemove", (event) => {
+    source.start(time);
+}
 
-    if (!dragging) {
+
+/* --------------------------------------------------
+   UPDATE PLAYHEAD
+-------------------------------------------------- */
+
+function updatePlayhead(step) {
+
+    const cells =
+        channelRack.querySelectorAll(
+            ".step.playing"
+        );
+
+
+    cells.forEach(
+        cell => {
+            cell.classList.remove(
+                "playing"
+            );
+        }
+    );
+
+
+    const newCells =
+        channelRack.querySelectorAll(
+            '.step[data-step="' +
+            step +
+            '"]'
+        );
+
+
+    newCells.forEach(
+        cell => {
+            cell.classList.add(
+                "playing"
+            );
+        }
+    );
+}
+
+
+/* --------------------------------------------------
+   SCHEDULE STEP
+-------------------------------------------------- */
+
+function scheduleStep(
+    step,
+    time
+) {
+
+    for (
+        let row = 0;
+        row < channels.length;
+        row++
+    ) {
+
+        const channel =
+            channels[row];
+
+
+        if (
+            channel.active[step]
+        ) {
+
+            playChannelSample(
+                channel,
+                time
+            );
+        }
+    }
+
+
+    /*
+        UI highlight cannot be perfectly synchronized
+        to the audio clock because DOM rendering uses
+        the browser's visual frame loop.
+
+        It is scheduled separately while the actual
+        audio remains AudioContext-timed.
+    */
+
+    const delay =
+        Math.max(
+            0,
+            (
+                time -
+                getAudioContext().currentTime
+            ) * 1000
+        );
+
+
+    setTimeout(
+        () => {
+
+            if (playing) {
+                updatePlayhead(step);
+            }
+
+        },
+        delay
+    );
+}
+
+
+/* --------------------------------------------------
+   SCHEDULER
+-------------------------------------------------- */
+
+function scheduler() {
+
+    if (!playing) {
         return;
     }
 
-    windowEl.style.left =
-        (event.clientX - offsetX) + "px";
 
-    windowEl.style.top =
-        (event.clientY - offsetY) + "px";
-});
+    const context =
+        getAudioContext();
 
 
-document.addEventListener("mouseup", () => {
+    while (
+        nextStepTime <
+        context.currentTime +
+        SCHEDULE_AHEAD_TIME
+    ) {
 
-    dragging = false;
+        scheduleStep(
+            currentStep,
+            nextStepTime
+        );
 
-    windowEl.classList.remove("dragging");
-});
+
+        nextStepTime +=
+            getStepDuration();
+
+
+        currentStep =
+            (
+                currentStep + 1
+            ) % STEP_COUNT;
+    }
+}
+
+
+/* --------------------------------------------------
+   START
+-------------------------------------------------- */
+
+async function startSequencer() {
+
+    const context =
+        getAudioContext();
+
+
+    if (
+        context.state ===
+        "suspended"
+    ) {
+
+        await context.resume();
+    }
+
+
+    playing = true;
+
+    currentStep = 0;
+
+
+    /*
+        Start just slightly ahead of the current
+        audio clock so the first step has room
+        to be scheduled.
+    */
+
+    nextStepTime =
+        context.currentTime +
+        0.03;
+
+
+    playButton.textContent =
+        "Stop";
+
+
+    schedulerTimer =
+        setInterval(
+            scheduler,
+            SCHEDULER_INTERVAL
+        );
+
+
+    scheduler();
+}
+
+
+/* --------------------------------------------------
+   STOP
+-------------------------------------------------- */
+
+function stopSequencer() {
+
+    playing = false;
+
+
+    if (schedulerTimer !== null) {
+
+        clearInterval(
+            schedulerTimer
+        );
+
+        schedulerTimer = null;
+    }
+
+
+    playButton.textContent =
+        "Play";
+
+
+    currentStep = 0;
+
+
+    const playingCells =
+        channelRack.querySelectorAll(
+            ".step.playing"
+        );
+
+
+    playingCells.forEach(
+        cell => {
+            cell.classList.remove(
+                "playing"
+            );
+        }
+    );
+}
+
+
+/* --------------------------------------------------
+   PLAY BUTTON
+-------------------------------------------------- */
+
+playButton.addEventListener(
+    "click",
+    async () => {
+
+        if (playing) {
+
+            stopSequencer();
+
+        } else {
+
+            await startSequencer();
+        }
+    }
+);
+
+
+/* --------------------------------------------------
+   TEMPO CHANGE
+-------------------------------------------------- */
+
+tempoInput.addEventListener(
+    "change",
+    () => {
+
+        getBPM();
+    }
+);
+
+
+/* ==========================================================
+   GLOBAL PAGE BEHAVIOR
+========================================================== */
 
 
 /* --------------------------------------------------
    DISABLE RIGHT CLICK
 -------------------------------------------------- */
 
-document.addEventListener("contextmenu", (event) => {
-    event.preventDefault();
-});
+document.addEventListener(
+    "contextmenu",
+    (event) => {
+        event.preventDefault();
+    }
+);
 
 
 /* --------------------------------------------------
-   DISABLE TEXT SELECTION
+   DISABLE SELECTION
 -------------------------------------------------- */
 
-document.addEventListener("selectstart", (event) => {
-    event.preventDefault();
-});
+document.addEventListener(
+    "selectstart",
+    (event) => {
+        event.preventDefault();
+    }
+);
 
 
-document.addEventListener("dragstart", (event) => {
-    event.preventDefault();
-});
+/* --------------------------------------------------
+   DISABLE DRAGGING
+-------------------------------------------------- */
+
+document.addEventListener(
+    "dragstart",
+    (event) => {
+        event.preventDefault();
+    }
+);
 
 </script>
 
