@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rack</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+html,
+body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    background: #242424;
+    position: relative;
+}
+
+/* --------------------------------------------------
+   SPARK WALLPAPER
+-------------------------------------------------- */
+
+body::before,
+body::after {
+    content:
+        "spark spark spark spark spark spark spark spark
+         spark spark spark spark spark spark spark spark
+         spark spark spark spark spark spark spark spark
+         spark spark spark spark spark spark spark spark
+         spark spark spark spark spark spark spark spark
+         spark spark spark spark spark spark spark spark
+         spark spark spark spark spark spark spark spark
+         spark spark spark spark spark spark spark spark
+         spark spark spark spark spark spark spark spark
+         spark spark spark spark spark spark spark spark
+         spark spark spark spark spark spark spark spark
+         spark spark spark spark spark spark spark spark
+         spark spark spark spark spark spark spark spark
+         spark spark spark spark spark spark spark spark
+         spark spark spark spark spark spark spark spark
+         spark spark spark spark spark spark spark spark";
+
+    position: fixed;
+    left: -100%;
+    top: -100%;
+
+    width: 300%;
+    height: 300%;
+
+    font-size: 34px;
+    font-weight: bold;
+    letter-spacing: 12px;
+    word-spacing: 28px;
+    line-height: 100px;
+
+    color: rgba(255,255,255,0.045);
+
+    white-space: pre-wrap;
+    pointer-events: none;
+}
+
+body::before {
+    transform: rotate(-45deg);
+}
+
+body::after {
+    color: rgba(255,255,255,0.025);
+    transform: rotate(45deg);
+}
+
+
+/* --------------------------------------------------
+   WINDOW
+-------------------------------------------------- */
+
+.window {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    width: 720px;
+    height: 430px;
+
+    transform: translate(-50%, -50%);
+
+    background: #aaa;
+    border: 2px solid #151515;
+
+    box-shadow:
+        6px 6px 0 rgba(0,0,0,0.35),
+        inset 1px 1px 0 rgba(255,255,255,0.25);
+}
+
+
+/* --------------------------------------------------
+   TOPBAR
+
+   This is permanently attached to the TOP of the
+   window. It does not get repositioned when the
+   window is minimized.
+-------------------------------------------------- */
+
+.titlebar {
+    position: absolute;
+
+    left: -2px;
+    top: -2px;
+
+    width: calc(100% + 4px);
+    height: 30px;
+
+    display: flex;
+    align-items: center;
+
+    background: #3c3c3c;
+    border: 2px solid #151515;
+    border-bottom: 2px solid #202020;
+
+    color: #eee;
+
+    font-size: 13px;
+    font-weight: bold;
+
+    cursor: move;
+
+    z-index: 10;
+}
+
+.title {
+    flex: 1;
+    padding-left: 9px;
+    pointer-events: none;
+}
+
+
+/* --------------------------------------------------
+   SINGLE MIN/MAX BUTTON
+-------------------------------------------------- */
+
+.window-button {
+    width: 32px;
+    height: 100%;
+
+    border: 0;
+    border-left: 1px solid #202020;
+
+    background: #505050;
+    color: #ddd;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.window-button:hover {
+    background: #666;
+}
+
+.window-button:active {
+    background: #333;
+}
+
+
+/* --------------------------------------------------
+   CONTENT
+-------------------------------------------------- */
+
+.content {
+    position: absolute;
+
+    left: 0;
+    top: 30px;
+
+    width: 100%;
+    height: calc(100% - 30px);
+
+    padding: 12px;
+
+    background: #aaa;
+}
+
+
+/* --------------------------------------------------
+   MINIMIZED
+
+   IMPORTANT:
+   The window itself does NOT move.
+   The topbar stays at the exact same X/Y.
+   Only the content disappears.
+-------------------------------------------------- */
+
+.window.minimized {
+    height: 30px;
+}
+
+.window.minimized .content {
+    display: none;
+}
+
+
+/* --------------------------------------------------
+   DRAGGING
+-------------------------------------------------- */
+
+.window.dragging {
+    box-shadow:
+        8px 8px 0 rgba(0,0,0,0.4),
+        inset 1px 1px 0 rgba(255,255,255,0.25);
+}
+</style>
+</head>
+
+<body>
+
+<div class="window" id="rack">
+
+    <div class="titlebar" id="rackTitlebar">
+
+        <div class="title">
+            rack
+        </div>
+
+        <button
+            class="window-button"
+            id="toggleWindow"
+            title="Minimize / Restore"
+        >_</button>
+
+    </div>
+
+    <div class="content">
+        <!-- Fruity Loops-style content -->
+    </div>
+
+</div>
+
+
+<script>
+
+const windowEl = document.getElementById("rack");
+const titlebar = document.getElementById("rackTitlebar");
+const toggleButton = document.getElementById("toggleWindow");
+
+let minimized = false;
+let dragging = false;
+
+let offsetX = 0;
+let offsetY = 0;
+
+
+/* --------------------------------------------------
+   MINIMIZE / RESTORE
+-------------------------------------------------- */
+
+toggleButton.addEventListener("click", (event) => {
+
+    event.stopPropagation();
+
+    minimized = !minimized;
+
+    windowEl.classList.toggle(
+        "minimized",
+        minimized
+    );
+
+    toggleButton.textContent =
+        minimized ? "□" : "_";
+});
+
+
+/* --------------------------------------------------
+   DRAG BY TOPBAR
+-------------------------------------------------- */
+
+titlebar.addEventListener("mousedown", (event) => {
+
+    // Don't drag when pressing the button.
+    if (event.target === toggleButton) {
+        return;
+    }
+
+    dragging = true;
+
+    windowEl.classList.add("dragging");
+
+    const rect = windowEl.getBoundingClientRect();
+
+    /*
+        Convert the window from its initial centered
+        position to an explicit screen position.
+    */
+
+    windowEl.style.transform = "none";
+
+    windowEl.style.left =
+        rect.left + "px";
+
+    windowEl.style.top =
+        rect.top + "px";
+
+    offsetX =
+        event.clientX - rect.left;
+
+    offsetY =
+        event.clientY - rect.top;
+
+    event.preventDefault();
+});
+
+
+document.addEventListener("mousemove", (event) => {
+
+    if (!dragging) {
+        return;
+    }
+
+    windowEl.style.left =
+        (event.clientX - offsetX) + "px";
+
+    windowEl.style.top =
+        (event.clientY - offsetY) + "px";
+});
+
+
+document.addEventListener("mouseup", () => {
+
+    dragging = false;
+
+    windowEl.classList.remove("dragging");
+});
+
+
+/* --------------------------------------------------
+   DISABLE RIGHT CLICK
+-------------------------------------------------- */
+
+document.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+});
+
+
+/* --------------------------------------------------
+   DISABLE TEXT SELECTION
+-------------------------------------------------- */
+
+document.addEventListener("selectstart", (event) => {
+    event.preventDefault();
+});
+
+
+document.addEventListener("dragstart", (event) => {
+    event.preventDefault();
+});
+
+</script>
+
+</body>
+</html>
