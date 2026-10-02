@@ -532,57 +532,58 @@ body {
     id="rack"
 >
 
-```
 <div
     class="titlebar"
     id="rackTitlebar"
 >
 
-    <div class="title">
-        rack
-    </div>
 
-    <button
-        class="window-button"
-        id="toggleRack"
-    >_</button>
-
+<div class="title">
+    rack
 </div>
 
+<button
+    class="window-button"
+    id="toggleRack"
+>_</button>
+
+
+</div>
 
 <div class="content">
 
-    <div class="controls">
 
-        <button
-            class="play-button"
-            id="playButton"
-        >Play</button>
+<div class="controls">
 
-        <span class="tempo-label">
-            BPM
-        </span>
+    <button
+        class="play-button"
+        id="playButton"
+    >Play</button>
 
-        <input
-            class="tempo-input"
-            id="tempoInput"
-            type="number"
-            min="30"
-            max="300"
-            value="120"
-            step="1"
-        >
+    <span class="tempo-label">
+        BPM
+    </span>
 
-    </div>
-
-
-    <div
-        class="channel-rack"
-        id="channelRack"
-    ></div>
+    <input
+        class="tempo-input"
+        id="tempoInput"
+        type="number"
+        min="30"
+        max="300"
+        value="120"
+        step="1"
+    >
 
 </div>
-```
+
+
+<div
+    class="channel-rack"
+    id="channelRack"
+></div>
+
+
+</div>
 
 </div>
 
@@ -595,35 +596,36 @@ body {
     id="browser"
 >
 
-```
 <div
     class="titlebar"
     id="browserTitlebar"
 >
 
-    <div class="title">
-        browser
-    </div>
 
-    <button
-        class="window-button"
-        id="toggleBrowser"
-    >_</button>
-
+<div class="title">
+    browser
 </div>
 
+<button
+    class="window-button"
+    id="toggleBrowser"
+>_</button>
+
+
+</div>
 
 <div class="browser-content">
 
-    <div
-        class="tree"
-        id="tree"
-    >
-        Loading drum_samples...
-    </div>
+
+<div
+    class="tree"
+    id="tree"
+>
+    Loading drum_samples...
+</div>
+
 
 </div>
-```
 
 </div>
 
@@ -1203,7 +1205,7 @@ function getAudioContext() {
 
 
 /* ==========================================================
-   LOAD SAMPLE FROM ./drum_samples
+   LOAD GITHUB SAMPLE
 ========================================================== */
 
 async function loadSampleIntoChannel(
@@ -1279,28 +1281,26 @@ async function loadSampleIntoChannel(
 
 
 /* ==========================================================
-   LOCAL FOLDER BROWSER
+   GITHUB DRUM SAMPLE CONFIG
 ========================================================== */
 
 /*
-    The page automatically requests:
+    GitHub repository:
 
-        ./drum_samples/
+    https://github.com/mrfranco27/spark/tree/main/drum_samples
 
-    The server needs to expose a directory listing.
+    GitHub API endpoint:
 
-    No file picker is used.
+    https://api.github.com/repos/mrfranco27/spark/contents/drum_samples
 */
 
-const tree =
-    document.getElementById(
-        "tree"
-    );
+const GITHUB_API_URL =
+    "https://api.github.com/repos/mrfranco27/spark/contents/drum_samples";
 
 
-/* --------------------------------------------------
+/* ==========================================================
    AUDIO CHECK
--------------------------------------------------- */
+========================================================== */
 
 function isAudioFile(
     filename
@@ -1329,134 +1329,61 @@ function isAudioFile(
 
 
 /* ==========================================================
-   FETCH DIRECTORY
+   LOAD GITHUB FOLDER
 ========================================================== */
 
-async function fetchDirectory(
-    path
+async function loadGitHubFolder(
+    apiURL,
+    parentElement,
+    depth
 ) {
 
     const response =
         await fetch(
-            path
+            apiURL
         );
 
 
     if (!response.ok) {
 
         throw new Error(
-            "Directory request failed: " +
+            "GitHub API request failed: " +
             response.status
         );
 
     }
 
 
-    return await response.text();
-
-}
-
-
-/* ==========================================================
-   PARSE DIRECTORY LISTING
-========================================================== */
-
-function parseDirectoryListing(
-    html,
-    currentPath,
-    parentElement,
-    depth
-) {
-
-    const parser =
-        new DOMParser();
-
-
-    const documentPage =
-        parser.parseFromString(
-            html,
-            "text/html"
-        );
-
-
-    const links =
-        [
-            ...documentPage.querySelectorAll(
-                "a"
-            )
-        ];
-
-
-    const entries = [];
-
-
-    for (
-        const link
-        of links
-    ) {
-
-        const href =
-            link.getAttribute(
-                "href"
-            );
-
-
-        if (!href) {
-            continue;
-        }
-
-
-        /*
-            Ignore parent-directory links.
-        */
-
-        if (
-            href === "../" ||
-            href === ".."
-        ) {
-            continue;
-        }
-
-
-        const name =
-            decodeURIComponent(
-                link.textContent
-                    .trim()
-            );
-
-
-        if (!name) {
-            continue;
-        }
-
-
-        const isFolder =
-            href.endsWith("/");
-
-
-        entries.push({
-
-            name:
-                name.replace(
-                    /\/$/,
-                    ""
-                ),
-
-            href,
-
-            isFolder
-
-        });
-
-    }
+    const entries =
+        await response.json();
 
 
     /*
-        Remove duplicate entries.
+        Sort folders first,
+        then files alphabetically.
     */
 
-    const seen =
-        new Set();
+    entries.sort(
+        (a, b) => {
+
+            if (
+                a.type !==
+                b.type
+            ) {
+
+                return a.type === "dir"
+                    ? -1
+                    : 1;
+
+            }
+
+
+            return a.name.localeCompare(
+                b.name
+            );
+
+        }
+    );
 
 
     for (
@@ -1465,34 +1392,11 @@ function parseDirectoryListing(
     ) {
 
         if (
-            seen.has(
-                entry.href
-            )
-        ) {
-            continue;
-        }
-
-
-        seen.add(
-            entry.href
-        );
-
-
-        const fullURL =
-            new URL(
-                entry.href,
-                new URL(
-                    currentPath,
-                    window.location.href
-                )
-            ).href;
-
-
-        if (
-            entry.isFolder
+            entry.type ===
+            "dir"
         ) {
 
-            createFolderRow(
+            createGitHubFolderRow(
                 entry.name,
                 parentElement,
                 depth
@@ -1500,25 +1404,27 @@ function parseDirectoryListing(
 
 
             /*
-                Recursively fetch the folder.
+                Recursively read
+                subfolders too.
             */
 
-            loadDirectoryRecursive(
-                fullURL,
+            await loadGitHubFolder(
+                entry.url,
                 parentElement,
                 depth + 1
             );
 
-
         } else if (
+            entry.type ===
+            "file" &&
             isAudioFile(
                 entry.name
             )
         ) {
 
-            createFileRow(
+            createGitHubFileRow(
                 entry.name,
-                fullURL,
+                entry.download_url,
                 parentElement,
                 depth
             );
@@ -1531,49 +1437,10 @@ function parseDirectoryListing(
 
 
 /* ==========================================================
-   RECURSIVE DIRECTORY LOADING
+   GITHUB FOLDER ROW
 ========================================================== */
 
-async function loadDirectoryRecursive(
-    path,
-    parentElement,
-    depth
-) {
-
-    try {
-
-        const html =
-            await fetchDirectory(
-                path
-            );
-
-
-        parseDirectoryListing(
-            html,
-            path,
-            parentElement,
-            depth
-        );
-
-
-    } catch (error) {
-
-        console.warn(
-            "Could not read folder:",
-            path,
-            error
-        );
-
-    }
-
-}
-
-
-/* ==========================================================
-   FOLDER ROW
-========================================================== */
-
-function createFolderRow(
+function createGitHubFolderRow(
     name,
     parentElement,
     depth
@@ -1594,9 +1461,37 @@ function createFolderRow(
         "px";
 
 
-    row.innerHTML =
-        '<span class="folder-icon">📁</span>' +
-        escapeHTML(name);
+    const icon =
+        document.createElement(
+            "span"
+        );
+
+
+    icon.className =
+        "folder-icon";
+
+
+    icon.textContent =
+        "📁";
+
+
+    const text =
+        document.createElement(
+            "span"
+        );
+
+
+    text.textContent =
+        name;
+
+
+    row.appendChild(
+        icon
+    );
+
+    row.appendChild(
+        text
+    );
 
 
     parentElement.appendChild(
@@ -1607,10 +1502,10 @@ function createFolderRow(
 
 
 /* ==========================================================
-   AUDIO FILE ROW
+   GITHUB AUDIO FILE ROW
 ========================================================== */
 
-function createFileRow(
+function createGitHubFileRow(
     name,
     url,
     parentElement,
@@ -1636,11 +1531,41 @@ function createFileRow(
         "px";
 
 
-    row.innerHTML =
-        '<span class="file-icon">♪</span>' +
-        '<span class="file-name">' +
-        escapeHTML(name) +
-        '</span>';
+    const icon =
+        document.createElement(
+            "span"
+        );
+
+
+    icon.className =
+        "file-icon";
+
+
+    icon.textContent =
+        "♪";
+
+
+    const text =
+        document.createElement(
+            "span"
+        );
+
+
+    text.className =
+        "file-name";
+
+
+    text.textContent =
+        name;
+
+
+    row.appendChild(
+        icon
+    );
+
+    row.appendChild(
+        text
+    );
 
 
     row.addEventListener(
@@ -1679,30 +1604,7 @@ function createFileRow(
 
 
 /* ==========================================================
-   ESCAPE HTML
-========================================================== */
-
-function escapeHTML(
-    text
-) {
-
-    const element =
-        document.createElement(
-            "div"
-        );
-
-
-    element.textContent =
-        text;
-
-
-    return element.innerHTML;
-
-}
-
-
-/* ==========================================================
-   AUTOMATICALLY READ ./drum_samples
+   LOAD DRUM SAMPLES FROM GITHUB
 ========================================================== */
 
 async function loadDrumSamples() {
@@ -1732,15 +1634,8 @@ async function loadDrumSamples() {
 
     try {
 
-        const html =
-            await fetchDirectory(
-                "./drum_samples/"
-            );
-
-
-        parseDirectoryListing(
-            html,
-            "./drum_samples/",
+        await loadGitHubFolder(
+            GITHUB_API_URL,
             tree,
             1
         );
@@ -1749,7 +1644,7 @@ async function loadDrumSamples() {
     } catch (error) {
 
         console.error(
-            "Could not read ./drum_samples:",
+            "Could not read GitHub drum_samples:",
             error
         );
 
@@ -1768,7 +1663,7 @@ async function loadDrumSamples() {
 
 
         message.textContent =
-            "Could not read ./drum_samples.";
+            "Could not read GitHub drum_samples.";
 
 
         tree.appendChild(
