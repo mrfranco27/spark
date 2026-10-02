@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -27,20 +28,12 @@ body {
 }
 
 
-/* --------------------------------------------------
-   WINDOW
--------------------------------------------------- */
+/* ==========================================================
+   WINDOWS
+========================================================== */
 
 .window {
     position: absolute;
-
-    left: 50%;
-    top: 50%;
-
-    width: 640px;
-    height: 380px;
-
-    transform: translate(-50%, -50%);
 
     background: #aaa;
     border: 2px solid #151515;
@@ -53,9 +46,39 @@ body {
 }
 
 
-/* --------------------------------------------------
-   TOPBAR
--------------------------------------------------- */
+/* ==========================================================
+   RACK WINDOW
+========================================================== */
+
+#rack {
+    left: 50%;
+    top: 50%;
+
+    width: 640px;
+    height: 380px;
+
+    transform: translate(-50%, -50%);
+}
+
+
+/* ==========================================================
+   BROWSER WINDOW
+========================================================== */
+
+#browser {
+    left: 80px;
+    top: 80px;
+
+    width: 330px;
+    height: 430px;
+
+    z-index: 1;
+}
+
+
+/* ==========================================================
+   TITLEBAR
+========================================================== */
 
 .titlebar {
     position: absolute;
@@ -70,6 +93,7 @@ body {
     align-items: center;
 
     background: #3c3c3c;
+
     border: 2px solid #151515;
     border-bottom: 2px solid #202020;
 
@@ -90,9 +114,9 @@ body {
 }
 
 
-/* --------------------------------------------------
+/* ==========================================================
    WINDOW BUTTON
--------------------------------------------------- */
+========================================================== */
 
 .window-button {
     width: 32px;
@@ -119,9 +143,9 @@ body {
 }
 
 
-/* --------------------------------------------------
-   CONTENT
--------------------------------------------------- */
+/* ==========================================================
+   RACK CONTENT
+========================================================== */
 
 .content {
     position: absolute;
@@ -138,9 +162,9 @@ body {
 }
 
 
-/* --------------------------------------------------
+/* ==========================================================
    CONTROLS
--------------------------------------------------- */
+========================================================== */
 
 .controls {
     height: 38px;
@@ -152,6 +176,7 @@ body {
     padding: 4px 5px;
 
     background: #858585;
+
     border: 2px solid #666;
     border-top-color: #bdbdbd;
     border-left-color: #bdbdbd;
@@ -187,8 +212,10 @@ body {
 
 .tempo-label {
     color: #ddd;
+
     font-size: 12px;
     font-weight: bold;
+
     margin-left: 3px;
 }
 
@@ -197,8 +224,8 @@ body {
     height: 26px;
 
     border: 2px solid #444;
-    background: #d0d0d0;
 
+    background: #d0d0d0;
     color: #222;
 
     font-size: 12px;
@@ -214,9 +241,9 @@ body {
 }
 
 
-/* --------------------------------------------------
+/* ==========================================================
    CHANNEL RACK
--------------------------------------------------- */
+========================================================== */
 
 .channel-rack {
     width: 100%;
@@ -234,9 +261,9 @@ body {
 }
 
 
-/* --------------------------------------------------
+/* ==========================================================
    CHANNEL ROW
--------------------------------------------------- */
+========================================================== */
 
 .channel-row {
     height: 58px;
@@ -252,9 +279,9 @@ body {
 }
 
 
-/* --------------------------------------------------
+/* ==========================================================
    SAMPLE BOX
--------------------------------------------------- */
+========================================================== */
 
 .sample-box {
     flex-shrink: 0;
@@ -275,8 +302,6 @@ body {
 
     padding: 0 8px;
 
-    cursor: pointer;
-
     overflow: hidden;
 }
 
@@ -284,8 +309,10 @@ body {
     background: #606060;
 }
 
-.sample-box:active {
-    background: #484848;
+.sample-box.drag-over {
+    background: #777;
+
+    border-color: #e0b82f;
 }
 
 .sample-name {
@@ -302,9 +329,9 @@ body {
 }
 
 
-/* --------------------------------------------------
+/* ==========================================================
    STEP AREA
--------------------------------------------------- */
+========================================================== */
 
 .steps {
     height: 52px;
@@ -312,7 +339,9 @@ body {
     flex: 1;
 
     display: grid;
-    grid-template-columns: repeat(16, 1fr);
+
+    grid-template-columns:
+        repeat(16, 1fr);
 
     gap: 3px;
 
@@ -320,9 +349,9 @@ body {
 }
 
 
-/* --------------------------------------------------
+/* ==========================================================
    STEP
--------------------------------------------------- */
+========================================================== */
 
 .step {
     min-width: 0;
@@ -336,16 +365,6 @@ body {
         filter 0.04s linear;
 }
 
-
-/*
-    Groups:
-
-    0 = blue
-    1 = dull red
-    2 = blue
-    3 = dull red
-*/
-
 .step.group-blue {
     background: #41647d;
 }
@@ -354,27 +373,12 @@ body {
     background: #765050;
 }
 
-
-/* --------------------------------------------------
-   ACTIVE STEPS
--------------------------------------------------- */
-
-.step.active.group-blue {
-    background: #e0b82f;
-
-    border-color: #9b7b15;
-}
-
+.step.active.group-blue,
 .step.active.group-red {
     background: #e0b82f;
 
     border-color: #9b7b15;
 }
-
-
-/* --------------------------------------------------
-   HOVER
--------------------------------------------------- */
 
 .step:hover {
     filter: brightness(1.15);
@@ -383,11 +387,6 @@ body {
 .step.active:hover {
     filter: brightness(1.08);
 }
-
-
-/* --------------------------------------------------
-   PLAYHEAD
--------------------------------------------------- */
 
 .step.playing {
     filter: brightness(1.45);
@@ -398,329 +397,527 @@ body {
     filter: brightness(1.05);
 }
 
-
-/* --------------------------------------------------
-   GROUP SEPARATION
--------------------------------------------------- */
-
 .step.group-start {
     margin-left: 3px;
 }
 
 
-/* --------------------------------------------------
+/* ==========================================================
    MINIMIZED
--------------------------------------------------- */
+========================================================== */
 
 .window.minimized {
     height: 30px;
 }
 
-.window.minimized .content {
+.window.minimized .content,
+.window.minimized .browser-content {
     display: none;
 }
 
 
-/* --------------------------------------------------
+/* ==========================================================
    DRAGGING
--------------------------------------------------- */
+========================================================== */
 
 .window.dragging {
     box-shadow:
         8px 8px 0 rgba(0,0,0,0.4),
         inset 1px 1px 0 rgba(255,255,255,0.25);
 }
+
+
+/* ==========================================================
+   BROWSER
+========================================================== */
+
+.browser-content {
+    position: absolute;
+
+    left: 0;
+    top: 30px;
+
+    width: 100%;
+    height: calc(100% - 30px);
+
+    padding: 7px;
+
+    background: #aaa;
+
+    overflow: hidden;
+}
+
+.tree {
+    width: 100%;
+    height: 100%;
+
+    background: #c0c0c0;
+
+    border: 2px solid #666;
+    border-top-color: #444;
+    border-left-color: #444;
+
+    padding: 6px;
+
+    overflow: auto;
+
+    color: #222;
+
+    font-size: 12px;
+}
+
+.tree-row {
+    min-height: 22px;
+
+    display: flex;
+    align-items: center;
+
+    white-space: nowrap;
+
+    padding-right: 4px;
+}
+
+.tree-folder {
+    font-weight: bold;
+}
+
+.tree-file {
+    cursor: grab;
+
+    border: 1px solid transparent;
+}
+
+.tree-file:hover {
+    background: #d8d8d8;
+    border-color: #999;
+}
+
+.tree-file:active {
+    cursor: grabbing;
+    background: #aaa;
+}
+
+.folder-icon {
+    width: 18px;
+    display: inline-block;
+}
+
+.file-icon {
+    width: 18px;
+    display: inline-block;
+}
+
+.file-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tree-message {
+    color: #555;
+    padding: 5px;
+    font-size: 11px;
+}
 </style>
+
 </head>
 
 <body>
 
-<div class="window" id="rack">
+<!-- ==========================================================
+     RACK
+========================================================== -->
 
-    <div class="titlebar" id="rackTitlebar">
+<div
+    class="window"
+    id="rack"
+>
 
-        <div class="title">
-            rack
-        </div>
+```
+<div
+    class="titlebar"
+    id="rackTitlebar"
+>
 
-        <button
-            class="window-button"
-            id="toggleWindow"
-            title="Minimize / Restore"
-        >_</button>
-
+    <div class="title">
+        rack
     </div>
 
-
-    <div class="content">
-
-        <!-- ------------------------------------------------
-             PLAYBACK CONTROLS
-        ------------------------------------------------- -->
-
-        <div class="controls">
-
-            <button
-                class="play-button"
-                id="playButton"
-            >Play</button>
-
-            <span class="tempo-label">
-                BPM
-            </span>
-
-            <input
-                class="tempo-input"
-                id="tempoInput"
-                type="number"
-                min="30"
-                max="300"
-                value="120"
-                step="1"
-            >
-
-        </div>
-
-
-        <!-- ------------------------------------------------
-             CHANNEL RACK
-        ------------------------------------------------- -->
-
-        <div class="channel-rack" id="channelRack">
-
-            <!-- Rows generated by JavaScript -->
-
-        </div>
-
-    </div>
+    <button
+        class="window-button"
+        id="toggleRack"
+    >_</button>
 
 </div>
 
 
-<!-- Hidden file selector -->
+<div class="content">
 
-<input
-    type="file"
-    id="sampleFileInput"
-    accept="audio/*"
-    style="display:none;"
+    <div class="controls">
+
+        <button
+            class="play-button"
+            id="playButton"
+        >Play</button>
+
+        <span class="tempo-label">
+            BPM
+        </span>
+
+        <input
+            class="tempo-input"
+            id="tempoInput"
+            type="number"
+            min="30"
+            max="300"
+            value="120"
+            step="1"
+        >
+
+    </div>
+
+
+    <div
+        class="channel-rack"
+        id="channelRack"
+    ></div>
+
+</div>
+```
+
+</div>
+
+<!-- ==========================================================
+     BROWSER
+========================================================== -->
+
+<div
+    class="window"
+    id="browser"
 >
 
+```
+<div
+    class="titlebar"
+    id="browserTitlebar"
+>
+
+    <div class="title">
+        browser
+    </div>
+
+    <button
+        class="window-button"
+        id="toggleBrowser"
+    >_</button>
+
+</div>
+
+
+<div class="browser-content">
+
+    <div
+        class="tree"
+        id="tree"
+    >
+        Loading drum_samples...
+    </div>
+
+</div>
+```
+
+</div>
 
 <script>
 
 /* ==========================================================
-   WINDOW
+   WINDOW MANAGER
 ========================================================== */
 
-const windowEl =
-    document.getElementById("rack");
-
-const titlebar =
-    document.getElementById("rackTitlebar");
-
-const toggleButton =
-    document.getElementById("toggleWindow");
-
-let minimized = false;
-let dragging = false;
-
-let offsetX = 0;
-let offsetY = 0;
+let highestZIndex = 10;
 
 
-/* --------------------------------------------------
-   KEEP WINDOW INSIDE SCREEN
--------------------------------------------------- */
+function bringToFront(
+    windowElement
+) {
 
-function clampWindowPosition(left, top) {
+    highestZIndex++;
 
-    const rect =
-        windowEl.getBoundingClientRect();
+    windowElement.style.zIndex =
+        highestZIndex;
 
-    const maxLeft =
-        Math.max(
-            0,
-            window.innerWidth - rect.width
-        );
-
-    const maxTop =
-        Math.max(
-            0,
-            window.innerHeight - rect.height
-        );
-
-    return {
-        left: Math.max(
-            0,
-            Math.min(left, maxLeft)
-        ),
-
-        top: Math.max(
-            0,
-            Math.min(top, maxTop)
-        )
-    };
 }
 
 
-/* --------------------------------------------------
-   MINIMIZE
--------------------------------------------------- */
+document.querySelectorAll(
+    ".window"
+).forEach(
+    windowElement => {
 
-toggleButton.addEventListener(
-    "click",
-    (event) => {
+        windowElement.addEventListener(
+            "pointerdown",
+            () => {
 
-        event.stopPropagation();
+                bringToFront(
+                    windowElement
+                );
 
-        const rect =
-            windowEl.getBoundingClientRect();
-
-        windowEl.style.transform =
-            "none";
-
-        windowEl.style.left =
-            rect.left + "px";
-
-        windowEl.style.top =
-            rect.top + "px";
-
-        minimized = !minimized;
-
-        windowEl.classList.toggle(
-            "minimized",
-            minimized
+            },
+            true
         );
 
-        toggleButton.textContent =
-            minimized ? "□" : "_";
-    }
-);
-
-
-/* --------------------------------------------------
-   DRAG
--------------------------------------------------- */
-
-titlebar.addEventListener(
-    "mousedown",
-    (event) => {
-
-        if (event.target === toggleButton) {
-            return;
-        }
-
-        dragging = true;
-
-        windowEl.classList.add(
-            "dragging"
-        );
-
-        const rect =
-            windowEl.getBoundingClientRect();
-
-        windowEl.style.transform =
-            "none";
-
-        windowEl.style.left =
-            rect.left + "px";
-
-        windowEl.style.top =
-            rect.top + "px";
-
-        offsetX =
-            event.clientX - rect.left;
-
-        offsetY =
-            event.clientY - rect.top;
-
-        event.preventDefault();
-    }
-);
-
-
-document.addEventListener(
-    "mousemove",
-    (event) => {
-
-        if (!dragging) {
-            return;
-        }
-
-        const newLeft =
-            event.clientX - offsetX;
-
-        const newTop =
-            event.clientY - offsetY;
-
-        const clamped =
-            clampWindowPosition(
-                newLeft,
-                newTop
-            );
-
-        windowEl.style.left =
-            clamped.left + "px";
-
-        windowEl.style.top =
-            clamped.top + "px";
-    }
-);
-
-
-document.addEventListener(
-    "mouseup",
-    () => {
-
-        dragging = false;
-
-        windowEl.classList.remove(
-            "dragging"
-        );
-    }
-);
-
-
-/* --------------------------------------------------
-   WINDOW RESIZE
--------------------------------------------------- */
-
-window.addEventListener(
-    "resize",
-    () => {
-
-        const rect =
-            windowEl.getBoundingClientRect();
-
-        const clamped =
-            clampWindowPosition(
-                rect.left,
-                rect.top
-            );
-
-        windowEl.style.transform =
-            "none";
-
-        windowEl.style.left =
-            clamped.left + "px";
-
-        windowEl.style.top =
-            clamped.top + "px";
     }
 );
 
 
 /* ==========================================================
-   CHANNEL RACK
+   WINDOW DRAGGING
+========================================================== */
+
+function setupWindowDrag(
+    windowElement,
+    titlebar,
+    toggleButton
+) {
+
+    let dragging = false;
+
+    let offsetX = 0;
+    let offsetY = 0;
+
+    let minimized = false;
+
+
+    toggleButton.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+            bringToFront(
+                windowElement
+            );
+
+
+            const rect =
+                windowElement.getBoundingClientRect();
+
+
+            windowElement.style.transform =
+                "none";
+
+
+            windowElement.style.left =
+                rect.left + "px";
+
+
+            windowElement.style.top =
+                rect.top + "px";
+
+
+            minimized =
+                !minimized;
+
+
+            windowElement.classList.toggle(
+                "minimized",
+                minimized
+            );
+
+
+            toggleButton.textContent =
+                minimized
+                    ? "□"
+                    : "_";
+
+        }
+    );
+
+
+    titlebar.addEventListener(
+        "mousedown",
+        event => {
+
+            if (
+                event.target ===
+                toggleButton
+            ) {
+                return;
+            }
+
+
+            bringToFront(
+                windowElement
+            );
+
+
+            dragging = true;
+
+
+            windowElement.classList.add(
+                "dragging"
+            );
+
+
+            const rect =
+                windowElement.getBoundingClientRect();
+
+
+            windowElement.style.transform =
+                "none";
+
+
+            windowElement.style.left =
+                rect.left + "px";
+
+
+            windowElement.style.top =
+                rect.top + "px";
+
+
+            offsetX =
+                event.clientX -
+                rect.left;
+
+
+            offsetY =
+                event.clientY -
+                rect.top;
+
+
+            event.preventDefault();
+
+        }
+    );
+
+
+    document.addEventListener(
+        "mousemove",
+        event => {
+
+            if (!dragging) {
+                return;
+            }
+
+
+            const rect =
+                windowElement.getBoundingClientRect();
+
+
+            const maxLeft =
+                Math.max(
+                    0,
+                    window.innerWidth -
+                    rect.width
+                );
+
+
+            const maxTop =
+                Math.max(
+                    0,
+                    window.innerHeight -
+                    rect.height
+                );
+
+
+            const left =
+                event.clientX -
+                offsetX;
+
+
+            const top =
+                event.clientY -
+                offsetY;
+
+
+            windowElement.style.left =
+                Math.max(
+                    0,
+                    Math.min(
+                        left,
+                        maxLeft
+                    )
+                ) + "px";
+
+
+            windowElement.style.top =
+                Math.max(
+                    0,
+                    Math.min(
+                        top,
+                        maxTop
+                    )
+                ) + "px";
+
+        }
+    );
+
+
+    document.addEventListener(
+        "mouseup",
+        () => {
+
+            if (!dragging) {
+                return;
+            }
+
+
+            dragging = false;
+
+
+            windowElement.classList.remove(
+                "dragging"
+            );
+
+        }
+    );
+
+}
+
+
+/* ==========================================================
+   WINDOW SETUP
+========================================================== */
+
+const rackWindow =
+    document.getElementById(
+        "rack"
+    );
+
+const browserWindow =
+    document.getElementById(
+        "browser"
+    );
+
+
+setupWindowDrag(
+    rackWindow,
+    document.getElementById(
+        "rackTitlebar"
+    ),
+    document.getElementById(
+        "toggleRack"
+    )
+);
+
+
+setupWindowDrag(
+    browserWindow,
+    document.getElementById(
+        "browserTitlebar"
+    ),
+    document.getElementById(
+        "toggleBrowser"
+    )
+);
+
+
+/* ==========================================================
+   CHANNELS
 ========================================================== */
 
 const channelRack =
-    document.getElementById("channelRack");
-
-const sampleFileInput =
     document.getElementById(
-        "sampleFileInput"
+        "channelRack"
     );
 
 
@@ -728,24 +925,8 @@ const ROW_COUNT = 4;
 const STEP_COUNT = 16;
 
 
-/*
-    Each row has:
+const channels = [];
 
-    sample
-    active[16]
-    AudioBuffer
-*/
-
-const channels =
-    [];
-
-
-let selectedChannel = 0;
-
-
-/* --------------------------------------------------
-   CREATE CHANNELS
--------------------------------------------------- */
 
 for (
     let row = 0;
@@ -755,13 +936,17 @@ for (
 
     channels.push({
 
-        name: "Sample " + (row + 1),
+        name:
+            "Sample " +
+            (row + 1),
 
-        buffer: null,
+        buffer:
+            null,
 
         active:
-            new Array(STEP_COUNT)
-                .fill(false)
+            new Array(
+                STEP_COUNT
+            ).fill(false)
 
     });
 
@@ -771,22 +956,23 @@ for (
             "div"
         );
 
+
     rowElement.className =
         "channel-row";
 
 
-    /* Sample selector */
+    /* --------------------------------------------------
+       SAMPLE BOX
+    -------------------------------------------------- */
 
     const sampleBox =
         document.createElement(
             "div"
         );
 
+
     sampleBox.className =
         "sample-box";
-
-    sampleBox.dataset.channel =
-        row;
 
 
     const sampleName =
@@ -794,11 +980,14 @@ for (
             "div"
         );
 
+
     sampleName.className =
         "sample-name";
 
+
     sampleName.textContent =
-        "Sample " + (row + 1);
+        "Sample " +
+        (row + 1);
 
 
     sampleBox.appendChild(
@@ -806,18 +995,81 @@ for (
     );
 
 
-    sampleBox.addEventListener(
-        "click",
-        () => {
+    /* --------------------------------------------------
+       DROP
+    -------------------------------------------------- */
 
-            selectedChannel =
-                Number(
-                    sampleBox.dataset.channel
+    sampleBox.addEventListener(
+        "dragover",
+        event => {
+
+            if (
+                event.dataTransfer.types.includes(
+                    "application/x-rack-audio"
+                )
+            ) {
+
+                event.preventDefault();
+
+                event.dataTransfer.dropEffect =
+                    "copy";
+
+                sampleBox.classList.add(
+                    "drag-over"
                 );
 
-            sampleFileInput.value = "";
+            }
 
-            sampleFileInput.click();
+        }
+    );
+
+
+    sampleBox.addEventListener(
+        "dragleave",
+        () => {
+
+            sampleBox.classList.remove(
+                "drag-over"
+            );
+
+        }
+    );
+
+
+    sampleBox.addEventListener(
+        "drop",
+        async event => {
+
+            event.preventDefault();
+
+            sampleBox.classList.remove(
+                "drag-over"
+            );
+
+
+            const url =
+                event.dataTransfer.getData(
+                    "application/x-rack-audio"
+                );
+
+
+            const filename =
+                event.dataTransfer.getData(
+                    "application/x-rack-name"
+                );
+
+
+            if (!url) {
+                return;
+            }
+
+
+            await loadSampleIntoChannel(
+                row,
+                url,
+                filename
+            );
+
         }
     );
 
@@ -827,12 +1079,15 @@ for (
     );
 
 
-    /* Step grid */
+    /* --------------------------------------------------
+       STEPS
+    -------------------------------------------------- */
 
     const steps =
         document.createElement(
             "div"
         );
+
 
     steps.className =
         "steps";
@@ -853,7 +1108,9 @@ for (
         cell.className =
             "step " +
             (
-                Math.floor(step / 4) % 2 === 0
+                Math.floor(
+                    step / 4
+                ) % 2 === 0
                     ? "group-blue"
                     : "group-red"
             );
@@ -864,9 +1121,11 @@ for (
             step === 8 ||
             step === 12
         ) {
+
             cell.classList.add(
                 "group-start"
             );
+
         }
 
 
@@ -881,16 +1140,15 @@ for (
             "click",
             () => {
 
-                const channel =
-                    channels[row];
+                channels[row].active[step] =
+                    !channels[row].active[step];
 
-                channel.active[step] =
-                    !channel.active[step];
 
                 cell.classList.toggle(
                     "active",
-                    channel.active[step]
+                    channels[row].active[step]
                 );
+
             }
         );
 
@@ -898,6 +1156,7 @@ for (
         steps.appendChild(
             cell
         );
+
     }
 
 
@@ -905,25 +1164,20 @@ for (
         steps
     );
 
+
     channelRack.appendChild(
         rowElement
     );
+
 }
 
 
 /* ==========================================================
-   SAMPLE LOADING
+   AUDIO
 ========================================================== */
 
 let audioContext = null;
 
-
-/*
-    AudioContext is created only after the user
-    interacts with the page.
-
-    This avoids browsers blocking audio automatically.
-*/
 
 function getAudioContext() {
 
@@ -933,90 +1187,600 @@ function getAudioContext() {
             window.AudioContext ||
             window.webkitAudioContext;
 
+
         audioContext =
             new AudioContext({
-                latencyHint: "interactive"
+                latencyHint:
+                    "interactive"
             });
+
     }
 
+
     return audioContext;
+
 }
 
 
-sampleFileInput.addEventListener(
-    "change",
-    async () => {
+/* ==========================================================
+   LOAD SAMPLE FROM ./drum_samples
+========================================================== */
 
-        const file =
-            sampleFileInput.files[0];
+async function loadSampleIntoChannel(
+    channelIndex,
+    url,
+    filename
+) {
 
-        if (!file) {
-            return;
+    const channel =
+        channels[channelIndex];
+
+
+    const context =
+        getAudioContext();
+
+
+    try {
+
+        const response =
+            await fetch(url);
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Could not load " +
+                url
+            );
+
         }
 
 
-        const channel =
-            channels[selectedChannel];
+        const arrayBuffer =
+            await response.arrayBuffer();
 
 
-        const context =
-            getAudioContext();
+        const decoded =
+            await context.decodeAudioData(
+                arrayBuffer
+            );
 
 
-        try {
+        channel.buffer =
+            decoded;
 
-            const arrayBuffer =
-                await file.arrayBuffer();
+
+        channel.name =
+            filename;
+
+
+        const rowElement =
+            channelRack.children[
+                channelIndex
+            ];
+
+
+        rowElement.querySelector(
+            ".sample-name"
+        ).textContent =
+            filename;
+
+
+    } catch (error) {
+
+        console.error(
+            "Could not load sample:",
+            error
+        );
+
+    }
+
+}
+
+
+/* ==========================================================
+   LOCAL FOLDER BROWSER
+========================================================== */
+
+/*
+    The page automatically requests:
+
+        ./drum_samples/
+
+    The server needs to expose a directory listing.
+
+    No file picker is used.
+*/
+
+const tree =
+    document.getElementById(
+        "tree"
+    );
+
+
+/* --------------------------------------------------
+   AUDIO CHECK
+-------------------------------------------------- */
+
+function isAudioFile(
+    filename
+) {
+
+    const extension =
+        filename
+            .split(".")
+            .pop()
+            .toLowerCase();
+
+
+    return [
+        "wav",
+        "mp3",
+        "ogg",
+        "m4a",
+        "aac",
+        "flac",
+        "webm"
+    ].includes(
+        extension
+    );
+
+}
+
+
+/* ==========================================================
+   FETCH DIRECTORY
+========================================================== */
+
+async function fetchDirectory(
+    path
+) {
+
+    const response =
+        await fetch(
+            path
+        );
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Directory request failed: " +
+            response.status
+        );
+
+    }
+
+
+    return await response.text();
+
+}
+
+
+/* ==========================================================
+   PARSE DIRECTORY LISTING
+========================================================== */
+
+function parseDirectoryListing(
+    html,
+    currentPath,
+    parentElement,
+    depth
+) {
+
+    const parser =
+        new DOMParser();
+
+
+    const documentPage =
+        parser.parseFromString(
+            html,
+            "text/html"
+        );
+
+
+    const links =
+        [
+            ...documentPage.querySelectorAll(
+                "a"
+            )
+        ];
+
+
+    const entries = [];
+
+
+    for (
+        const link
+        of links
+    ) {
+
+        const href =
+            link.getAttribute(
+                "href"
+            );
+
+
+        if (!href) {
+            continue;
+        }
+
+
+        /*
+            Ignore parent-directory links.
+        */
+
+        if (
+            href === "../" ||
+            href === ".."
+        ) {
+            continue;
+        }
+
+
+        const name =
+            decodeURIComponent(
+                link.textContent
+                    .trim()
+            );
+
+
+        if (!name) {
+            continue;
+        }
+
+
+        const isFolder =
+            href.endsWith("/");
+
+
+        entries.push({
+
+            name:
+                name.replace(
+                    /\/$/,
+                    ""
+                ),
+
+            href,
+
+            isFolder
+
+        });
+
+    }
+
+
+    /*
+        Remove duplicate entries.
+    */
+
+    const seen =
+        new Set();
+
+
+    for (
+        const entry
+        of entries
+    ) {
+
+        if (
+            seen.has(
+                entry.href
+            )
+        ) {
+            continue;
+        }
+
+
+        seen.add(
+            entry.href
+        );
+
+
+        const fullURL =
+            new URL(
+                entry.href,
+                new URL(
+                    currentPath,
+                    window.location.href
+                )
+            ).href;
+
+
+        if (
+            entry.isFolder
+        ) {
+
+            createFolderRow(
+                entry.name,
+                parentElement,
+                depth
+            );
 
 
             /*
-                Decode once.
-
-                Playback uses the decoded AudioBuffer
-                instead of decoding every time a step plays.
+                Recursively fetch the folder.
             */
 
-            const decoded =
-                await context.decodeAudioData(
-                    arrayBuffer
-                );
-
-
-            channel.buffer =
-                decoded;
-
-
-            channel.name =
-                file.name;
-
-
-            const rowElement =
-                channelRack.children[
-                    selectedChannel
-                ];
-
-
-            const nameElement =
-                rowElement.querySelector(
-                    ".sample-name"
-                );
-
-
-            nameElement.textContent =
-                file.name;
-
-
-        } catch (error) {
-
-            console.error(
-                "Could not load audio:",
-                error
+            loadDirectoryRecursive(
+                fullURL,
+                parentElement,
+                depth + 1
             );
 
-            channel.buffer = null;
+
+        } else if (
+            isAudioFile(
+                entry.name
+            )
+        ) {
+
+            createFileRow(
+                entry.name,
+                fullURL,
+                parentElement,
+                depth
+            );
+
         }
+
     }
-);
+
+}
+
+
+/* ==========================================================
+   RECURSIVE DIRECTORY LOADING
+========================================================== */
+
+async function loadDirectoryRecursive(
+    path,
+    parentElement,
+    depth
+) {
+
+    try {
+
+        const html =
+            await fetchDirectory(
+                path
+            );
+
+
+        parseDirectoryListing(
+            html,
+            path,
+            parentElement,
+            depth
+        );
+
+
+    } catch (error) {
+
+        console.warn(
+            "Could not read folder:",
+            path,
+            error
+        );
+
+    }
+
+}
+
+
+/* ==========================================================
+   FOLDER ROW
+========================================================== */
+
+function createFolderRow(
+    name,
+    parentElement,
+    depth
+) {
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+
+    row.className =
+        "tree-row tree-folder";
+
+
+    row.style.paddingLeft =
+        (depth * 15) +
+        "px";
+
+
+    row.innerHTML =
+        '<span class="folder-icon">📁</span>' +
+        escapeHTML(name);
+
+
+    parentElement.appendChild(
+        row
+    );
+
+}
+
+
+/* ==========================================================
+   AUDIO FILE ROW
+========================================================== */
+
+function createFileRow(
+    name,
+    url,
+    parentElement,
+    depth
+) {
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+
+    row.className =
+        "tree-row tree-file";
+
+
+    row.draggable =
+        true;
+
+
+    row.style.paddingLeft =
+        (depth * 15) +
+        "px";
+
+
+    row.innerHTML =
+        '<span class="file-icon">♪</span>' +
+        '<span class="file-name">' +
+        escapeHTML(name) +
+        '</span>';
+
+
+    row.addEventListener(
+        "dragstart",
+        event => {
+
+            event.dataTransfer.setData(
+                "application/x-rack-audio",
+                url
+            );
+
+
+            event.dataTransfer.setData(
+                "application/x-rack-name",
+                name
+            );
+
+
+            event.dataTransfer.effectAllowed =
+                "copy";
+
+
+            bringToFront(
+                browserWindow
+            );
+
+        }
+    );
+
+
+    parentElement.appendChild(
+        row
+    );
+
+}
+
+
+/* ==========================================================
+   ESCAPE HTML
+========================================================== */
+
+function escapeHTML(
+    text
+) {
+
+    const element =
+        document.createElement(
+            "div"
+        );
+
+
+    element.textContent =
+        text;
+
+
+    return element.innerHTML;
+
+}
+
+
+/* ==========================================================
+   AUTOMATICALLY READ ./drum_samples
+========================================================== */
+
+async function loadDrumSamples() {
+
+    tree.innerHTML = "";
+
+
+    const root =
+        document.createElement(
+            "div"
+        );
+
+
+    root.className =
+        "tree-row tree-folder";
+
+
+    root.innerHTML =
+        '<span class="folder-icon">📁</span>' +
+        "drum_samples";
+
+
+    tree.appendChild(
+        root
+    );
+
+
+    try {
+
+        const html =
+            await fetchDirectory(
+                "./drum_samples/"
+            );
+
+
+        parseDirectoryListing(
+            html,
+            "./drum_samples/",
+            tree,
+            1
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Could not read ./drum_samples:",
+            error
+        );
+
+
+        tree.innerHTML = "";
+
+
+        const message =
+            document.createElement(
+                "div"
+            );
+
+
+        message.className =
+            "tree-message";
+
+
+        message.textContent =
+            "Could not read ./drum_samples.";
+
+
+        tree.appendChild(
+            message
+        );
+
+    }
+
+}
+
+
+loadDrumSamples();
 
 
 /* ==========================================================
@@ -1027,6 +1791,7 @@ const playButton =
     document.getElementById(
         "playButton"
     );
+
 
 const tempoInput =
     document.getElementById(
@@ -1043,25 +1808,12 @@ let nextStepTime = 0;
 let schedulerTimer = null;
 
 
-/*
-    How far ahead audio is scheduled.
-
-    Scheduling slightly ahead prevents small browser
-    frame-rate delays from causing audible timing gaps.
-*/
-
-const SCHEDULE_AHEAD_TIME = 0.1;
+const SCHEDULE_AHEAD_TIME =
+    0.1;
 
 
-/*
-    Scheduler checks frequently.
-
-    The actual audio timing is handled by
-    AudioContext.currentTime rather than setTimeout
-    directly, which gives much more stable timing.
-*/
-
-const SCHEDULER_INTERVAL = 25;
+const SCHEDULER_INTERVAL =
+    25;
 
 
 /* --------------------------------------------------
@@ -1076,15 +1828,22 @@ function getBPM() {
         );
 
 
-    if (!Number.isFinite(bpm)) {
+    if (
+        !Number.isFinite(bpm)
+    ) {
+
         bpm = 120;
+
     }
 
 
     bpm =
         Math.max(
             30,
-            Math.min(300, bpm)
+            Math.min(
+                300,
+                bpm
+            )
         );
 
 
@@ -1093,22 +1852,21 @@ function getBPM() {
 
 
     return bpm;
+
 }
 
 
-/*
-    One step is a sixteenth note.
-
-    60 / BPM = seconds per beat.
-
-    Divide by 4 for one 16th-note step.
-*/
+/* --------------------------------------------------
+   STEP DURATION
+-------------------------------------------------- */
 
 function getStepDuration() {
 
     return (
-        60 / getBPM()
+        60 /
+        getBPM()
     ) / 4;
+
 }
 
 
@@ -1138,63 +1896,62 @@ function playChannelSample(
         channel.buffer;
 
 
-    /*
-        Connect directly to destination.
-
-        BufferSource playback is very lightweight
-        after the sample has already been decoded.
-    */
-
     source.connect(
         context.destination
     );
 
 
-    source.start(time);
+    source.start(
+        time
+    );
+
 }
 
 
 /* --------------------------------------------------
-   UPDATE PLAYHEAD
+   PLAYHEAD
 -------------------------------------------------- */
 
-function updatePlayhead(step) {
+function updatePlayhead(
+    step
+) {
 
-    const cells =
-        channelRack.querySelectorAll(
+    channelRack
+        .querySelectorAll(
             ".step.playing"
+        )
+        .forEach(
+            cell => {
+
+                cell.classList.remove(
+                    "playing"
+                );
+
+            }
         );
 
 
-    cells.forEach(
-        cell => {
-            cell.classList.remove(
-                "playing"
-            );
-        }
-    );
-
-
-    const newCells =
-        channelRack.querySelectorAll(
+    channelRack
+        .querySelectorAll(
             '.step[data-step="' +
             step +
             '"]'
+        )
+        .forEach(
+            cell => {
+
+                cell.classList.add(
+                    "playing"
+                );
+
+            }
         );
 
-
-    newCells.forEach(
-        cell => {
-            cell.classList.add(
-                "playing"
-            );
-        }
-    );
 }
 
 
 /* --------------------------------------------------
-   SCHEDULE STEP
+   SCHEDULE
 -------------------------------------------------- */
 
 function scheduleStep(
@@ -1202,36 +1959,23 @@ function scheduleStep(
     time
 ) {
 
-    for (
-        let row = 0;
-        row < channels.length;
-        row++
-    ) {
+    channels.forEach(
+        channel => {
 
-        const channel =
-            channels[row];
+            if (
+                channel.active[step]
+            ) {
 
+                playChannelSample(
+                    channel,
+                    time
+                );
 
-        if (
-            channel.active[step]
-        ) {
+            }
 
-            playChannelSample(
-                channel,
-                time
-            );
         }
-    }
+    );
 
-
-    /*
-        UI highlight cannot be perfectly synchronized
-        to the audio clock because DOM rendering uses
-        the browser's visual frame loop.
-
-        It is scheduled separately while the actual
-        audio remains AudioContext-timed.
-    */
 
     const delay =
         Math.max(
@@ -1247,12 +1991,17 @@ function scheduleStep(
         () => {
 
             if (playing) {
-                updatePlayhead(step);
+
+                updatePlayhead(
+                    step
+                );
+
             }
 
         },
         delay
     );
+
 }
 
 
@@ -1289,9 +2038,12 @@ function scheduler() {
 
         currentStep =
             (
-                currentStep + 1
+                currentStep +
+                1
             ) % STEP_COUNT;
+
     }
+
 }
 
 
@@ -1311,6 +2063,7 @@ async function startSequencer() {
     ) {
 
         await context.resume();
+
     }
 
 
@@ -1318,12 +2071,6 @@ async function startSequencer() {
 
     currentStep = 0;
 
-
-    /*
-        Start just slightly ahead of the current
-        audio clock so the first step has room
-        to be scheduled.
-    */
 
     nextStepTime =
         context.currentTime +
@@ -1342,6 +2089,7 @@ async function startSequencer() {
 
 
     scheduler();
+
 }
 
 
@@ -1354,13 +2102,18 @@ function stopSequencer() {
     playing = false;
 
 
-    if (schedulerTimer !== null) {
+    if (
+        schedulerTimer !== null
+    ) {
 
         clearInterval(
             schedulerTimer
         );
 
-        schedulerTimer = null;
+
+        schedulerTimer =
+            null;
+
     }
 
 
@@ -1371,19 +2124,20 @@ function stopSequencer() {
     currentStep = 0;
 
 
-    const playingCells =
-        channelRack.querySelectorAll(
+    channelRack
+        .querySelectorAll(
             ".step.playing"
+        )
+        .forEach(
+            cell => {
+
+                cell.classList.remove(
+                    "playing"
+                );
+
+            }
         );
 
-
-    playingCells.forEach(
-        cell => {
-            cell.classList.remove(
-                "playing"
-            );
-        }
-    );
 }
 
 
@@ -1395,6 +2149,11 @@ playButton.addEventListener(
     "click",
     async () => {
 
+        bringToFront(
+            rackWindow
+        );
+
+
         if (playing) {
 
             stopSequencer();
@@ -1402,13 +2161,15 @@ playButton.addEventListener(
         } else {
 
             await startSequencer();
+
         }
+
     }
 );
 
 
 /* --------------------------------------------------
-   TEMPO CHANGE
+   TEMPO
 -------------------------------------------------- */
 
 tempoInput.addEventListener(
@@ -1416,47 +2177,52 @@ tempoInput.addEventListener(
     () => {
 
         getBPM();
+
     }
 );
 
 
 /* ==========================================================
-   GLOBAL PAGE BEHAVIOR
+   GLOBAL BEHAVIOR
 ========================================================== */
-
-
-/* --------------------------------------------------
-   DISABLE RIGHT CLICK
--------------------------------------------------- */
 
 document.addEventListener(
     "contextmenu",
-    (event) => {
+    event => {
+
         event.preventDefault();
+
     }
 );
 
-
-/* --------------------------------------------------
-   DISABLE SELECTION
--------------------------------------------------- */
 
 document.addEventListener(
     "selectstart",
-    (event) => {
+    event => {
+
         event.preventDefault();
+
     }
 );
 
 
-/* --------------------------------------------------
-   DISABLE DRAGGING
--------------------------------------------------- */
-
 document.addEventListener(
     "dragstart",
-    (event) => {
-        event.preventDefault();
+    event => {
+
+        if (
+            event.target.closest(
+                ".tree-file"
+            ) ||
+            event.target.closest(
+                ".titlebar"
+            )
+        ) {
+
+            return;
+
+        }
+
     }
 );
 
