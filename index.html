@@ -720,12 +720,25 @@ body {
 ========================================================== */
 
 .window.minimized {
-    height: 30px;
+    height: 30px !important;
+    min-height: 30px !important;
+    max-height: 30px !important;
+}
+
+.window.minimized .titlebar {
+    display: flex !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    max-height: 30px !important;
 }
 
 .window.minimized .content,
 .window.minimized .browser-content {
-    display: none;
+    display: none !important;
+}
+
+.window.minimized > :not(.titlebar) {
+    display: none !important;
 }
 
 /* ==========================================================
@@ -2981,7 +2994,8 @@ async function exportCurrentPatternAsAudio(
                     Math.max(
                         renderDuration,
                         step * stepDuration +
-                        channel.buffer.duration
+                        channel.buffer.duration /
+                        Math.pow(2, (Number(channel.pitchCents) || 0) / 1200)
                     );
 
             }
@@ -3001,6 +3015,9 @@ async function exportCurrentPatternAsAudio(
             renderLength,
             sampleRate
         );
+
+    // Track offline sources so cutself behaves exactly like the live sampler.
+    const offlineActiveSources = new Map();
 
     for (
         let step = 0;
@@ -3030,17 +3047,36 @@ async function exportCurrentPatternAsAudio(
                 continue;
             }
 
+            // cutself: stop the previous note from this channel when a new one starts.
+            if (channel.cutSelf && offlineActiveSources.has(row)) {
+                try {
+                    offlineActiveSources.get(row).stop(time);
+                } catch (error) {
+                    // Source may already have ended; nothing to do.
+                }
+            }
+
             const source =
                 offlineContext.createBufferSource();
 
             source.buffer =
-                channel.buffer;
+                getPlayableBuffer(channel.buffer, !!channel.reverse);
+
+            const pitchCents =
+                Number.isFinite(Number(channel.pitchCents))
+                    ? Number(channel.pitchCents)
+                    : 0;
+
+            source.playbackRate.value =
+                Math.pow(2, pitchCents / 1200);
 
             source.connect(
                 offlineContext.destination
             );
 
             source.start(time);
+
+            offlineActiveSources.set(row, source);
 
         }
 
