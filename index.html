@@ -217,7 +217,7 @@ body {
 
     padding: 8px;
 
-    background: #aaa;
+    background: #171717;
 }
 
 /* ==========================================================
@@ -617,6 +617,104 @@ body {
     background: #3b3b3b;
 }
 
+
+/* ==========================================================
+   SAMPLER
+========================================================== */
+
+#sampler {
+    left: 50%;
+    top: 50%;
+    width: 620px;
+    height: 360px;
+    transform: translate(-50%, -50%);
+    display: none;
+    z-index: 30;
+}
+
+#sampler.open {
+    display: block;
+}
+
+.sampler-content {
+    position: absolute;
+    left: 0;
+    top: 30px;
+    width: 100%;
+    height: calc(100% - 30px);
+    padding: 10px;
+    background: #151515;
+}
+
+.sampler-controls {
+    height: 72px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    background: #0b0b0b;
+    border: 2px solid #292929;
+    padding: 7px 10px;
+}
+
+.pitch-control {
+    height: 54px;
+    width: 250px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pitch-slider {
+    appearance: slider-vertical;
+    -webkit-appearance: slider-vertical;
+    width: 24px;
+    height: 52px;
+    accent-color: #e0b82f;
+    cursor: ns-resize;
+}
+
+.pitch-readout {
+    width: 120px;
+    color: #ddd;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 18px;
+}
+
+.sampler-check {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #ddd;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.sampler-check input {
+    width: 16px;
+    height: 16px;
+    accent-color: #e0b82f;
+    cursor: pointer;
+}
+
+.waveform-wrap {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    top: 92px;
+    background: #050505;
+    border: 2px solid #292929;
+    overflow: hidden;
+}
+
+#waveformCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
 /* ==========================================================
    MINIMIZED
 ========================================================== */
@@ -655,7 +753,7 @@ body {
 
     padding: 7px;
 
-    background: #aaa;
+    background: #080808;
 
     overflow: hidden;
 }
@@ -664,7 +762,7 @@ body {
     width: 100%;
     height: 100%;
 
-    background: #c0c0c0;
+    background: #0d0d0d;
 
     border: 2px solid #666;
     border-top-color: #444;
@@ -674,7 +772,7 @@ body {
 
     overflow: auto;
 
-    color: #222;
+    color: #ddd;
 
     font-size: 12px;
 }
@@ -701,13 +799,13 @@ body {
 }
 
 .tree-file:hover {
-    background: #d8d8d8;
-    border-color: #999;
+    background: #1a1a1a;
+    border-color: #333;
 }
 
 .tree-file:active {
     cursor: grabbing;
-    background: #aaa;
+    background: #171717;
 }
 
 .folder-icon {
@@ -726,7 +824,7 @@ body {
 }
 
 .tree-message {
-    color: #555;
+    color: #777;
     padding: 5px;
     font-size: 11px;
 }
@@ -960,6 +1058,36 @@ body {
 
 </div>
 
+<!-- ==========================================================
+     SAMPLER
+========================================================== -->
+
+<div class="window" id="sampler">
+    <div class="titlebar" id="samplerTitlebar">
+        <div class="title" id="samplerTitle">sampler</div>
+        <button class="window-button" id="closeSampler">X</button>
+    </div>
+    <div class="sampler-content">
+        <div class="sampler-controls">
+            <div class="pitch-control">
+                <input class="pitch-slider" id="pitchSlider" type="range" min="-1200" max="1200" value="0" step="1">
+                <div class="pitch-readout" id="pitchReadout">Pitch: 0 cents<br>0.00 semitones</div>
+            </div>
+            <label class="sampler-check">
+                <input type="checkbox" id="cutSelf">
+                cutself
+            </label>
+            <label class="sampler-check">
+                <input type="checkbox" id="reverseSample">
+                reverse
+            </label>
+        </div>
+        <div class="waveform-wrap">
+            <canvas id="waveformCanvas"></canvas>
+        </div>
+    </div>
+</div>
+
 <script>
 
 /* ==========================================================
@@ -1009,41 +1137,43 @@ function setupWindowDrag(
 
     let minimized = false;
 
-    toggleButton.addEventListener(
-        "click",
-        event => {
+    if (toggleButton) {
+        toggleButton.addEventListener(
+            "click",
+            event => {
 
-            event.stopPropagation();
+                event.stopPropagation();
 
-            bringToFront(windowElement);
+                bringToFront(windowElement);
 
-            const rect =
-                windowElement.getBoundingClientRect();
+                const rect =
+                    windowElement.getBoundingClientRect();
 
-            windowElement.style.transform =
-                "none";
+                windowElement.style.transform =
+                    "none";
 
-            windowElement.style.left =
-                rect.left + "px";
+                windowElement.style.left =
+                    rect.left + "px";
 
-            windowElement.style.top =
-                rect.top + "px";
+                windowElement.style.top =
+                    rect.top + "px";
 
-            minimized =
-                !minimized;
+                minimized =
+                    !minimized;
 
-            windowElement.classList.toggle(
-                "minimized",
-                minimized
-            );
+                windowElement.classList.toggle(
+                    "minimized",
+                    minimized
+                );
 
-            toggleButton.textContent =
-                minimized
-                    ? "□"
-                    : "_";
+                toggleButton.textContent =
+                    minimized
+                        ? "□"
+                        : "_";
 
-        }
-    );
+            }
+        );
+    }
 
     titlebar.addEventListener(
         "mousedown",
@@ -1184,6 +1314,29 @@ setupWindowDrag(
     document.getElementById("toggleBrowser")
 );
 
+const exportSettingsWindow =
+    document.getElementById("exportSettings");
+
+setupWindowDrag(
+    exportSettingsWindow,
+    document.getElementById("exportSettingsTitlebar"),
+    null
+);
+
+document.getElementById("closeExportSettings").addEventListener("click", event => {
+    event.stopPropagation();
+    exportSettingsWindow.classList.remove("open");
+});
+
+const samplerWindow =
+    document.getElementById("sampler");
+
+setupWindowDrag(
+    samplerWindow,
+    document.getElementById("samplerTitlebar"),
+    null
+);
+
 /* ==========================================================
    PATTERN SYSTEM
 ========================================================== */
@@ -1316,7 +1469,13 @@ for (
             (row + 1),
 
         buffer:
-            null
+            null,
+        pitchCents:
+            0,
+        cutSelf:
+            false,
+        reverse:
+            false
 
     });
 
@@ -1413,6 +1572,11 @@ for (
 
         }
     );
+
+    sampleBox.addEventListener("dblclick", event => {
+        event.stopPropagation();
+        openSamplerForChannel(row);
+    });
 
     rowElement.appendChild(
         sampleBox
@@ -1642,6 +1806,12 @@ async function loadSampleIntoChannel(
 
         channel.name =
             filename;
+        channel.pitchCents =
+            0;
+        channel.cutSelf =
+            false;
+        channel.reverse =
+            false;
 
         const rowElement =
             channelRack.children[
@@ -1864,6 +2034,30 @@ function createGitHubFileRow(
     row.appendChild(text);
 
     row.addEventListener(
+        "click",
+        async event => {
+            event.stopPropagation();
+            try {
+                const context = getAudioContext();
+                if (context.state === "suspended") {
+                    await context.resume();
+                }
+
+                const response = await fetch(url);
+                const arrayBuffer = await response.arrayBuffer();
+                const decoded = await context.decodeAudioData(arrayBuffer);
+
+                const source = context.createBufferSource();
+                source.buffer = decoded;
+                source.connect(context.destination);
+                source.start();
+            } catch (error) {
+                console.error("Could not preview sample:", error);
+            }
+        }
+    );
+
+    row.addEventListener(
         "dragstart",
         event => {
 
@@ -1949,6 +2143,181 @@ async function loadDrumSamples() {
 loadDrumSamples();
 
 /* ==========================================================
+   SAMPLER
+========================================================== */
+
+const samplerTitle =
+    document.getElementById("samplerTitle");
+const pitchSlider =
+    document.getElementById("pitchSlider");
+const pitchReadout =
+    document.getElementById("pitchReadout");
+const cutSelf =
+    document.getElementById("cutSelf");
+const reverseSample =
+    document.getElementById("reverseSample");
+const waveformCanvas =
+    document.getElementById("waveformCanvas");
+
+function formatPitch(cents) {
+    const sign = cents > 0 ? "+" : "";
+    const semitones = cents / 100;
+    return "Pitch: " + sign + cents + " cents<br>" +
+        sign + semitones.toFixed(2) + " semitones";
+}
+
+function drawWaveform(buffer) {
+    const canvas = waveformCanvas;
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+
+    canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+    canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const width = rect.width;
+    const height = rect.height;
+
+    ctx.fillStyle = "#050505";
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.strokeStyle = "#222";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, height / 2);
+    ctx.lineTo(width, height / 2);
+    ctx.stroke();
+
+    if (!buffer) return;
+
+    const channels = buffer.numberOfChannels;
+    const length = buffer.length;
+    const mono = new Float32Array(length);
+
+    for (let channel = 0; channel < channels; channel++) {
+        const data = buffer.getChannelData(channel);
+        for (let i = 0; i < length; i++) {
+            mono[i] += data[i] / channels;
+        }
+    }
+
+    /*
+       Dense min/max rendering keeps transients, subs, mids and highs
+       visible instead of reducing the waveform to a smooth blob.
+    */
+    const columns = Math.max(1, Math.floor(width));
+    const samplesPerColumn = Math.max(1, Math.ceil(length / columns));
+
+    ctx.strokeStyle = "#e0b82f";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+
+    for (let x = 0; x < columns; x++) {
+        const start = x * samplesPerColumn;
+        const end = Math.min(length, start + samplesPerColumn);
+
+        let min = 1;
+        let max = -1;
+
+        for (let i = start; i < end; i++) {
+            const value = mono[i];
+            if (value < min) min = value;
+            if (value > max) max = value;
+        }
+
+        const top = height / 2 - max * (height * 0.46);
+        const bottom = height / 2 - min * (height * 0.46);
+
+        ctx.moveTo(x + 0.5, top);
+        ctx.lineTo(x + 0.5, bottom);
+    }
+
+    ctx.stroke();
+}
+
+function openSamplerForChannel(channelIndex) {
+    const channel = channels[channelIndex];
+    if (!channel || !channel.buffer) return;
+
+    samplerState.channelIndex = channelIndex;
+    samplerState.buffer = channel.buffer;
+    samplerState.pitchCents = channel.pitchCents || 0;
+    samplerState.cutSelf = !!channel.cutSelf;
+    samplerState.reverse = !!channel.reverse;
+
+    samplerTitle.textContent =
+        "sampler - " + channel.name;
+
+    pitchSlider.value =
+        samplerState.pitchCents;
+
+    pitchReadout.innerHTML =
+        formatPitch(samplerState.pitchCents);
+
+    cutSelf.checked =
+        samplerState.cutSelf;
+
+    reverseSample.checked =
+        samplerState.reverse;
+
+    samplerWindow.classList.add("open");
+    bringToFront(samplerWindow);
+
+    requestAnimationFrame(() => {
+        drawWaveform(samplerState.buffer);
+    });
+}
+
+pitchSlider.addEventListener("input", () => {
+    const cents = Number(pitchSlider.value);
+    samplerState.pitchCents = cents;
+
+    if (samplerState.channelIndex >= 0) {
+        channels[samplerState.channelIndex].pitchCents = cents;
+    }
+
+    pitchReadout.innerHTML =
+        formatPitch(cents);
+});
+
+cutSelf.addEventListener("change", () => {
+    samplerState.cutSelf = cutSelf.checked;
+
+    if (samplerState.channelIndex >= 0) {
+        channels[samplerState.channelIndex].cutSelf =
+            cutSelf.checked;
+    }
+});
+
+reverseSample.addEventListener("change", () => {
+    samplerState.reverse = reverseSample.checked;
+
+    if (samplerState.channelIndex >= 0) {
+        channels[samplerState.channelIndex].reverse =
+            reverseSample.checked;
+    }
+});
+
+document.getElementById("closeSampler").addEventListener(
+    "click",
+    event => {
+        event.stopPropagation();
+        samplerWindow.classList.remove("open");
+    }
+);
+
+window.addEventListener("resize", () => {
+    if (
+        samplerWindow.classList.contains("open") &&
+        samplerState.buffer
+    ) {
+        drawWaveform(samplerState.buffer);
+    }
+});
+
+/* ==========================================================
    SEQUENCER
 ========================================================== */
 
@@ -1976,6 +2345,16 @@ const SCHEDULE_AHEAD_TIME =
 
 const SCHEDULER_INTERVAL =
     25;
+
+const activeSources = new Map();
+let samplerState = {
+    channelIndex: -1,
+    buffer: null,
+    pitchCents: 0,
+    cutSelf: false,
+    reverse: false
+};
+const reversedBufferCache = new WeakMap();
 
 /* ==========================================================
    BPM
@@ -2027,30 +2406,62 @@ function getStepDuration() {
    PLAY SAMPLE
 ========================================================== */
 
-function playChannelSample(
-    channel,
-    time
-) {
+function getPlayableBuffer(buffer, reverse) {
+    if (!reverse) return buffer;
 
-    if (!channel.buffer) {
-        return;
-    }
+    let cached = reversedBufferCache.get(buffer);
+    if (cached) return cached;
 
-    const context =
-        getAudioContext();
-
-    const source =
-        context.createBufferSource();
-
-    source.buffer =
-        channel.buffer;
-
-    source.connect(
-        context.destination
+    const context = getAudioContext();
+    const reversed = context.createBuffer(
+        buffer.numberOfChannels,
+        buffer.length,
+        buffer.sampleRate
     );
 
+    for (let channel = 0; channel < buffer.numberOfChannels; channel++) {
+        const sourceData = buffer.getChannelData(channel);
+        const targetData = reversed.getChannelData(channel);
+        for (let i = 0; i < sourceData.length; i++) {
+            targetData[i] = sourceData[sourceData.length - 1 - i];
+        }
+    }
+
+    reversedBufferCache.set(buffer, reversed);
+    return reversed;
+}
+
+function playChannelSample(channel, time, channelIndex = -1) {
+    if (!channel.buffer) return;
+
+    const context = getAudioContext();
+
+    if (channel.cutSelf && activeSources.has(channelIndex)) {
+        try {
+            activeSources.get(channelIndex).stop(time);
+        } catch (_) {}
+        activeSources.delete(channelIndex);
+    }
+
+    const source = context.createBufferSource();
+    source.buffer = getPlayableBuffer(channel.buffer, channel.reverse);
+
+    const cents = Number.isFinite(channel.pitchCents)
+        ? channel.pitchCents
+        : 0;
+
+    source.playbackRate.value =
+        Math.pow(2, cents / 1200);
+
+    source.connect(context.destination);
     source.start(time);
 
+    activeSources.set(channelIndex, source);
+    source.addEventListener("ended", () => {
+        if (activeSources.get(channelIndex) === source) {
+            activeSources.delete(channelIndex);
+        }
+    });
 }
 
 /* ==========================================================
@@ -2106,7 +2517,8 @@ function scheduleStep(
 
                 playChannelSample(
                     channel,
-                    time
+                    time,
+                    row
                 );
 
             }
@@ -2923,6 +3335,33 @@ document.getElementById(
 
     }
 );
+
+/* ==========================================================
+   SPACEBAR PLAY / STOP
+========================================================== */
+
+document.addEventListener("keydown", async event => {
+    if (event.code !== "Space") return;
+
+    const tag = event.target && event.target.tagName;
+    if (
+        tag === "INPUT" ||
+        tag === "SELECT" ||
+        tag === "TEXTAREA"
+    ) {
+        return;
+    }
+
+    event.preventDefault();
+
+    if (event.repeat) return;
+
+    if (playing) {
+        stopSequencer();
+    } else {
+        await startSequencer();
+    }
+});
 
 /* ==========================================================
    INITIAL STATE
