@@ -458,6 +458,31 @@ body {
     width: 112px;
 }
 
+.metronome-button {
+    width: 88px;
+    height: 26px;
+    border: 2px solid #292929;
+    background: #555;
+    color: #eee;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.metronome-button:hover {
+    background: #666;
+}
+
+.metronome-button:active {
+    background: #3b3b3b;
+}
+
+.metronome-button.enabled {
+    background: #e0b82f;
+    border-color: #9b7b15;
+    color: #222;
+}
+
 .play-button:hover,
 .playlist-button:hover {
     background: #666;
@@ -1280,6 +1305,13 @@ body {
             id="playlistButton"
         >
             Play in playlist
+        </button>
+
+        <button
+            class="metronome-button"
+            id="metronomeButton"
+        >
+            Metronome
         </button>
 
     </div>
@@ -3051,6 +3083,12 @@ const tempoUp =
 const tempoDown =
     document.getElementById("tempoDown");
 
+const metronomeButton =
+    document.getElementById("metronomeButton");
+
+let metronomeEnabled = false;
+let metronomeBuffer = null;
+
 let playing = false;
 
 let playInPlaylist = false;
@@ -3122,6 +3160,67 @@ function getStepDuration() {
         getBPM()
     ) / 4;
 
+}
+
+/* ==========================================================
+   METRONOME
+========================================================== */
+
+const METRONOME_URL =
+    "https://raw.githubusercontent.com/mrfranco27/spark/main/sounds/wood_tick.wav";
+
+async function loadMetronome() {
+
+    if (metronomeBuffer) {
+        return metronomeBuffer;
+    }
+
+    const context = getAudioContext();
+
+    try {
+        const response = await fetch(METRONOME_URL);
+
+        if (!response.ok) {
+            throw new Error(
+                "Could not load metronome: " + response.status
+            );
+        }
+
+        const arrayBuffer =
+            await response.arrayBuffer();
+
+        metronomeBuffer =
+            await context.decodeAudioData(arrayBuffer);
+
+        return metronomeBuffer;
+
+    } catch (error) {
+        console.error(
+            "Could not load metronome:",
+            error
+        );
+        return null;
+    }
+}
+
+function playMetronome(time, accent) {
+
+    if (!metronomeEnabled || !metronomeBuffer) {
+        return;
+    }
+
+    const context = getAudioContext();
+    const source = context.createBufferSource();
+
+    source.buffer = metronomeBuffer;
+
+    if (accent) {
+        source.playbackRate.value =
+            Math.pow(4, 100 / 1200);
+    }
+
+    source.connect(context.destination);
+    source.start(time);
 }
 
 /* ==========================================================
@@ -3238,6 +3337,10 @@ function updatePlaylistPlayhead(column, step) {
 function scheduleRackStep(step, time) {
     const pattern = patterns[currentPattern];
 
+    if (step % 4 === 0) {
+        playMetronome(time, step === 0);
+    }
+
     channels.forEach((channel, row) => {
         if (pattern[row][step]) {
             playChannelSample(channel, time, row);
@@ -3257,6 +3360,10 @@ function scheduleRackStep(step, time) {
 }
 
 function schedulePlaylistStep(column, step, time) {
+    if (step % 4 === 0) {
+        playMetronome(time, step === 0);
+    }
+
     for (let pattern = 0; pattern < PATTERN_COUNT; pattern++) {
         if (!playlistRows[pattern].has(column)) {
             continue;
@@ -3405,6 +3512,29 @@ playButton.addEventListener(
             stopSequencer();
         } else {
             await startSequencer();
+        }
+    }
+);
+
+/* ==========================================================
+   METRONOME BUTTON
+========================================================== */
+
+metronomeButton.addEventListener(
+    "click",
+    async event => {
+        event.stopPropagation();
+
+        metronomeEnabled =
+            !metronomeEnabled;
+
+        metronomeButton.classList.toggle(
+            "enabled",
+            metronomeEnabled
+        );
+
+        if (metronomeEnabled) {
+            await loadMetronome();
         }
     }
 );
