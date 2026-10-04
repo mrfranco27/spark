@@ -59,6 +59,16 @@ body {
     z-index: 1;
 }
 
+#playlist {
+    left: 50%;
+    top: 50%;
+    width: 760px;
+    height: 500px;
+    transform: translate(-50%, -50%);
+    display: none;
+    z-index: 25;
+}
+
 /* ==========================================================
    TITLEBAR
 ========================================================== */
@@ -229,6 +239,8 @@ body {
 
     display: flex;
     align-items: center;
+    justify-content: center;
+    gap: 34px;
 
     background: #858585;
 
@@ -241,59 +253,161 @@ body {
     margin-bottom: 7px;
 }
 
+.pattern-control {
+    height: 94px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
 .pattern-title {
     width: 90px;
+    height: 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     color: #ddd;
 
     font-size: 13px;
     font-weight: bold;
-
     text-align: center;
 }
 
-.pattern-grid {
-    width: 150px;
-    height: 90px;
-
-    display: grid;
-
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-
-    gap: 4px;
+.pattern-selector {
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 }
 
-.pattern-button {
+.pattern-number {
+    width: 90px;
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     border: 2px solid #777;
-
     background: #d0d0d0;
+    color: #222;
 
-    color: #333;
+    font-size: 26px;
+    font-weight: bold;
+    user-select: none;
+}
 
+.pattern-arrow-buttons {
+    width: 34px;
+    height: 52px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.pattern-arrow {
+    flex: 1;
+    padding: 0;
+
+    border: 2px solid #777;
+    background: #bdbdbd;
+    color: #222;
+
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.pattern-arrow:hover {
+    background: #d0d0d0;
+}
+
+.pattern-arrow:active {
+    background: #999;
+}
+
+.tempo-control {
+    height: 94px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.tempo-title {
+    width: 90px;
+    height: 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #ddd;
     font-size: 13px;
     font-weight: bold;
-
-    cursor: pointer;
-
-    box-shadow:
-        inset 1px 1px 0 rgba(255,255,255,0.6);
+    text-align: center;
 }
 
-.pattern-button:hover {
-    background: #ddd;
+.tempo-selector {
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 }
 
-.pattern-button:active {
-    background: #aaa;
-}
+.tempo-number {
+    width: 90px;
+    height: 52px;
 
-.pattern-button.selected {
-    background: #e0b82f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    border-color: #9b7b15;
-
+    border: 2px solid #777;
+    background: #d0d0d0;
     color: #222;
+
+    font-size: 26px;
+    font-weight: bold;
+    user-select: none;
+}
+
+.tempo-arrow-buttons {
+    width: 34px;
+    height: 52px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.tempo-arrow {
+    flex: 1;
+    padding: 0;
+
+    border: 2px solid #777;
+    background: #bdbdbd;
+    color: #222;
+
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.tempo-arrow:hover {
+    background: #d0d0d0;
+}
+
+.tempo-arrow:active {
+    background: #999;
 }
 
 /* ==========================================================
@@ -322,7 +436,7 @@ body {
 }
 
 .play-button,
-.loop-button {
+.playlist-button {
     height: 26px;
 
     border: 2px solid #292929;
@@ -340,21 +454,21 @@ body {
     width: 58px;
 }
 
-.loop-button {
-    width: 58px;
+.playlist-button {
+    width: 112px;
 }
 
 .play-button:hover,
-.loop-button:hover {
+.playlist-button:hover {
     background: #666;
 }
 
 .play-button:active,
-.loop-button:active {
+.playlist-button:active {
     background: #3b3b3b;
 }
 
-.loop-button.enabled {
+.playlist-button.enabled {
     background: #e0b82f;
     border-color: #9b7b15;
     color: #222;
@@ -516,10 +630,14 @@ body {
     background: #765050;
 }
 
-.step.active.group-blue,
+.step.active.group-blue {
+    background: #79a9c7;
+    border-color: #a9cbe0;
+}
+
 .step.active.group-red {
-    background: #e0b82f;
-    border-color: #9b7b15;
+    background: #c88484;
+    border-color: #e0abab;
 }
 
 .step:hover {
@@ -535,12 +653,122 @@ body {
 }
 
 .step.active.playing {
-    background: #f5d65a;
-    filter: brightness(1.05);
+    filter: brightness(1.2);
 }
 
 .step.group-start {
     margin-left: 3px;
+}
+
+/* ==========================================================
+   PLAYLIST
+========================================================== */
+
+.playlist-content {
+    position: absolute;
+    left: 0;
+    top: 30px;
+    width: 100%;
+    height: calc(100% - 30px);
+    padding: 8px;
+    background: #111;
+    overflow: hidden;
+}
+
+.playlist-scroll {
+    width: 100%;
+    height: 100%;
+    overflow: scroll;
+    background: #0a0a0a;
+    border: 2px solid #292929;
+    scroll-snap-type: none;
+    overscroll-behavior: contain;
+}
+
+.playlist-grid {
+    display: grid;
+    grid-template-columns: 62px repeat(var(--playlist-columns), 64px);
+    grid-template-rows: repeat(50, 32px);
+    gap: 2px;
+    width: max-content;
+    min-height: 100%;
+    padding: 2px;
+}
+
+.playlist-label {
+    position: sticky;
+    left: 0;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #202a31;
+    color: #d8e3ea;
+    border: 1px solid #394952;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.playlist-cell {
+    width: 64px;
+    height: 32px;
+    background: #48677b;
+    border: 1px solid #304957;
+    cursor: pointer;
+}
+
+.playlist-cell:hover {
+    background: #5d8097;
+}
+
+.playlist-cell.active {
+    background: #83aeca;
+    border-color: #a9cbe0;
+}
+
+.playlist-cell.playing {
+    filter: brightness(1.35);
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.35);
+}
+
+.playlist-cell.active.playing {
+    background: #a8cce3;
+}
+
+.playlist-scroll::-webkit-scrollbar {
+    width: 14px;
+    height: 14px;
+}
+
+.playlist-scroll::-webkit-scrollbar-track {
+    background: #111;
+}
+
+.playlist-scroll::-webkit-scrollbar-thumb {
+    background: #3c4d57;
+    border: 3px solid #111;
+}
+
+.playlist-scroll::-webkit-scrollbar-thumb:hover {
+    background: #516976;
+}
+
+/* ==========================================================
+   PLAYLIST PLAYHEAD
+========================================================== */
+
+.playlist-status {
+    position: absolute;
+    left: 10px;
+    top: 7px;
+    z-index: 8;
+    padding: 3px 6px;
+    background: #151515;
+    color: #aebec7;
+    border: 1px solid #303c43;
+    font-size: 10px;
+    font-weight: bold;
+    pointer-events: none;
 }
 
 /* ==========================================================
@@ -716,6 +944,39 @@ body {
 }
 
 /* ==========================================================
+   PITCH CONTEXT MENU
+========================================================== */
+
+.pitch-context-menu {
+    position: fixed;
+    min-width: 150px;
+    background: #d0d0d0;
+    border: 2px solid #222;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.35);
+    display: none;
+    z-index: 1000;
+}
+
+.pitch-context-menu.open {
+    display: block;
+}
+
+.pitch-context-item {
+    height: 30px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    color: #222;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.pitch-context-item:hover {
+    background: #e0b82f;
+}
+
+/* ==========================================================
    MINIMIZED
 ========================================================== */
 
@@ -733,7 +994,8 @@ body {
 }
 
 .window.minimized .content,
-.window.minimized .browser-content {
+.window.minimized .browser-content,
+.window.minimized .playlist-content {
     display: none !important;
 }
 
@@ -853,7 +1115,6 @@ body {
 
 <div class="window" id="rack">
 
-```
 <div class="titlebar" id="rackTitlebar">
 
     <div class="title">
@@ -876,6 +1137,13 @@ body {
             Edit
         </button>
 
+        <button
+            class="menu-button"
+            id="viewButton"
+        >
+            View
+        </button>
+
     </div>
 
     <button
@@ -888,8 +1156,15 @@ body {
     <div
         class="dropdown"
         id="fileMenu"
-        style="right: 84px;"
+        style="right: 136px;"
     >
+        <div
+            class="dropdown-item"
+            id="newProject"
+        >
+            New
+        </div>
+
         <div
             class="dropdown-item"
             id="exportAudio"
@@ -900,8 +1175,21 @@ body {
 
     <div
         class="dropdown"
-        id="editMenu"
+        id="viewMenu"
         style="right: 32px;"
+    >
+        <div
+            class="dropdown-item"
+            id="playlistView"
+        >
+            <span id="playlistViewCheck" style="display:none; width:16px;">✓</span><span>Playlist</span>
+        </div>
+    </div>
+
+    <div
+        class="dropdown"
+        id="editMenu"
+        style="right: 84px;"
     >
         <div
             class="dropdown-item"
@@ -924,14 +1212,57 @@ body {
 
     <div class="pattern-area">
 
-        <div class="pattern-title">
-            patterns
+        <div class="pattern-control">
+            <div class="pattern-title">
+                pattern
+            </div>
+
+            <div class="pattern-selector">
+                <div class="pattern-number" id="patternNumber">1</div>
+
+                <div class="pattern-arrow-buttons">
+                    <button
+                        type="button"
+                        class="pattern-arrow"
+                        id="patternUp"
+                        aria-label="Next pattern"
+                    >▲</button>
+
+                    <button
+                        type="button"
+                        class="pattern-arrow"
+                        id="patternDown"
+                        aria-label="Previous pattern"
+                    >▼</button>
+                </div>
+            </div>
         </div>
 
-        <div
-            class="pattern-grid"
-            id="patternGrid"
-        ></div>
+        <div class="tempo-control">
+            <div class="tempo-title">
+                tempo
+            </div>
+
+            <div class="tempo-selector">
+                <div class="tempo-number" id="tempoNumber">120</div>
+
+                <div class="tempo-arrow-buttons">
+                    <button
+                        type="button"
+                        class="tempo-arrow"
+                        id="tempoUp"
+                        aria-label="Increase tempo"
+                    >▲</button>
+
+                    <button
+                        type="button"
+                        class="tempo-arrow"
+                        id="tempoDown"
+                        aria-label="Decrease tempo"
+                    >▼</button>
+                </div>
+            </div>
+        </div>
 
     </div>
 
@@ -945,25 +1276,11 @@ body {
         </button>
 
         <button
-            class="loop-button enabled"
-            id="loopButton"
+            class="playlist-button"
+            id="playlistButton"
         >
-            Loop
+            Play in playlist
         </button>
-
-        <span class="tempo-label">
-            BPM
-        </span>
-
-        <input
-            class="tempo-input"
-            id="tempoInput"
-            type="number"
-            min="30"
-            max="300"
-            value="120"
-            step="1"
-        >
 
     </div>
 
@@ -973,7 +1290,6 @@ body {
     ></div>
 
 </div>
-```
 
 </div>
 
@@ -983,7 +1299,6 @@ body {
 
 <div class="window" id="browser">
 
-```
 <div
     class="titlebar"
     id="browserTitlebar"
@@ -1012,8 +1327,25 @@ body {
     </div>
 
 </div>
-```
 
+</div>
+
+<!-- ==========================================================
+     PLAYLIST
+========================================================== -->
+
+<div class="window" id="playlist" style="display: none;">
+    <div class="titlebar" id="playlistTitlebar">
+        <div class="title">playlist</div>
+        <button class="window-button" id="togglePlaylist">_</button>
+    </div>
+
+    <div class="playlist-content">
+        <div class="playlist-status" id="playlistStatus">playlist</div>
+        <div class="playlist-scroll" id="playlistScroll">
+            <div class="playlist-grid" id="playlistGrid"></div>
+        </div>
+    </div>
 </div>
 
 <!-- ==========================================================
@@ -1098,6 +1430,12 @@ body {
         <div class="waveform-wrap">
             <canvas id="waveformCanvas"></canvas>
         </div>
+    </div>
+</div>
+
+<div class="pitch-context-menu" id="pitchContextMenu">
+    <div class="pitch-context-item" id="pitchTypeValue">
+        Type value
     </div>
 </div>
 
@@ -1327,6 +1665,15 @@ setupWindowDrag(
     document.getElementById("toggleBrowser")
 );
 
+const playlistWindow =
+    document.getElementById("playlist");
+
+setupWindowDrag(
+    playlistWindow,
+    document.getElementById("playlistTitlebar"),
+    document.getElementById("togglePlaylist")
+);
+
 const exportSettingsWindow =
     document.getElementById("exportSettings");
 
@@ -1354,7 +1701,7 @@ setupWindowDrag(
    PATTERN SYSTEM
 ========================================================== */
 
-const PATTERN_COUNT = 9;
+const PATTERN_COUNT = 50;
 const ROW_COUNT = 4;
 const STEP_COUNT = 16;
 
@@ -1387,78 +1734,309 @@ for (
 }
 
 /* ==========================================================
-   PATTERN BUTTONS
+   PLAYLIST DATA
 ========================================================== */
 
-const patternGrid =
-    document.getElementById("patternGrid");
+const PLAYLIST_INITIAL_COLUMNS = 32;
+const PLAYLIST_COLUMN_CHUNK = 16;
+let playlistColumnCount = PLAYLIST_INITIAL_COLUMNS;
 
-for (
-    let pattern = 0;
-    pattern < PATTERN_COUNT;
-    pattern++
-) {
+const playlistRows = Array.from(
+    { length: PATTERN_COUNT },
+    () => new Set()
+);
 
-    const button =
-        document.createElement("button");
+const playlistGrid =
+    document.getElementById("playlistGrid");
 
-    button.className =
-        "pattern-button";
+const playlistScroll =
+    document.getElementById("playlistScroll");
 
-    button.textContent =
-        pattern + 1;
+const playlistStatus =
+    document.getElementById("playlistStatus");
 
-    button.dataset.pattern =
-        pattern;
+function renderPlaylistColumns() {
+    const savedScrollLeft = playlistScroll.scrollLeft;
+    const savedScrollTop = playlistScroll.scrollTop;
 
-    button.addEventListener(
-        "click",
-        () => {
-
-            switchPattern(pattern);
-
-        }
+    playlistGrid.style.setProperty(
+        "--playlist-columns",
+        playlistColumnCount
     );
 
-    patternGrid.appendChild(button);
+    playlistGrid.innerHTML = "";
+
+    for (let pattern = 0; pattern < PATTERN_COUNT; pattern++) {
+        const label = document.createElement("div");
+        label.className = "playlist-label";
+        label.textContent = "Pattern " + (pattern + 1);
+        label.dataset.pattern = pattern;
+        playlistGrid.appendChild(label);
+
+        for (let column = 0; column < playlistColumnCount; column++) {
+            const cell = document.createElement("div");
+            cell.className = "playlist-cell";
+            cell.dataset.pattern = pattern;
+            cell.dataset.column = column;
+
+            if (playlistRows[pattern].has(column)) {
+                cell.classList.add("active");
+            }
+
+            playlistGrid.appendChild(cell);
+        }
+    }
+
+    requestAnimationFrame(() => {
+        playlistScroll.scrollLeft = Math.max(0, savedScrollLeft);
+        playlistScroll.scrollTop = Math.max(0, savedScrollTop);
+    });
+}
+
+function setPlaylistCell(pattern, column, enabled) {
+    if (
+        pattern < 0 ||
+        pattern >= PATTERN_COUNT ||
+        column < 0
+    ) {
+        return;
+    }
+
+    if (enabled) {
+        playlistRows[pattern].add(column);
+    } else {
+        playlistRows[pattern].delete(column);
+    }
+
+    const cell = playlistGrid.querySelector(
+        '.playlist-cell[data-pattern="' + pattern +
+        '"][data-column="' + column + '"]'
+    );
+
+    if (cell) {
+        cell.classList.toggle("active", enabled);
+    }
+}
+
+function getPlaylistLength() {
+    let lastColumn = -1;
+
+    playlistRows.forEach(row => {
+        row.forEach(column => {
+            if (column > lastColumn) {
+                lastColumn = column;
+            }
+        });
+    });
+
+    return Math.max(1, lastColumn + 1);
+}
+
+function clearPlaylist() {
+    playlistRows.forEach(row => row.clear());
+    renderPlaylistColumns();
+}
+
+function ensurePlaylistColumns(column) {
+    if (column < playlistColumnCount - 8) {
+        return;
+    }
+
+    playlistColumnCount += PLAYLIST_COLUMN_CHUNK;
+    renderPlaylistColumns();
+}
+
+let playlistPaintMode = null;
+let playlistPainting = false;
+let lastPaintedPlaylistCell = "";
+
+playlistGrid.addEventListener("pointerdown", event => {
+    const cell = event.target.closest(".playlist-cell");
+    if (!cell) return;
+
+    event.preventDefault();
+
+    const pattern = Number(cell.dataset.pattern);
+    const column = Number(cell.dataset.column);
+
+    playlistPaintMode =
+        cell.classList.contains("active")
+            ? "erase"
+            : "paint";
+
+    playlistPainting = true;
+    lastPaintedPlaylistCell = "";
+
+    setPlaylistCell(
+        pattern,
+        column,
+        playlistPaintMode === "paint"
+    );
+
+    if (playlistPaintMode === "paint") {
+        ensurePlaylistColumns(column);
+    }
+
+    lastPaintedPlaylistCell =
+        pattern + ":" + column;
+
+    cell.setPointerCapture?.(event.pointerId);
+});
+
+playlistGrid.addEventListener("pointerover", event => {
+    if (!playlistPainting || !playlistPaintMode) {
+        return;
+    }
+
+    const cell = event.target.closest(".playlist-cell");
+    if (!cell) return;
+
+    const pattern = Number(cell.dataset.pattern);
+    const column = Number(cell.dataset.column);
+    const key = pattern + ":" + column;
+
+    if (key === lastPaintedPlaylistCell) {
+        return;
+    }
+
+    setPlaylistCell(
+        pattern,
+        column,
+        playlistPaintMode === "paint"
+    );
+
+    if (playlistPaintMode === "paint") {
+        ensurePlaylistColumns(column);
+    }
+
+    lastPaintedPlaylistCell = key;
+});
+
+window.addEventListener("pointerup", () => {
+    playlistPainting = false;
+    playlistPaintMode = null;
+    lastPaintedPlaylistCell = "";
+});
+
+playlistGrid.addEventListener("contextmenu", event => {
+    const cell = event.target.closest(".playlist-cell");
+    if (!cell) return;
+
+    event.preventDefault();
+
+    const pattern = Number(cell.dataset.pattern);
+    const column = Number(cell.dataset.column);
+
+    setPlaylistCell(pattern, column, false);
+});
+
+playlistScroll.addEventListener("scroll", () => {
+    if (playlistScroll.scrollLeft < 0) {
+        playlistScroll.scrollLeft = 0;
+    }
+
+    if (playlistScroll.scrollTop < 0) {
+        playlistScroll.scrollTop = 0;
+    }
+
+    if (
+        playlistScroll.scrollLeft +
+        playlistScroll.clientWidth >=
+        playlistScroll.scrollWidth - 160
+    ) {
+        playlistColumnCount += PLAYLIST_COLUMN_CHUNK;
+        renderPlaylistColumns();
+    }
+});
+
+renderPlaylistColumns();
+playlistScroll.scrollLeft = 0;
+playlistScroll.scrollTop = 0;
+
+/* ==========================================================
+   PATTERN SELECTOR
+========================================================== */
+
+const patternNumber =
+    document.getElementById("patternNumber");
+
+const patternUp =
+    document.getElementById("patternUp");
+
+const patternDown =
+    document.getElementById("patternDown");
+
+function clampPatternNumber(value) {
+
+    value = Number(value);
+
+    if (!Number.isFinite(value)) {
+        value = currentPattern + 1;
+    }
+
+    value = Math.round(value);
+
+    return Math.max(
+        1,
+        Math.min(
+            PATTERN_COUNT,
+            value
+        )
+    );
 
 }
 
-function updatePatternButtons() {
+function updatePatternNumber() {
 
-    patternGrid
-        .querySelectorAll(".pattern-button")
-        .forEach(button => {
-
-            const pattern =
-                Number(button.dataset.pattern);
-
-            button.classList.toggle(
-                "selected",
-                pattern === currentPattern
-            );
-
-        });
+    patternNumber.textContent =
+        currentPattern + 1;
 
 }
 
 function switchPattern(pattern) {
 
-    if (
-        pattern < 0 ||
-        pattern >= PATTERN_COUNT
-    ) {
-        return;
-    }
+    pattern = clampPatternNumber(
+        pattern + 1
+    ) - 1;
 
     currentPattern =
         pattern;
 
-    updatePatternButtons();
+    updatePatternNumber();
 
     renderCurrentPattern();
 
 }
+
+function changePatternBy(amount) {
+
+    const next =
+        clampPatternNumber(
+            currentPattern + 1 + amount
+        );
+
+    currentPattern =
+        next - 1;
+
+    updatePatternNumber();
+
+    renderCurrentPattern();
+
+}
+
+patternUp.addEventListener(
+    "click",
+    () => {
+        changePatternBy(1);
+    }
+);
+
+patternDown.addEventListener(
+    "click",
+    () => {
+        changePatternBy(-1);
+    }
+);
 
 /* ==========================================================
    CHANNELS
@@ -2284,15 +2862,7 @@ function openSamplerForChannel(channelIndex) {
 }
 
 pitchSlider.addEventListener("input", () => {
-    const cents = Number(pitchSlider.value);
-    samplerState.pitchCents = cents;
-
-    if (samplerState.channelIndex >= 0) {
-        channels[samplerState.channelIndex].pitchCents = cents;
-    }
-
-    pitchReadout.innerHTML =
-        formatPitch(cents);
+    setPitchCents(pitchSlider.value);
 });
 
 cutSelf.addEventListener("change", () => {
@@ -2312,6 +2882,138 @@ reverseSample.addEventListener("change", () => {
             reverseSample.checked;
     }
 });
+
+/* ==========================================================
+   PITCH VALUE CONTEXT MENU
+========================================================== */
+
+const pitchContextMenu =
+    document.getElementById("pitchContextMenu");
+
+const pitchTypeValue =
+    document.getElementById("pitchTypeValue");
+
+function hidePitchContextMenu() {
+    pitchContextMenu.classList.remove("open");
+}
+
+function setPitchCents(cents) {
+
+    cents = Number(cents);
+
+    if (!Number.isFinite(cents)) {
+        cents = 0;
+    }
+
+    cents = Math.max(
+        -1200,
+        Math.min(
+            1200,
+            Math.round(cents)
+        )
+    );
+
+    pitchSlider.value = cents;
+    samplerState.pitchCents = cents;
+
+    if (samplerState.channelIndex >= 0) {
+        channels[samplerState.channelIndex].pitchCents =
+            cents;
+    }
+
+    pitchReadout.innerHTML =
+        formatPitch(cents);
+}
+
+pitchSlider.addEventListener(
+    "contextmenu",
+    event => {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        const menuWidth = 150;
+        const menuHeight = 34;
+
+        const left = Math.min(
+            event.clientX,
+            window.innerWidth - menuWidth - 4
+        );
+
+        const top = Math.min(
+            event.clientY,
+            window.innerHeight - menuHeight - 4
+        );
+
+        pitchContextMenu.style.left =
+            Math.max(4, left) + "px";
+
+        pitchContextMenu.style.top =
+            Math.max(4, top) + "px";
+
+        pitchContextMenu.classList.add("open");
+
+    }
+);
+
+pitchTypeValue.addEventListener(
+    "click",
+    event => {
+
+        event.stopPropagation();
+
+        hidePitchContextMenu();
+
+        const current =
+            samplerState.pitchCents || 0;
+
+        const typed =
+            prompt(
+                "Enter pitch in cents (-1200 to +1200):",
+                current >= 0
+                    ? "+" + current
+                    : String(current)
+            );
+
+        if (typed === null) {
+            return;
+        }
+
+        const value =
+            Number(String(typed).trim());
+
+        if (!Number.isFinite(value)) {
+            return;
+        }
+
+        setPitchCents(value);
+
+    }
+);
+
+document.addEventListener(
+    "click",
+    event => {
+
+        if (
+            !event.target.closest("#pitchContextMenu")
+        ) {
+            hidePitchContextMenu();
+        }
+
+    }
+);
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (event.key === "Escape") {
+            hidePitchContextMenu();
+        }
+
+    }
+);
 
 document.getElementById("closeSampler").addEventListener(
     "click",
@@ -2337,17 +3039,24 @@ window.addEventListener("resize", () => {
 const playButton =
     document.getElementById("playButton");
 
-const loopButton =
-    document.getElementById("loopButton");
+const playlistButton =
+    document.getElementById("playlistButton");
 
-const tempoInput =
-    document.getElementById("tempoInput");
+const tempoNumber =
+    document.getElementById("tempoNumber");
+
+const tempoUp =
+    document.getElementById("tempoUp");
+
+const tempoDown =
+    document.getElementById("tempoDown");
 
 let playing = false;
 
-let loopEnabled = true;
+let playInPlaylist = false;
 
 let currentStep = 0;
+let currentPlaylistColumn = 0;
 
 let nextStepTime = 0;
 
@@ -2376,7 +3085,7 @@ const reversedBufferCache = new WeakMap();
 function getBPM() {
 
     let bpm =
-        Number(tempoInput.value);
+        Number(tempoNumber.textContent);
 
     if (
         !Number.isFinite(bpm)
@@ -2395,7 +3104,7 @@ function getBPM() {
             )
         );
 
-    tempoInput.value =
+    tempoNumber.textContent =
         bpm;
 
     return bpm;
@@ -2481,86 +3190,97 @@ function playChannelSample(channel, time, channelIndex = -1) {
    PLAYHEAD
 ========================================================== */
 
-function updatePlayhead(step) {
-
+function clearPlayheads() {
     channelRack
         .querySelectorAll(".step.playing")
-        .forEach(cell => {
+        .forEach(cell => cell.classList.remove("playing"));
 
-            cell.classList.remove(
-                "playing"
-            );
+    playlistGrid
+        .querySelectorAll(".playlist-cell.playing")
+        .forEach(cell => cell.classList.remove("playing"));
+}
 
-        });
+function updateRackPlayhead(step) {
+    channelRack
+        .querySelectorAll(".step.playing")
+        .forEach(cell => cell.classList.remove("playing"));
 
     channelRack
         .querySelectorAll(
-            '.step[data-step="' +
-            step +
-            '"]'
+            '.step[data-step="' + step + '"]'
         )
-        .forEach(cell => {
+        .forEach(cell => cell.classList.add("playing"));
+}
 
-            cell.classList.add(
-                "playing"
-            );
+function updatePlaylistPlayhead(column, step) {
+    if (step !== 0) {
+        return;
+    }
 
-        });
+    playlistGrid
+        .querySelectorAll(".playlist-cell.playing")
+        .forEach(cell => cell.classList.remove("playing"));
 
+    playlistGrid
+        .querySelectorAll(
+            '.playlist-cell[data-column="' + column + '"].active'
+        )
+        .forEach(cell => cell.classList.add("playing"));
+
+    playlistStatus.textContent =
+        "column " + (column + 1);
 }
 
 /* ==========================================================
    SCHEDULE
 ========================================================== */
 
-function scheduleStep(
-    step,
-    time
-) {
+function scheduleRackStep(step, time) {
+    const pattern = patterns[currentPattern];
 
-    const pattern =
-        patterns[currentPattern];
-
-    channels.forEach(
-        (channel, row) => {
-
-            if (
-                pattern[row][step]
-            ) {
-
-                playChannelSample(
-                    channel,
-                    time,
-                    row
-                );
-
-            }
-
+    channels.forEach((channel, row) => {
+        if (pattern[row][step]) {
+            playChannelSample(channel, time, row);
         }
+    });
+
+    const delay = Math.max(
+        0,
+        (time - getAudioContext().currentTime) * 1000
     );
 
-    const delay =
-        Math.max(
-            0,
-            (
-                time -
-                getAudioContext().currentTime
-            ) * 1000
-        );
+    setTimeout(() => {
+        if (playing && !playInPlaylist) {
+            updateRackPlayhead(step);
+        }
+    }, delay);
+}
 
-    setTimeout(
-        () => {
+function schedulePlaylistStep(column, step, time) {
+    for (let pattern = 0; pattern < PATTERN_COUNT; pattern++) {
+        if (!playlistRows[pattern].has(column)) {
+            continue;
+        }
 
-            if (playing) {
+        const patternData = patterns[pattern];
 
-                updatePlayhead(step);
-
+        channels.forEach((channel, row) => {
+            if (patternData[row][step]) {
+                playChannelSample(channel, time, row);
             }
+        });
+    }
 
-        },
-        delay
+    const delay = Math.max(
+        0,
+        (time - getAudioContext().currentTime) * 1000
     );
 
+    setTimeout(() => {
+        if (playing && playInPlaylist) {
+            updatePlaylistPlayhead(column, step);
+        }
+    }, delay);
 }
 
 /* ==========================================================
@@ -2568,66 +3288,51 @@ function scheduleStep(
 ========================================================== */
 
 function scheduler() {
-
     if (!playing) {
         return;
     }
 
-    const context =
-        getAudioContext();
+    const context = getAudioContext();
 
     while (
         nextStepTime <
         context.currentTime +
         SCHEDULE_AHEAD_TIME
     ) {
+        if (playInPlaylist) {
+            const playlistLength = getPlaylistLength();
 
-        /*
-            If loop is OFF and we've reached
-            the end of the 16-step pattern,
-            stop instead of scheduling step 0.
-        */
+            schedulePlaylistStep(
+                currentPlaylistColumn,
+                currentStep,
+                nextStepTime
+            );
 
-        if (
-            !loopEnabled &&
-            currentStep >= STEP_COUNT
-        ) {
+            nextStepTime += getStepDuration();
+            currentStep++;
 
-            stopSequencer();
-
-            return;
-
-        }
-
-        scheduleStep(
-            currentStep,
-            nextStepTime
-        );
-
-        nextStepTime +=
-            getStepDuration();
-
-        currentStep++;
-
-        /*
-            Loop back to step 0 only when
-            looping is enabled.
-        */
-
-        if (
-            currentStep >= STEP_COUNT
-        ) {
-
-            if (loopEnabled) {
-
+            if (currentStep >= STEP_COUNT) {
                 currentStep = 0;
+                currentPlaylistColumn++;
 
+                if (currentPlaylistColumn >= playlistLength) {
+                    currentPlaylistColumn = 0;
+                }
             }
+        } else {
+            scheduleRackStep(
+                currentStep,
+                nextStepTime
+            );
 
+            nextStepTime += getStepDuration();
+            currentStep++;
+
+            if (currentStep >= STEP_COUNT) {
+                currentStep = 0;
+            }
         }
-
     }
-
 }
 
 /* ==========================================================
@@ -2635,37 +3340,32 @@ function scheduler() {
 ========================================================== */
 
 async function startSequencer() {
+    const context = getAudioContext();
 
-    const context =
-        getAudioContext();
-
-    if (
-        context.state === "suspended"
-    ) {
-
+    if (context.state === "suspended") {
         await context.resume();
-
     }
 
     playing = true;
-
     currentStep = 0;
+    currentPlaylistColumn = 0;
 
     nextStepTime =
         context.currentTime +
         0.03;
 
-    playButton.textContent =
-        "Stop";
+    playButton.textContent = "Stop";
 
-    schedulerTimer =
-        setInterval(
-            scheduler,
-            SCHEDULER_INTERVAL
-        );
+    if (playInPlaylist) {
+        playlistStatus.textContent = "column 1";
+    }
+
+    schedulerTimer = setInterval(
+        scheduler,
+        SCHEDULER_INTERVAL
+    );
 
     scheduler();
-
 }
 
 /* ==========================================================
@@ -2673,39 +3373,19 @@ async function startSequencer() {
 ========================================================== */
 
 function stopSequencer() {
-
     playing = false;
 
-    if (
-        schedulerTimer !== null
-    ) {
-
-        clearInterval(
-            schedulerTimer
-        );
-
-        schedulerTimer =
-            null;
-
+    if (schedulerTimer !== null) {
+        clearInterval(schedulerTimer);
+        schedulerTimer = null;
     }
 
-    playButton.textContent =
-        "Play";
-
+    playButton.textContent = "Play";
     currentStep = 0;
+    currentPlaylistColumn = 0;
 
-    channelRack
-        .querySelectorAll(
-            ".step.playing"
-        )
-        .forEach(cell => {
-
-            cell.classList.remove(
-                "playing"
-            );
-
-        });
-
+    clearPlayheads();
+    playlistStatus.textContent = "playlist";
 }
 
 /* ==========================================================
@@ -2715,45 +3395,49 @@ function stopSequencer() {
 playButton.addEventListener(
     "click",
     async () => {
-
-        bringToFront(rackWindow);
+        bringToFront(
+            playInPlaylist
+                ? playlistWindow
+                : rackWindow
+        );
 
         if (playing) {
-
             stopSequencer();
-
         } else {
-
             await startSequencer();
-
         }
-
     }
 );
 
 /* ==========================================================
-   LOOP BUTTON
+   PLAY IN PLAYLIST
 ========================================================== */
 
-loopButton.addEventListener(
+playlistButton.addEventListener(
     "click",
     event => {
-
         event.stopPropagation();
 
-        loopEnabled =
-            !loopEnabled;
+        playInPlaylist =
+            !playInPlaylist;
 
-        loopButton.classList.toggle(
+        playlistButton.classList.toggle(
             "enabled",
-            loopEnabled
+            playInPlaylist
         );
 
-        loopButton.textContent =
-            loopEnabled
-                ? "Loop"
-                : "Loop: Off";
+        if (playInPlaylist) {
+            playlistButton.textContent =
+                "Play in playlist";
+        } else {
+            playlistButton.textContent =
+                "Play in playlist";
+            bringToFront(rackWindow);
+        }
 
+        if (playing) {
+            stopSequencer();
+        }
     }
 );
 
@@ -2761,12 +3445,19 @@ loopButton.addEventListener(
    TEMPO
 ========================================================== */
 
-tempoInput.addEventListener(
-    "change",
+tempoUp.addEventListener(
+    "click",
     () => {
+        const bpm = Math.min(300, getBPM() + 1);
+        tempoNumber.textContent = bpm;
+    }
+);
 
-        getBPM();
-
+tempoDown.addEventListener(
+    "click",
+    () => {
+        const bpm = Math.max(30, getBPM() - 1);
+        tempoNumber.textContent = bpm;
     }
 );
 
@@ -2811,19 +3502,40 @@ const fileButton =
 const editButton =
     document.getElementById("editButton");
 
+const viewButton =
+    document.getElementById("viewButton");
+
 const fileMenu =
     document.getElementById("fileMenu");
 
 const editMenu =
     document.getElementById("editMenu");
 
+const viewMenu =
+    document.getElementById("viewMenu");
+
+const playlistView =
+    document.getElementById("playlistView");
+
+const playlistViewCheck =
+    document.getElementById("playlistViewCheck");
+
+function updatePlaylistViewCheck() {
+    playlistViewCheck.style.display =
+        playlistWindow.style.display !== "none"
+            ? "inline-block"
+            : "none";
+}
+
 function closeMenus() {
 
     fileMenu.classList.remove("open");
     editMenu.classList.remove("open");
+    viewMenu.classList.remove("open");
 
     fileButton.classList.remove("open");
     editButton.classList.remove("open");
+    viewButton.classList.remove("open");
 
 }
 
@@ -2873,6 +3585,46 @@ editButton.addEventListener(
     }
 );
 
+viewButton.addEventListener(
+    "click",
+    event => {
+        event.stopPropagation();
+        bringToFront(rackWindow);
+
+        const wasOpen =
+            viewMenu.classList.contains("open");
+
+        closeMenus();
+
+        if (!wasOpen) {
+            viewMenu.classList.add("open");
+            viewButton.classList.add("open");
+        }
+    }
+);
+
+playlistView.addEventListener(
+    "click",
+    event => {
+        event.stopPropagation();
+
+        const isOpen =
+            playlistWindow.style.display !== "none";
+
+        if (isOpen) {
+            playlistWindow.style.display = "none";
+        } else {
+            playlistWindow.style.display = "block";
+            bringToFront(playlistWindow);
+        }
+
+        updatePlaylistViewCheck();
+        closeMenus();
+    }
+);
+
+updatePlaylistViewCheck();
+
 document.addEventListener(
     "click",
     () => {
@@ -2897,6 +3649,13 @@ editMenu.addEventListener(
 
         event.stopPropagation();
 
+    }
+);
+
+viewMenu.addEventListener(
+    "click",
+    event => {
+        event.stopPropagation();
     }
 );
 
@@ -2929,6 +3688,212 @@ document.getElementById(
 
         pastePattern();
 
+        closeMenus();
+
+    }
+);
+
+/* ==========================================================
+   NEW / FULL RESET
+========================================================== */
+
+function resetProject() {
+
+    stopSequencer();
+
+    /*
+        Stop any samples that are still ringing from
+        before the reset.
+    */
+    activeSources.forEach(source => {
+        try {
+            source.stop();
+        } catch (_) {}
+    });
+
+    activeSources.clear();
+
+    /*
+        Clear the Edit > Copy clipboard as well.
+    */
+    copiedPattern = null;
+
+    /*
+        Clear every pattern and every step.
+    */
+    for (
+        let pattern = 0;
+        pattern < PATTERN_COUNT;
+        pattern++
+    ) {
+        for (
+            let row = 0;
+            row < ROW_COUNT;
+            row++
+        ) {
+            patterns[pattern][row].fill(false);
+        }
+    }
+
+    /*
+        Remove every loaded sound and restore
+        every channel's sampler settings.
+    */
+    channels.forEach((channel, row) => {
+
+        channel.name =
+            "Sample " + (row + 1);
+
+        channel.buffer =
+            null;
+
+        channel.pitchCents =
+            0;
+
+        channel.cutSelf =
+            false;
+
+        channel.reverse =
+            false;
+
+        const rowElement =
+            channelRack.children[row];
+
+        if (rowElement) {
+            const sampleName =
+                rowElement.querySelector(".sample-name");
+
+            if (sampleName) {
+                sampleName.textContent =
+                    "Sample " + (row + 1);
+            }
+        }
+
+    });
+
+    currentPattern = 0;
+    currentStep = 0;
+    updatePatternNumber();
+    playInPlaylist = false;
+    currentPlaylistColumn = 0;
+
+    clearPlaylist();
+
+    tempoNumber.textContent = 120;
+
+    if (loopSetting) {
+        loopSetting.value = "leave";
+    }
+
+    playlistButton.classList.remove("enabled");
+    playlistButton.textContent = "Play in playlist";
+
+    samplerState.channelIndex = -1;
+    samplerState.buffer = null;
+    samplerState.pitchCents = 0;
+    samplerState.cutSelf = false;
+    samplerState.reverse = false;
+
+    pitchSlider.value = 0;
+    pitchReadout.innerHTML =
+        formatPitch(0);
+
+    cutSelf.checked = false;
+    reverseSample.checked = false;
+
+    samplerTitle.textContent =
+        "sampler";
+
+    samplerWindow.classList.remove("open");
+    exportSettingsWindow.classList.remove("open");
+    playlistWindow.style.display = "none";
+
+    hidePitchContextMenu();
+    closeMenus();
+
+    /*
+        Restore the default rack/browser positions
+        and their normal expanded state.
+    */
+    const defaultWindows = [
+        {
+            element: rackWindow,
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            minimized: false
+        },
+        {
+            element: browserWindow,
+            left: "80px",
+            top: "80px",
+            transform: "none",
+            minimized: false
+        },
+        {
+            element: exportSettingsWindow,
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            minimized: false
+        },
+        {
+            element: samplerWindow,
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            minimized: false
+        },
+        {
+            element: playlistWindow,
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            minimized: false
+        }
+    ];
+
+    defaultWindows.forEach(windowInfo => {
+
+        windowInfo.element.style.left =
+            windowInfo.left;
+
+        windowInfo.element.style.top =
+            windowInfo.top;
+
+        windowInfo.element.style.transform =
+            windowInfo.transform;
+
+        windowInfo.element.classList.remove(
+            "minimized"
+        );
+
+    });
+
+    document.getElementById("toggleRack").textContent =
+        "_";
+
+    document.getElementById("toggleBrowser").textContent =
+        "_";
+
+    updatePatternNumber();
+    renderCurrentPattern();
+}
+
+/* ==========================================================
+   NEW PROJECT BUTTON
+========================================================== */
+
+document.getElementById(
+    "newProject"
+).addEventListener(
+    "click",
+    event => {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        resetProject();
         closeMenus();
 
     }
@@ -3405,13 +4370,16 @@ document.addEventListener("keydown", async event => {
 
 currentPattern = 0;
 
-loopEnabled = true;
+playInPlaylist = false;
 
-loopButton.classList.add(
+playlistButton.classList.remove(
     "enabled"
 );
 
-updatePatternButtons();
+playlistButton.textContent =
+    "Play in playlist";
+
+updatePatternNumber();
 
 renderCurrentPattern();
 
@@ -3429,7 +4397,8 @@ document.addEventListener(
         */
 
         if (
-            event.target.closest(".step")
+            event.target.closest(".step") ||
+            event.target.closest(".playlist-cell")
         ) {
             return;
         }
