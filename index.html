@@ -1455,6 +1455,34 @@ body { background:#242424; }
 #playlistScroll::-webkit-scrollbar-thumb { background:#606a70 !important; border:3px solid #111 !important; }
 #playlistPlayheadViewport { z-index:95 !important; }
 </style>
+
+<style id="final-playhead-and-pattern-resize-fix">
+/* Keep the playhead anchored at the ruler's top and visible all the way down the playlist. */
+#playlistPlayheadViewport {
+  top: 28px !important;
+  bottom: 0 !important;
+  left: 100px !important;
+  right: 28px !important;
+  overflow: visible !important;
+  z-index: 120 !important;
+  pointer-events: none !important;
+}
+#playlistPlayhead {
+  top: 0 !important;
+  bottom: 0 !important;
+  z-index: 121 !important;
+  pointer-events: auto !important;
+}
+#playlistPlayhead::before { top: 0 !important; z-index: 122 !important; }
+/* Left-edge resizing must actually translate the block; older styles forced transform:none. */
+#playlist .playlist-cell .pattern-block {
+  transform: translateX(var(--pattern-shift, 0px)) !important;
+  transform-origin: left center !important;
+  will-change: width, transform;
+}
+#playlist .playlist-cell .pattern-block.resize-hover { cursor: ew-resize !important; }
+</style>
+
 </head>
 
 <body>
@@ -1499,6 +1527,7 @@ body { background:#242424; }
 
     <div class="dropdown" id="viewMenu" style="right: 32px;">
         <div class="dropdown-item" id="pianoRollView">Piano roll</div>
+        <div class="dropdown-item" id="channelsView">Channels</div>
     </div>
 
     <div class="dropdown" id="editMenu" style="right: 84px;">
@@ -1543,9 +1572,6 @@ body { background:#242424; }
         browser
     </div>
 
-    <button class="window-button" id="toggleBrowser">
-        _
-    </button>
 
 </div>
 
@@ -3539,6 +3565,8 @@ const metronomeButton =
 
 let metronomeEnabled = false;
 let metronomeBuffer = null;
+// Prevent the same metronome beat from being triggered twice by overlapping scheduler calls.
+const scheduledMetronomeTimes = new Set();
 
 let playing = false;
 
@@ -3563,12 +3591,14 @@ const activeSources = new Map();
 const activeAudioVoices = new Set();
 const AUDIO_RELEASE_SECONDS = 0.32;
 
-function trackAudioVoice(source, gain, channelIndex = -1) {
-    const voice = { source, gain, channelIndex, released: false };
+function trackAudioVoice(source, gain, channelIndex = -1, startTime = 0) {
+    const voice = { source, gain, channelIndex, startTime, released: false };
     activeAudioVoices.add(voice);
     source.addEventListener("ended", () => {
         activeAudioVoices.delete(voice);
-        if (channelIndex >= 0 && activeSources.get(channelIndex) === source) activeSources.delete(channelIndex);
+        if (channelIndex >= 0 && activeSources.get(channelIndex) === source) {
+            activeSources.delete(channelIndex);
+        }
     }, { once: true });
     return voice;
 }
@@ -3576,19 +3606,33 @@ function trackAudioVoice(source, gain, channelIndex = -1) {
 function releaseAudioVoice(voice, when = null) {
     if (!voice || voice.released) return;
     voice.released = true;
+
     const context = getAudioContext();
     const now = when == null ? context.currentTime : Math.max(context.currentTime, when);
-    const gain = voice.gain.gain;
+    const gainParam = voice.gain.gain;
+
     try {
-        if (typeof gain.cancelAndHoldAtTime === "function") {
-            gain.cancelAndHoldAtTime(now);
-        } else {
-            gain.cancelScheduledValues(now);
-            gain.setValueAtTime(gain.value > 0 ? gain.value : 1, now);
+        // A voice scheduled in the future should be cancelled before it becomes audible.
+        if (voice.startTime > now + 0.002) {
+            gainParam.cancelScheduledValues(now);
+            gainParam.setValueAtTime(0, now);
+            voice.source.stop(now);
+            return;
         }
-        gain.linearRampToValueAtTime(0, now + AUDIO_RELEASE_SECONDS);
-        voice.source.stop(now + AUDIO_RELEASE_SECONDS + 0.02);
-    } catch (_) {}
+
+        // Hold the exact current envelope value before fading, avoiding a sudden gain jump.
+        if (typeof gainParam.cancelAndHoldAtTime === "function") {
+            gainParam.cancelAndHoldAtTime(now);
+        } else {
+            gainParam.cancelScheduledValues(now);
+            gainParam.setValueAtTime(Math.max(0, gainParam.value), now);
+        }
+
+        gainParam.linearRampToValueAtTime(0, now + AUDIO_RELEASE_SECONDS);
+        voice.source.stop(now + AUDIO_RELEASE_SECONDS + 0.03);
+    } catch (_) {
+        // A source may already have ended or been stopped.
+    }
 }
 
 function releaseAllAudioVoices() {
@@ -3692,23 +3736,33 @@ async function loadMetronome() {
 }
 
 function playMetronome(time, accent) {
+    if (!metronomeEnabled || !metronomeBuffer) return;
 
-    if (!metronomeEnabled || !metronomeBuffer) {
-        return;
+    // Multiple UI/scheduler paths can request the same beat. Only emit one tick
+    // for a given AudioContext time so the click cannot turn into a loud buzz.
+    const timeKey = Math.round(time * 10000);
+    if (scheduledMetronomeTimes.has(timeKey)) return;
+    scheduledMetronomeTimes.add(timeKey);
+    if (scheduledMetronomeTimes.size > 256) {
+        const oldest = scheduledMetronomeTimes.values().next().value;
+        scheduledMetronomeTimes.delete(oldest);
     }
 
     const context = getAudioContext();
     const source = context.createBufferSource();
-
+    const gain = context.createGain();
     source.buffer = metronomeBuffer;
+    if (accent) source.playbackRate.value = Math.pow(4, 100 / 1200);
 
-    if (accent) {
-        source.playbackRate.value =
-            Math.pow(4, 100 / 1200);
-    }
-
-    source.connect(context.destination);
+    // Short fade edges protect against clicks and keep ticks from stacking harshly.
+    gain.gain.setValueAtTime(0, time);
+    gain.gain.linearRampToValueAtTime(0.75, time + 0.002);
+    gain.gain.setValueAtTime(0.75, time + 0.025);
+    gain.gain.linearRampToValueAtTime(0, time + 0.045);
+    source.connect(gain);
+    gain.connect(context.destination);
     source.start(time);
+    try { source.stop(time + 0.05); } catch (_) {}
 }
 
 /* ==========================================================
@@ -3760,12 +3814,14 @@ function playChannelSample(channel, time, channelIndex = -1) {
 
     source.playbackRate.value = Math.pow(2, cents / 1200);
     const gain = context.createGain();
-    gain.gain.setValueAtTime(1, time);
+    // A tiny fade-in prevents a waveform discontinuity at the start of a sample.
+    gain.gain.setValueAtTime(0, time);
+    gain.gain.linearRampToValueAtTime(1, time + 0.005);
     source.connect(gain);
     gain.connect(context.destination);
     source.start(time);
 
-    trackAudioVoice(source, gain, channelIndex);
+    trackAudioVoice(source, gain, channelIndex, time);
     activeSources.set(channelIndex, source);
 }
 
@@ -4002,14 +4058,23 @@ function scheduler() {
    START
 ========================================================== */
 
+let sequencerStarting = false;
+
 async function startSequencer() {
+    if (playing || sequencerStarting) return;
+    sequencerStarting = true;
     const context = getAudioContext();
 
-    if (context.state === "suspended") {
-        await context.resume();
+    try {
+        if (context.state === "suspended") await context.resume();
+    } catch (error) {
+        sequencerStarting = false;
+        console.error("Could not start audio:", error);
+        return;
     }
 
     playing = true;
+    sequencerStarting = false;
     if (playInPlaylist) {
         currentPlaylistColumn = Math.floor(playlistStartBeat / 4);
         currentStep = (playlistStartBeat % 4) * 4;
@@ -4049,6 +4114,7 @@ async function startSequencer() {
 
 function stopSequencer() {
     playing = false;
+    sequencerStarting = false;
     // Fade every currently playing sound and instrument voice instead of letting
     // the complete sample ring out after playback is stopped.
     releaseAllAudioVoices();
@@ -5138,11 +5204,31 @@ document.addEventListener(
   const vstDirectoryPage = 'https://github.com/mrfranco27/spark/tree/main/vst/spark_keys';
   const rawBase = 'https://raw.githubusercontent.com/mrfranco27/spark/main/vst/spark_keys/';
   const requiredKeys = [
+    {name:'piano_c4', midi:60},
+    {name:'piano_d#4', midi:63},
+    {name:'piano_f#4', midi:66},
+    {name:'piano_a4', midi:69},
     {name:'piano_c5', midi:72},
     {name:'piano_d#5', midi:75},
     {name:'piano_f#5', midi:78},
     {name:'piano_a5', midi:81}
   ];
+
+  // Choose the closest recorded root sample in C4 or C5, then transpose
+  // by the exact semitone distance. C6 uses the C5 sample one octave up.
+  function getInstrumentSampleForPitch(samples, pitch) {
+    const octaveRoot = pitch >= 60 && pitch <= 71 ? 60 : pitch >= 72 && pitch <= 83 ? 72 : null;
+    if (octaveRoot !== null) {
+      const roots = [octaveRoot, octaveRoot + 3, octaveRoot + 6, octaveRoot + 9];
+      let root = roots[0];
+      for (const candidate of roots) {
+        if (Math.abs(pitch - candidate) < Math.abs(pitch - root)) root = candidate;
+      }
+      return {buffer:samples[root] || null, cents:(pitch-root)*100};
+    }
+    if (pitch === 84) return {buffer:samples[72] || null, cents:1200};
+    return {buffer:samples[pitch] || null, cents:0};
+  }
 
   tabs.addEventListener('click', e => {
     const button = e.target.closest('button[data-tab]'); if (!button) return;
@@ -5224,7 +5310,7 @@ document.addEventListener(
       const response = await fetch(vstDirectoryApi, {headers:{Accept:'application/vnd.github+json'}});
       if (!response.ok) throw new Error('GitHub API returned ' + response.status);
       const entries = await response.json();
-      vstFiles = entries.filter(x => x.type === 'file' && (/^piano_(c5|d#5|f#5|a5)(?:\.|$)/i.test(x.name) || /\.(wav|ogg|mp3|flac|aiff?)$/i.test(x.name)));
+      vstFiles = entries.filter(x => x.type === 'file' && (/^piano_(c4|d#4|f#4|a4|c5|d#5|f#5|a5)(?:\.|$)/i.test(x.name) || /\.(wav|ogg|mp3|flac|aiff?)$/i.test(x.name)));
       vstTree.innerHTML = '';
       const root = document.createElement('div'); root.className = 'tree-row tree-folder'; root.innerHTML = '<span class="folder-icon">📁</span><span>vst</span>'; vstTree.appendChild(root);
       createVstRow();
@@ -5448,15 +5534,9 @@ document.addEventListener(
     const context=getAudioContext();
     let buffer=null; let cents=0;
     if (channel.instrument && channel.instrument.samples) {
-      // Octave 5: use the C5 sample and transpose it by semitones.
-      // C6 and every other octave keep their original sample mapping.
-      if (note.pitch >= 72 && note.pitch <= 83) {
-        buffer=channel.instrument.samples[72] || null;
-        cents=(note.pitch-72)*100+(Number(channel.pitchCents)||0);
-      } else {
-        buffer=channel.instrument.samples[note.pitch] || null;
-        cents=Number(channel.pitchCents)||0;
-      }
+      const mapped = getInstrumentSampleForPitch(channel.instrument.samples, note.pitch);
+      buffer = mapped.buffer;
+      cents = mapped.cents + (Number(channel.pitchCents)||0);
     } else if (channel.buffer) {
       buffer=getPlayableBuffer(channel.buffer, !!channel.reverse);
       cents=(Number(channel.pitchCents)||0)+(note.pitch-72)*100;
@@ -5467,32 +5547,55 @@ document.addEventListener(
     const stepDuration=60/getBPM()/4; const duration=Math.max(1,Number(note.duration)||1)*stepDuration/2;
     const end=time+duration;
     const release=Math.min(.28,Math.max(.16,stepDuration*.8));
-    gain.gain.setValueAtTime(1,time); // no artificial attack: start at the sample's natural level
+    // A 5 ms attack removes clicks without changing the note's natural tail.
+    gain.gain.setValueAtTime(0,time);
+    gain.gain.linearRampToValueAtTime(1,time+0.005);
     gain.gain.setValueAtTime(1,end);
     gain.gain.setTargetAtTime(0,end,release/3.5); // smooth, audible release after the note ends
-    trackAudioVoice(source,gain,note.channel);
+    trackAudioVoice(source,gain,note.channel,time);
     source.start(time);
     // Let short samples finish naturally; only stop a longer sample after its release tail.
     try { source.stop(Math.min(time+buffer.duration/Math.pow(2,cents/1200),end+release*4)); } catch(_) {}
   }
+
+  // Expose the piano voice player so the later playlist-timing layer can call
+  // the exact same sample/instrument playback function from its own scope.
+  window.playPianoVoice = playPianoVoice;
+
   scheduleRackStep = function(step,time) {
     if(step%4===0)playMetronome(time,step===0);
     pianoNotes[currentPattern].forEach(note=>{ if(Math.floor(note.step/2)===step && channels[note.channel])playPianoVoice(channels[note.channel],note,time+(note.step%2)*(60/getBPM()/8)); });
   };
-  schedulePlaylistStep = function(column,step,time) {
-    if(step%4===0)playMetronome(time,step===0);
-    for(let track=0;track<playlistRows.length;track++) {
-      playlistRows[track].forEach((pattern,slot)=>{
-        const absolutePatternStart=Math.floor(slot/4)*16+(slot%4)*4;
-        pianoNotes[pattern].forEach(note=>{
-          const absoluteNoteStep=absolutePatternStart+Math.floor(note.step/2);
-          const fineOffset=(note.step%2)*(60/getBPM()/8);
-          if(absoluteNoteStep===column*16+step && channels[note.channel]) playPianoVoice(channels[note.channel],note,time+fineOffset);
+  schedulePlaylistStep = function(column, step, time) {
+    if (step % 4 === 0) playMetronome(time, step === 0 && column === 0);
+
+    const absoluteStep = column * 16 + step;
+    const scheduledNotes = new Set();
+
+    for (let track = 0; track < playlistRows.length; track++) {
+      playlistRows[track].forEach((patternIndex, slot) => {
+        if (!pianoNotes[patternIndex]) return;
+        // Playlist keys are beat slots; each beat equals four sequencer steps.
+        const patternStartStep = slot * 4;
+        pianoNotes[patternIndex].forEach(note => {
+          const noteStep = patternStartStep + Math.floor(Number(note.step) / 2);
+          if (noteStep !== absoluteStep || !channels[note.channel]) return;
+
+          // Avoid double-triggering if a pattern is accidentally represented by
+          // overlapping playlist blocks at the same timeline position.
+          const noteKey = `${track}:${slot}:${patternIndex}:${note.channel}:${note.pitch}:${note.step}`;
+          if (scheduledNotes.has(noteKey)) return;
+          scheduledNotes.add(noteKey);
+          const fineOffset = (Number(note.step) % 2) * (60 / getBPM() / 8);
+          playPianoVoice(channels[note.channel], note, time + fineOffset);
         });
       });
     }
-    const delay=Math.max(0,(time-getAudioContext().currentTime)*1000);
-    setTimeout(()=>{if(playing&&playInPlaylist)updatePlaylistPlayhead(column,step);},delay);
+
+    const delay = Math.max(0, (time - getAudioContext().currentTime) * 1000);
+    setTimeout(() => {
+      if (playing && playInPlaylist) updatePlaylistPlayhead(column, step);
+    }, delay);
   };
 
   // Export playlist notes from both sample channels and VST key samples, respecting note length/release.
@@ -5506,14 +5609,10 @@ document.addEventListener(
         const channel=channels[note.channel]; if(!channel)return;
         let buffer=null, cents=0;
         if(channel.instrument?.samples) {
-          // Match live playback: transpose the C5 sample across C5-B5 only.
-          if(note.pitch>=72 && note.pitch<=83) {
-            buffer=channel.instrument.samples[72]||null;
-            cents=(note.pitch-72)*100+(Number(channel.pitchCents)||0);
-          } else {
-            buffer=channel.instrument.samples[note.pitch]||null;
-            cents=Number(channel.pitchCents)||0;
-          }
+          // Use the same C4/C5 multisample mapping as live playback.
+          const mapped=getInstrumentSampleForPitch(channel.instrument.samples,note.pitch);
+          buffer=mapped.buffer;
+          cents=mapped.cents+(Number(channel.pitchCents)||0);
         }
         else if(channel.buffer){buffer=channel.buffer;cents=(Number(channel.pitchCents)||0)+(note.pitch-72)*100;}
         if(!buffer)return;
@@ -5595,4 +5694,668 @@ document.addEventListener(
 })();
 </script>
 
+
+<style id="playlist-final-layout-and-toolbar-fix">
+/* Keep File/Edit/View and every transport/pattern control grouped at the left. */
+#rackTitlebar { display:flex !important; justify-content:flex-start !important; gap:0 !important; }
+#rackTitlebar .menu-area { order:0 !important; flex:0 0 auto !important; margin:0 !important; }
+#rackTitlebar .pattern-area { order:1 !important; flex:0 0 auto !important; margin-left:4px !important; margin-right:5px !important; }
+#rackTitlebar .controls { order:2 !important; flex:0 0 auto !important; margin:0 4px 0 0 !important; }
+#rackTitlebar #toggleRack { order:3 !important; margin-left:auto !important; flex:0 0 auto !important; }
+#rackTitlebar .dropdown { z-index:300 !important; }
+#rackTitlebar .menu-area, #rackTitlebar .pattern-area, #rackTitlebar .controls,
+#rackTitlebar #toggleRack { position:relative !important; z-index:150 !important; }
+
+/* Remove the extra visible box above the track labels; preserve the 100px alignment spacer. */
+#playlistRulerSpacer { background:#202026 !important; border:0 !important; box-shadow:none !important; }
+#playlistTopScrollbar::before { content:none !important; display:none !important; }
+#playlistTopScrollbar::after { content:none !important; display:none !important; }
+
+/* Start the vertical scrollbar at the ruler's top edge, while keeping playlist rows below it. */
+#playlistScroll {
+  top:28px !important;
+  padding-top:25px !important;
+  box-sizing:border-box !important;
+  overflow-x:auto !important;
+  overflow-y:scroll !important;
+  z-index:110 !important;
+  scrollbar-gutter:stable !important;
+}
+#playlistRulerViewport { z-index:90 !important; margin-right:28px !important; }
+#playlistTopScrollbar { z-index:100 !important; margin-right:28px !important; }
+#playlistScroll::-webkit-scrollbar { width:28px !important; height:0 !important; }
+#playlistScroll::-webkit-scrollbar:horizontal { display:none !important; height:0 !important; }
+#playlistScroll::-webkit-scrollbar-track { background:#111 !important; }
+#playlistScroll::-webkit-scrollbar-thumb { background:#606a70 !important; border:3px solid #111 !important; }
+</style>
+<script id="playlist-final-bidirectional-scroll-fix">
+(() => {
+  const area = document.getElementById('playlistScroll');
+  const top = document.getElementById('playlistTopScrollbar');
+  if (!area || !top) return;
+  let syncing = false;
+  const copyScroll = (from, to) => {
+    if (syncing) return;
+    syncing = true;
+    to.scrollLeft = from.scrollLeft;
+    syncing = false;
+  };
+  area.addEventListener('scroll', () => copyScroll(area, top), {passive:true});
+  top.addEventListener('scroll', () => copyScroll(top, area), {passive:true});
+  area.addEventListener('wheel', event => {
+    let delta = event.deltaX;
+    if (event.shiftKey && !delta) delta = event.deltaY;
+    if (delta) {
+      area.scrollLeft += delta;
+      top.scrollLeft = area.scrollLeft;
+      event.preventDefault();
+    }
+  }, {passive:false});
+  top.addEventListener('wheel', event => {
+    let delta = event.deltaX;
+    if (event.shiftKey && !delta) delta = event.deltaY;
+    if (delta) {
+      top.scrollLeft += delta;
+      area.scrollLeft = top.scrollLeft;
+      event.preventDefault();
+    }
+  }, {passive:false});
+})();
+</script>
+
+
+<style id="dock-and-channel-controls-fix">
+/* Dock the sample browser below the global toolbar, flush against the left edge. */
+#browser {
+  position: fixed !important; left: 0 !important; top: 30px !important;
+  width: 292px !important; height: calc(100vh - 30px) !important;
+  max-height: none !important; transform: none !important; z-index: 300 !important;
+}
+/* The playlist viewport uses the remaining screen width instead of sliding its contents. */
+#playlist {
+  left: 292px !important; right: 0 !important; top: 48px !important;
+  width: calc(100vw - 292px) !important; height: calc(100vh - 58px) !important;
+  max-width: none !important; transform: none !important;
+}
+#playlist .playlist-content { min-width: 0 !important; width: 100% !important; }
+#playlistTopScrollbar { margin-left: 100px !important; }
+#channels .titlebar .window-button { font-size: 17px !important; line-height: 1 !important; }
+</style>
+<script id="dock-and-channel-controls-fix-script">
+(() => {
+  const channels = document.getElementById('channels');
+  const close = document.getElementById('toggleChannels');
+  const viewItem = document.getElementById('channelsView');
+  const viewMenu = document.getElementById('viewMenu');
+  const viewButton = document.getElementById('viewButton');
+  if (close && channels) {
+    close.textContent = '×';
+    close.title = 'Close channels';
+    // Override the old minimize handler so X really closes the window.
+    close.addEventListener('click', event => {
+      event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation();
+      channels.style.display = 'none';
+    }, true);
+  }
+  if (viewItem && channels) {
+    viewItem.addEventListener('click', event => {
+      event.preventDefault(); event.stopPropagation();
+      channels.style.display = getComputedStyle(channels).display === 'none' ? 'block' : 'none';
+      if (viewMenu) viewMenu.classList.remove('open');
+      if (viewButton) viewButton.classList.remove('open');
+    });
+  }
+})();
+</script>
+
 </body></html>
+
+<style id="playlist-toolbar-scroll-correction-v2">
+/* Keep every main-toolbar control grouped on the left; don't push the window button away. */
+#rackTitlebar { justify-content:flex-start !important; }
+#rackTitlebar .menu-area { order:0 !important; margin-left:0 !important; margin-right:0 !important; }
+#rackTitlebar .pattern-area { order:1 !important; margin-left:4px !important; margin-right:5px !important; }
+#rackTitlebar .controls { order:2 !important; margin-left:0 !important; margin-right:4px !important; }
+#rackTitlebar #toggleRack { order:3 !important; margin-left:0 !important; }
+
+/* Remove the added box at the upper-left of the track area, but keep its alignment width. */
+#playlistRulerSpacer {
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+}
+#playlistTopScrollbar::before,
+#playlistTopScrollbar::after { content:none !important; display:none !important; }
+
+/* The vertical scrollbar begins at the ruler's top edge (below the horizontal scrollbar). */
+#playlistScroll {
+  top:53px !important;
+  padding-top:0 !important;
+  overflow-x:auto !important;
+  overflow-y:scroll !important;
+  scrollbar-gutter:stable !important;
+}
+#playlistScroll::-webkit-scrollbar { width:28px !important; height:0 !important; }
+#playlistScroll::-webkit-scrollbar:horizontal { display:none !important; height:0 !important; }
+#playlistScroll::-webkit-scrollbar-track:horizontal,
+#playlistScroll::-webkit-scrollbar-thumb:horizontal { display:none !important; height:0 !important; }
+</style>
+<script id="playlist-bidirectional-scroll-correction-v2">
+(() => {
+  const area = document.getElementById('playlistScroll');
+  const top = document.getElementById('playlistTopScrollbar');
+  const ruler = document.getElementById('playlistRulerBeats');
+  if (!area || !top) return;
+  let syncing = false;
+  function update(from, to) {
+    if (syncing) return;
+    syncing = true;
+    const maxFrom = Math.max(0, from.scrollWidth - from.clientWidth);
+    const maxTo = Math.max(0, to.scrollWidth - to.clientWidth);
+    const ratio = maxFrom > 0 ? from.scrollLeft / maxFrom : 0;
+    to.scrollLeft = ratio * maxTo;
+    if (ruler) ruler.style.transform = `translateX(${-area.scrollLeft}px)`;
+    syncing = false;
+  }
+  area.addEventListener('scroll', () => update(area, top), {passive:true});
+  top.addEventListener('scroll', () => update(top, area), {passive:true});
+  function wheelScroll(event, target) {
+    const delta = event.deltaX || (event.shiftKey ? event.deltaY : 0);
+    if (!delta) return;
+    target.scrollLeft += delta;
+    event.preventDefault();
+  }
+  area.addEventListener('wheel', event => wheelScroll(event, area), {passive:false});
+  top.addEventListener('wheel', event => wheelScroll(event, top), {passive:false});
+  // Initial alignment after layout and after playlist width changes.
+  requestAnimationFrame(() => {
+    top.scrollLeft = area.scrollLeft;
+    if (ruler) ruler.style.transform = `translateX(${-area.scrollLeft}px)`;
+  });
+})();
+</script>
+
+<style id="note-pattern-zoom-polish">
+/* Notes and playlist patterns have invisible resize zones: no end-cap bars. */
+.piano-note-handle { display:none !important; }
+.piano-note-block { pointer-events:auto !important; cursor:grab !important; }
+#pianoGrid { min-width:0 !important; }
+#playlist { --playlist-beat-width:26px; }
+#playlist .playlist-grid { grid-template-columns:100px repeat(var(--playlist-beats), var(--playlist-beat-width, 26px)) !important; }
+#playlist .playlist-cell { width:var(--playlist-beat-width, 26px) !important; min-width:var(--playlist-beat-width, 26px) !important; }
+#playlist .playlist-cell .pattern-block { width:calc(var(--pattern-beats, 4) * var(--playlist-beat-width, 26px)) !important; min-width:0 !important; max-width:none !important; pointer-events:auto !important; }
+#playlist .playlist-cell .pattern-block-title { pointer-events:none !important; }
+/* Resize edges stay invisible, but advertise resizing before the drag begins. */
+#playlist .playlist-cell .pattern-block { pointer-events:auto !important; cursor:grab; }
+#playlist .playlist-cell .pattern-block.resize-hover { cursor:ew-resize !important; }
+#playlistRulerBeats .playlist-ruler-beat { width:calc(var(--playlist-beat-width, 26px) * 4) !important; min-width:calc(var(--playlist-beat-width, 26px) * 4) !important; }
+</style>
+<script id="note-pattern-zoom-polish-script">
+(() => {
+  const grid = document.getElementById('pianoGrid');
+  const gridScroll = document.getElementById('pianoGridScroll');
+  const pianoKeys = document.getElementById('pianoKeysInner');
+  const playlist = document.getElementById('playlist');
+  const playlistGrid = document.getElementById('playlistGrid');
+  const playlistScroll = document.getElementById('playlistScroll');
+  const topScroll = document.getElementById('playlistTopScrollbar');
+  const rulerViewport = document.getElementById('playlistRulerViewport');
+  const rulerBeats = document.getElementById('playlistRulerBeats');
+  if (!grid || !gridScroll || !playlistGrid || !playlistScroll || !topScroll) return;
+
+  const BEAT_MIN = 26;
+  let beatWidth = 26;
+  const patternLengths = new Map(); // key = track:startBeat; default patterns are one bar (4 beats)
+  const keyForPattern = (track, start) => track + ':' + start;
+  const lengthFor = (track, start) => patternLengths.get(keyForPattern(track, start)) || 4;
+  // The loop endpoint follows the actual end of the final placed/resized pattern.
+  const baseGetPlaylistLength = getPlaylistLength;
+  getPlaylistLength = function() {
+    let lastBeat = 0;
+    playlistRows.forEach((row, track) => row.forEach((pattern, start) => {
+      lastBeat = Math.max(lastBeat, start + lengthFor(track, start));
+    }));
+    return Math.max(1, Math.ceil(lastBeat / 4));
+  };
+  // Playlist cells are beat slots. Each slot is four sequencer ticks, and a
+  // pattern normally lasts four beats (one bar). Use the absolute timeline so
+  // notes play at the right time no matter which beat/bar the pattern starts on.
+  // Keep metronome scheduling independent from note/sample playback.
+  schedulePlaylistStep = function(column, step, time) {
+    const absoluteStep = column * 16 + step;
+    if (step % 4 === 0) {
+      playMetronome(time, absoluteStep === 0);
+    }
+
+    const bpm = getBPM();
+    const halfTick = 60 / bpm / 8;
+
+    for (let track = 0; track < playlistRows.length; track++) {
+      const row = playlistRows[track];
+      row.forEach((patternIndex, startBeat) => {
+        const notes = pianoNotes[patternIndex];
+        if (!notes) return;
+
+        const startStep = startBeat * 4;
+        const endStep = startStep + lengthFor(track, startBeat) * 4;
+        if (absoluteStep < startStep || absoluteStep >= endStep) return;
+
+        const localSequencerStep = absoluteStep - startStep;
+        notes.forEach(note => {
+          if (!note || !channels[note.channel]) return;
+          // The piano roll has 16 subdivisions while the sequencer has 8
+          // note positions per bar; odd subdivisions are scheduled halfway
+          // between sequencer ticks.
+          if (Math.floor(Number(note.step) / 2) !== localSequencerStep) return;
+
+          const remainingPianoSteps = Math.max(1, (endStep - absoluteStep) * 2);
+          const duration = Math.min(Number(note.duration) || 1, remainingPianoSteps);
+          const boundedNote = { ...note, duration };
+          const noteTime = time + (Number(note.step) % 2) * halfTick;
+          try {
+            if (typeof window.playPianoVoice === "function") {
+              window.playPianoVoice(channels[note.channel], boundedNote, noteTime);
+            } else {
+              console.error("Playlist audio player is unavailable.");
+            }
+          } catch (error) {
+            console.error("Could not play playlist note:", error);
+          }
+        });
+      });
+    }
+
+    const delay = Math.max(0, (time - getAudioContext().currentTime) * 1000);
+    setTimeout(() => {
+      if (playing && playInPlaylist) updatePlaylistPlayhead(column, step);
+    }, delay);
+  };
+
+  const oldGetStart = getPlaylistPatternStart;
+  getPlaylistPatternStart = function(track, slot) {
+    const row = playlistRows[track];
+    if (!row) return -1;
+    for (const start of row.keys()) {
+      const len = lengthFor(track, start);
+      if (slot >= start && slot < start + len) return start;
+    }
+    return -1;
+  };
+
+  // Keep the existing move/erase code, but preserve a pattern's custom width when it moves.
+  let removedPatternLength = 4;
+  const oldSetPlaylistCell = setPlaylistCell;
+  setPlaylistCell = function(track, column, pattern) {
+    if (pattern == null) {
+      removedPatternLength = lengthFor(track, column);
+      patternLengths.delete(keyForPattern(track, column));
+      return oldSetPlaylistCell(track, column, pattern);
+    }
+    const result = oldSetPlaylistCell(track, column, pattern);
+    patternLengths.set(keyForPattern(track, column), removedPatternLength || 4);
+    const cell = playlistGrid.querySelector('.playlist-cell[data-track="' + track + '"][data-column="' + column + '"]');
+    const block = cell && cell.querySelector('.pattern-block');
+    if (block) {
+      block.style.setProperty('--pattern-beats', String(lengthFor(track, column)));
+      block.style.width = (lengthFor(track, column) * beatWidth) + 'px';
+    }
+    return result;
+  };
+
+  const oldRenderPlaylistColumns = renderPlaylistColumns;
+  renderPlaylistColumns = function() {
+    oldRenderPlaylistColumns();
+    requestAnimationFrame(() => {
+      playlistGrid.querySelectorAll('.playlist-track-label').forEach(label => {});
+      playlistGrid.querySelectorAll('.playlist-cell').forEach(cell => {
+        const track = Number(cell.dataset.track), start = Number(cell.dataset.column);
+        if (!playlistRows[track]?.has(start)) return;
+        const block = cell.querySelector('.pattern-block');
+        if (!block) return;
+        const len = lengthFor(track, start);
+        block.style.setProperty('--pattern-beats', String(len));
+        block.style.width = (len * beatWidth) + 'px';
+      });
+      applyPlaylistZoom();
+    });
+  };
+
+  function applyPlaylistZoom() {
+    playlist.style.setProperty('--playlist-beat-width', beatWidth + 'px');
+    playlistGrid.style.setProperty('--playlist-beat-width', beatWidth + 'px');
+    playlistGrid.querySelectorAll('.playlist-cell .pattern-block').forEach(block => {
+      const cell = block.closest('.playlist-cell');
+      if (!cell) return;
+      const len = lengthFor(Number(cell.dataset.track), Number(cell.dataset.column));
+      block.style.setProperty('--pattern-beats', String(len));
+      block.style.width = (len * beatWidth) + 'px';
+    });
+    if (typeof renderPlaylistRuler === 'function') renderPlaylistRuler();
+    if (typeof setPlaylistPlayheadFromBeat === 'function') setPlaylistPlayheadFromBeat(playlistStartBeat);
+    const scrollWidth = Math.max(0, playlistGrid.scrollWidth - playlistScroll.clientWidth);
+    topScroll.firstElementChild && (topScroll.firstElementChild.style.width = Math.max(0, playlistGrid.scrollWidth - 100) + 'px');
+    topScroll.scrollLeft = Math.min(topScroll.scrollLeft, scrollWidth);
+    playlistScroll.scrollLeft = topScroll.scrollLeft;
+  }
+
+  const oldRenderRuler = renderPlaylistRuler;
+  renderPlaylistRuler = function() {
+    oldRenderRuler();
+    rulerBeats.querySelectorAll('.playlist-ruler-beat').forEach(label => {
+      label.style.width = (beatWidth * 4) + 'px';
+      label.style.minWidth = (beatWidth * 4) + 'px';
+    });
+    const width = 100 + playlistColumnCount * beatWidth * 4;
+    const inner = document.getElementById('playlistTopScrollbarInner');
+    if (inner) inner.style.width = Math.max(0, width - 100) + 'px';
+    const content = document.getElementById('playlistRulerContent');
+    if (content) content.style.width = width + 'px';
+  };
+
+  setPlaylistPlayheadFromBeat = function(beat) {
+    playlistStartBeat = Math.max(0, Math.min(Math.round(beat), Math.max(0, playlistColumnCount * 4 - 1)));
+    if (playlistPlayhead) {
+      playlistPlayhead.style.left = (playlistStartBeat * beatWidth - playlistScroll.scrollLeft) + 'px';
+      playlistPlayhead.style.display = playInPlaylist ? 'block' : 'none';
+    }
+    if (playlistStatus) playlistStatus.textContent = 'bar ' + (Math.floor(playlistStartBeat / 4) + 1);
+  };
+  playlistBeatFromPointer = function(event) {
+    const rect = rulerViewport.getBoundingClientRect();
+    return Math.max(0, Math.round((event.clientX - rect.left - 100 + playlistScroll.scrollLeft) / beatWidth));
+  };
+  startPlaylistPlayhead = function() {
+    if (playlistPlayheadAnimationFrame !== null) cancelAnimationFrame(playlistPlayheadAnimationFrame);
+    if (!playlistPlayhead) return;
+    playlistPlayhead.style.display = 'block';
+    const animate = () => {
+      if (!playing || !playInPlaylist) {
+        playlistPlayheadAnimationFrame = null;
+        setPlaylistPlayheadFromBeat(playlistStartBeat);
+        return;
+      }
+      const elapsed = Math.max(0, getAudioContext().currentTime - playbackStartTime);
+      const beatDuration = getStepDuration() * 4;
+      const totalBeats = Math.max(4, getPlaylistLength() * 4, (Math.floor(playlistStartBeat / 4) + 1) * 4);
+      const totalPosition = (playlistStartBeat + elapsed / beatDuration) % totalBeats;
+      playlistPlayhead.style.left = (totalPosition * beatWidth - playlistScroll.scrollLeft) + 'px';
+      playlistPlayhead.style.display = 'block';
+      playlistPlayheadAnimationFrame = requestAnimationFrame(animate);
+    };
+    playlistPlayheadAnimationFrame = requestAnimationFrame(animate);
+  };
+
+  // Touching a pattern selects it immediately, even when the interaction is a resize.
+  playlistGrid.addEventListener('pointerdown', event => {
+    const block = event.target.closest?.('.pattern-block');
+    if (!block) return;
+    const label = block.querySelector('.pattern-block-title')?.textContent || '';
+    const match = label.match(/pattern\s+(\d+)/i);
+    if (match) switchPattern(Math.max(0, Number(match[1]) - 1));
+  }, true);
+
+  // Playlist resize gestures: invisible edge zones on both sides, snapped to one beat.
+  let patternResize = null;
+  const PATTERN_EDGE_HIT = 10;
+  function patternEdgeAt(event) {
+    const block = event.target.closest?.('.pattern-block');
+    if (!block || !playlistGrid.contains(block)) return null;
+    const rect = block.getBoundingClientRect();
+    if (event.clientX <= rect.left + PATTERN_EDGE_HIT) return {block, side:'left'};
+    if (event.clientX >= rect.right - PATTERN_EDGE_HIT) return {block, side:'right'};
+    return {block, side:null};
+  }
+  // Show the resize cursor just by hovering either edge, before any click/drag.
+  playlistGrid.addEventListener('pointermove', event => {
+    if (patternResize) return;
+    const hit = patternEdgeAt(event);
+    playlistGrid.querySelectorAll('.pattern-block.resize-hover').forEach(el => el.classList.remove('resize-hover'));
+    if (hit?.side) {
+      hit.block.classList.add('resize-hover');
+      playlistGrid.style.cursor = 'ew-resize';
+    } else {
+      playlistGrid.style.cursor = '';
+    }
+  });
+  playlistGrid.addEventListener('pointerleave', () => {
+    if (patternResize) return;
+    playlistGrid.querySelectorAll('.pattern-block.resize-hover').forEach(el => el.classList.remove('resize-hover'));
+    playlistGrid.style.cursor = '';
+  });
+  playlistGrid.addEventListener('pointerdown', event => {
+    if (event.button !== 0) return;
+    const hit = patternEdgeAt(event);
+    if (!hit?.side) return;
+    const block = hit.block;
+    const cell = block.closest('.playlist-cell');
+    if (!cell) return;
+    event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation();
+    const track = Number(cell.dataset.track), start = Number(cell.dataset.column);
+    const originalLength = lengthFor(track,start);
+    patternResize = {pointerId:event.pointerId, block, track, start, originalStart:start,
+      originalLength, originalEnd:start+originalLength, startX:event.clientX, side:hit.side};
+    block.setPointerCapture?.(event.pointerId);
+    document.body.style.cursor = 'ew-resize';
+    playlistGrid.style.cursor = 'ew-resize';
+  }, true);
+  window.addEventListener('pointermove', event => {
+    const drag = patternResize;
+    if (!drag || event.pointerId !== drag.pointerId) return;
+    const delta = Math.round((event.clientX - drag.startX) / beatWidth);
+    let start = drag.originalStart, length = drag.originalLength;
+    if (drag.side === 'right') {
+      // Right edge moves; the left edge remains fixed.
+      length = Math.max(1, Math.min(4, drag.originalLength + delta));
+    } else {
+      // Left edge moves; the right edge remains fixed.
+      start = Math.max(drag.originalEnd - 4, Math.min(drag.originalEnd - 1, drag.originalStart + delta));
+      length = drag.originalEnd - start;
+    }
+    drag.previewStart = start; drag.previewLength = length;
+    drag.block.style.width = (length * beatWidth) + 'px';
+    drag.block.style.setProperty('--pattern-beats', String(length));
+    drag.block.style.setProperty('--pattern-shift', ((start - drag.originalStart) * beatWidth) + 'px');
+  });
+  function finishPatternResize(event) {
+    const drag = patternResize;
+    if (!drag || (event && event.pointerId !== undefined && event.pointerId !== drag.pointerId)) return;
+    const newStart = drag.previewStart ?? drag.originalStart;
+    const newLength = drag.previewLength ?? drag.originalLength;
+    playlistRows[drag.track].delete(drag.originalStart);
+    patternLengths.delete(keyForPattern(drag.track, drag.originalStart));
+    // Retrieve the pattern index from its visible label before rebuilding the grid.
+    const title = drag.block.querySelector('.pattern-block-title')?.textContent || '';
+    const pattern = Math.max(0, Number(title.replace(/\D/g,'')) - 1) || 0;
+    playlistRows[drag.track].set(newStart, pattern);
+    patternLengths.set(keyForPattern(drag.track, newStart), newLength);
+    patternResize = null;
+    drag.block.style.removeProperty('--pattern-shift');
+    drag.block.style.removeProperty('transform');
+    document.body.style.cursor = '';
+    playlistGrid.style.cursor = '';
+    playlistGrid.querySelectorAll('.pattern-block.resize-hover').forEach(el => el.classList.remove('resize-hover'));
+    renderPlaylistColumns();
+  }
+  window.addEventListener('pointerup', finishPatternResize);
+  window.addEventListener('pointercancel', finishPatternResize);
+  window.addEventListener('pointerup', () => { removedPatternLength = 4; });
+  window.addEventListener('pointercancel', () => { removedPatternLength = 4; });
+
+  // Zoom is scoped to the panel under the pointer. Native browser zoom shortcuts are disabled.
+  const initialGridWidth = Math.max(704, grid.clientWidth || 704);
+  const defaultStepWidth = Math.max(22, initialGridWidth / 32);
+  let pianoZoom = 1;
+  function playlistBarsUsed() {
+    let last = 0;
+    playlistRows.forEach((row, track) => row.forEach((pattern, start) => {
+      last = Math.max(last, start + lengthFor(track, start));
+    }));
+    return Math.max(1, Math.ceil(last / 4));
+  }
+  function applyPianoZoom() {
+    const bars = playlistBarsUsed();
+    const minZoom = bars <= 2 ? 1 : 2 / bars;
+    pianoZoom = Math.max(minZoom, Math.min(4, pianoZoom));
+    const stepWidth = defaultStepWidth * pianoZoom;
+    grid.style.gridTemplateColumns = 'repeat(32, ' + stepWidth + 'px)';
+    grid.style.width = (32 * stepWidth) + 'px';
+    grid.style.minWidth = '0';
+    grid.querySelectorAll('.piano-note-block').forEach(block => {
+      block.style.width = Math.max(1, stepWidth * Number(block.dataset.duration || 1) - 2) + 'px';
+    });
+  }
+  function zoomAt(target, direction) {
+    if (target && (target.closest('#playlist') || target.closest('#playlistTopScrollbar'))) {
+      const old = beatWidth;
+      beatWidth = Math.max(BEAT_MIN, Math.min(104, beatWidth * (direction > 0 ? 1.12 : 1 / 1.12)));
+      if (Math.abs(old - beatWidth) > .01) {
+        const before = playlistScroll.scrollLeft;
+        applyPlaylistZoom();
+        // Keep the visible timeline start anchored while columns grow to the right.
+        playlistScroll.scrollLeft = before * (beatWidth / old);
+        topScroll.scrollLeft = playlistScroll.scrollLeft;
+      }
+      return;
+    }
+    if (target && (target.closest('#pianoWindow') || target.closest('#pianoRollWrap'))) {
+      const oldZoom = pianoZoom;
+      pianoZoom *= direction > 0 ? 1.12 : 1 / 1.12;
+      applyPianoZoom();
+      gridScroll.scrollLeft *= pianoZoom / oldZoom;
+    }
+  }
+  let lastWheelX = 0;
+  document.addEventListener('wheel', event => {
+    if (!event.ctrlKey) return;
+    if (!event.target.closest('#playlist, #pianoWindow, #pianoRollWrap')) return;
+    event.preventDefault();
+    lastWheelX = event.clientX;
+    zoomAt(event.target, event.deltaY < 0 ? 1 : -1);
+  }, {passive:false, capture:true});
+  document.addEventListener('keydown', event => {
+    if (!event.ctrlKey) return;
+    if (['+', '=', '-', '_', '0'].includes(event.key) || ['NumpadAdd','NumpadSubtract','Numpad0'].includes(event.code)) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  }, true);
+
+  // Piano note resizing: invisible edges on BOTH sides; snap to steps and preserve the far edge.
+  let noteResize = null;
+  grid.addEventListener('pointerdown', event => {
+    if (event.button !== 0) return;
+    const block = event.target.closest('.piano-note-block');
+    if (!block) return;
+    const rect = block.getBoundingClientRect();
+    const left = event.clientX <= rect.left + 7;
+    const right = event.clientX >= rect.right - 7;
+    if (!left && !right) return;
+    const key = block.dataset.noteKey;
+    const note = pianoNotes[currentPattern].get(key);
+    if (!note) return;
+    event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation();
+    noteResize = {pointerId:event.pointerId, note, key, block, side:left?'left':'right', x:event.clientX,
+      start:Number(note.step), duration:Number(note.duration)||1, end:Number(note.step)+(Number(note.duration)||1)};
+    try { grid.setPointerCapture(event.pointerId); } catch (_) {}
+    document.body.style.cursor = 'ew-resize';
+  }, true);
+  grid.addEventListener('pointermove', event => {
+    const drag = noteResize;
+    if (!drag || event.pointerId !== drag.pointerId) return;
+    const cellWidth = Math.max(1, grid.getBoundingClientRect().width / 32);
+    const delta = Math.round((event.clientX - drag.x) / cellWidth);
+    let start = drag.start, duration = drag.duration;
+    if (drag.side === 'right') duration = Math.max(1, Math.min(32 - start, drag.duration + delta));
+    else {
+      start = Math.max(0, Math.min(drag.end - 1, drag.start + delta));
+      duration = drag.end - start;
+    }
+    const newKey = noteKey(drag.note.channel, drag.note.pitch, start);
+    if (newKey !== drag.key && pianoNotes[currentPattern].has(newKey)) return;
+    drag.previewStart = start; drag.previewDuration = duration;
+    drag.block.dataset.duration = String(duration);
+    drag.block.style.width = Math.max(1, cellWidth * duration - 2) + 'px';
+    drag.block.style.transform = 'translateX(' + ((start - drag.start) * cellWidth) + 'px)';
+    drag.block.title = pitchName(drag.note.pitch) + ' · ' + duration + ' step' + (duration === 1 ? '' : 's');
+    drag.changed = start !== drag.start || duration !== drag.duration;
+  });
+  function finishNoteResize(event) {
+    const drag = noteResize;
+    if (!drag || (event && event.pointerId !== undefined && event.pointerId !== drag.pointerId)) return;
+    noteResize = null; document.body.style.cursor = '';
+    if (drag.changed) {
+      const start = drag.previewStart ?? drag.start;
+      const duration = drag.previewDuration ?? drag.duration;
+      pianoNotes[currentPattern].delete(drag.key);
+      drag.note.step = start; drag.note.duration = duration;
+      pianoNotes[currentPattern].set(noteKey(drag.note.channel, drag.note.pitch, start), drag.note);
+      renderPianoRoll();
+    } else renderPianoRoll();
+  }
+  grid.addEventListener('pointerup', finishNoteResize);
+  grid.addEventListener('pointercancel', finishNoteResize);
+  window.addEventListener('pointerup', finishNoteResize);
+
+  // Remove the visible resize handle on every rerender and reapply the active zoom.
+  const baseRender = renderPianoRoll;
+  renderPianoRoll = function() {
+    baseRender();
+    grid.querySelectorAll('.piano-note-handle').forEach(handle => handle.remove());
+    requestAnimationFrame(applyPianoZoom);
+  };
+  applyPlaylistZoom();
+  applyPianoZoom();
+})();
+</script>
+
+
+<style id="window-shadow-browser-piano-fix">
+/* Remove the decorative drop-shadow boxes from every window. */
+.window,
+.window.dragging,
+#pianoWindow,
+#pianoWindow.dragging { box-shadow: none !important; }
+/* Piano roll should sit above the docked browser. */
+#pianoWindow { z-index: 400 !important; }
+/* The browser is docked and no longer has a minimize control. */
+#browser #toggleBrowser { display: none !important; }
+</style>
+
+
+<style id="window-focus-stack-fix">
+/* Browser stays underneath the working windows; remove the piano roll's fixed stack priority. */
+#browser { z-index: 100 !important; }
+#pianoWindow { z-index: 500; }
+#channels { z-index: 501; }
+</style>
+<script id="window-focus-stack-fix-script">
+(() => {
+  const browser = document.getElementById('browser');
+  const piano = document.getElementById('pianoWindow');
+  const channels = document.getElementById('channels');
+  let topZ = 600;
+
+  // Browser is a dock, not a foreground window. Every other window rises above it.
+  window.bringToFront = function (element) {
+    if (!element || element === browser || element.id === 'browser') return;
+    topZ = Math.max(topZ + 1, 501);
+    element.style.zIndex = String(topZ);
+  };
+
+  // The piano roll is created separately from .window elements, so give it the same focus behavior.
+  [piano, channels].forEach(element => {
+    if (!element) return;
+    element.addEventListener('pointerdown', () => window.bringToFront(element), true);
+  });
+
+  // Keep all normal windows above the docked browser when focused, too.
+  document.querySelectorAll('.window').forEach(element => {
+    if (element === browser) return;
+    element.addEventListener('pointerdown', () => window.bringToFront(element), true);
+  });
+
+  // Start channels above the browser even before the user clicks it.
+  if (channels) channels.style.zIndex = '501';
+  if (piano) piano.style.zIndex = '502';
+})();
+</script>
