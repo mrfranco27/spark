@@ -690,9 +690,9 @@ body {
 .playlist-content {
     position: absolute;
     left: 0;
-    top: 30px;
+    top: 0;
     width: 100%;
-    height: calc(100% - 30px);
+    height: 100%;
     padding: 8px;
     background: #111;
     overflow: hidden;
@@ -710,8 +710,8 @@ body {
 
 .playlist-grid {
     display: grid;
-    grid-template-columns: 62px repeat(var(--playlist-columns), 64px);
-    grid-template-rows: repeat(50, 44px);
+    grid-template-columns: repeat(var(--playlist-beats), 26px);
+    grid-template-rows: repeat(50, 64px);
     gap: 2px;
     width: max-content;
     min-height: 100%;
@@ -733,8 +733,8 @@ body {
 }
 
 .playlist-cell {
-    width: 64px;
-    height: 44px;
+    width: 26px;
+    height: 64px;
     box-sizing: border-box;
     background: #33444e;
     border: 1px solid rgba(255, 255, 255, 0.07);
@@ -745,7 +745,7 @@ body {
 .playlist-cell .pattern-block {
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.58);
+    background: rgba(0, 0, 0, 0.42);
     border: 1px solid rgba(255, 255, 255, 0.10);
     box-sizing: border-box;
 }
@@ -809,6 +809,7 @@ body {
 ========================================================== */
 
 .playlist-status {
+    display: none !important;
     position: absolute;
     left: 10px;
     top: 7px;
@@ -843,9 +844,9 @@ body {
 .export-settings-content {
     position: absolute;
     left: 0;
-    top: 30px;
+    top: 0;
     width: 100%;
-    height: calc(100% - 30px);
+    height: 100%;
     padding: 12px;
     background: #aaa;
 }
@@ -918,9 +919,9 @@ body {
 .sampler-content {
     position: absolute;
     left: 0;
-    top: 30px;
+    top: 0;
     width: 100%;
-    height: calc(100% - 30px);
+    height: 100%;
     padding: 10px;
     background: #151515;
 }
@@ -1174,7 +1175,7 @@ body {
 .piano-key.white { background:#e5e5e5; }
 .piano-key.black { background:#353535; color:#eee; border-bottom-color:#555; }
 .piano-key.c-note { background:#bcbcbc; color:#555; font-weight:bold; }
-#pianoGrid { min-width:480px; grid-template-columns:repeat(16,minmax(22px,1fr)); width:100%; }
+#pianoGrid { min-width:704px; grid-template-columns:repeat(32,minmax(22px,1fr)); width:100%; }
 .piano-cell { position:relative; height:24px; border-right:1px solid #444; border-bottom:1px solid #292929; background:#202020; cursor:default; }
 #pianoPlayhead { position:absolute; top:0; bottom:0; left:0; width:3px; background:#ffd52a; z-index:1000; pointer-events:none; display:none; box-shadow:0 0 5px rgba(255,213,42,.8); }
 #pianoPlayhead::before { content:""; position:absolute; top:0; left:50%; transform:translateX(-50%); width:0; height:0; border-left:9px solid transparent; border-right:9px solid transparent; border-top:12px solid #ffd52a; filter:drop-shadow(0 1px 2px #000); }
@@ -1200,7 +1201,7 @@ body {
 
 /* Docked playlist and global toolbar layout */
 #rack { position:fixed !important; left:0 !important; top:0 !important; width:100% !important; height:30px !important; transform:none !important; z-index:100 !important; overflow:visible; box-shadow:none; border:0; background:transparent; }
-#rack .titlebar { position:fixed; left:0; top:0; width:100%; height:32px; border:0; border-bottom:2px solid #111; background:#3c3c3c; z-index:500; cursor:default; display:flex; gap:8px; padding-right:4px; }
+#rack .titlebar { position:fixed; left:0; top:0; width:100%; height:32px; border:0; border-bottom:2px solid #111; background:#707070; z-index:500; cursor:default; display:flex; gap:8px; padding-right:4px; }
 #rack .title { flex:0 0 auto; padding-right:8px; }
 #rack .menu-area { flex:0 0 auto; }
 #rack .window-button { display:none; }
@@ -1233,6 +1234,47 @@ body { background:#242424; }
  #rack .playlist-button { max-width:90px; overflow:hidden; }
  #rack .metronome-button { max-width:78px; overflow:hidden; }
 }
+
+
+/* Final playlist ruler/playhead polish */
+#playlistTopScrollbar { position:relative !important; margin-left:100px !important; margin-right:28px !important; }
+/* Fill the label/scrollbar corner and the scrollbar intersection with the titlebar grey. */
+#playlistTopScrollbar::before {
+  content:""; position:absolute; left:-100px; top:0; width:100px; height:28px;
+  background:#707070; box-sizing:border-box; z-index:95; pointer-events:none;
+}
+#playlistTopScrollbar::after {
+  content:""; position:absolute; right:-28px; top:0; width:28px; height:28px;
+  background:#707070; box-sizing:border-box; z-index:95; pointer-events:none;
+}
+#playlistRulerViewport {
+  background:#202026 !important; border:0 !important; position:relative !important; z-index:81 !important;
+}
+#playlistRulerContent, #playlistRulerBeats { background:#202026 !important; }
+.playlist-ruler-beat, .playlist-ruler-beat.bar-start {
+  background:#202026 !important; border:0 !important; outline:0 !important;
+}
+#playlistPlayheadViewport {
+  top:28px !important; /* start at the ruler so the triangle lives inside it */
+  z-index:90 !important; overflow:hidden !important;
+}
+#playlistPlayhead { top:0 !important; bottom:0 !important; }
+#playlistPlayhead::before { top:0 !important; z-index:92 !important; }
+#playlistScroll {
+  overflow-x:hidden !important;
+  overflow-y:auto !important;
+  scrollbar-width:auto;
+}
+#playlistScroll::-webkit-scrollbar { width:28px !important; height:0 !important; }
+#playlistScroll::-webkit-scrollbar:horizontal { height:0 !important; display:none !important; }
+#playlistScroll::-webkit-scrollbar-track:horizontal,
+#playlistScroll::-webkit-scrollbar-thumb:horizontal { display:none !important; height:0 !important; }
+#playlist .playlist-track-label { background:#696969 !important; }
+#playlist .playlist-cell:hover, #playlist .playlist-cell.active:hover,
+#playlist .playlist-cell.bar-shade-alt:hover {
+  filter:none !important; background-color:inherit !important; box-shadow:none !important;
+}
+
 </style>
 
 <style>
@@ -1240,24 +1282,43 @@ body { background:#242424; }
 
 /* Playlist: continuous background with clean black track/bar grid lines. */
 #playlist .playlist-grid {
+    grid-template-columns: repeat(var(--playlist-beats), 26px) !important;
+    grid-template-rows: repeat(50, 64px) !important;
     gap: 0 !important;
     padding: 0 !important;
     background: #33444e !important;
 }
 #playlist .playlist-cell {
+    position: relative;
+    overflow: visible !important;
     border: 0 !important;
-    border-right: 1px solid #000 !important;
-    border-bottom: 1px solid #000 !important;
+    border-right: 1px solid rgba(0,0,0,.18) !important;
+    border-bottom: 1px solid rgba(0,0,0,.45) !important;
     background: #33444e;
+}
+#playlist .playlist-cell.beat-line {
+    border-right-color: rgba(0,0,0,.34) !important;
+}
+#playlist .playlist-cell.bar-line {
+    border-right: 1px solid rgba(0,0,0,.82) !important;
 }
 #playlist .playlist-cell.bar-shade-alt,
 #playlist .playlist-cell.active.bar-shade-alt,
-#playlist .playlist-cell.active.playing {
-    background: #2A363E;
+#playlist .playlist-cell.active.playing { background: #2A363E; }
+#playlist .playlist-cell.active:not(.bar-shade-alt) { background: #33444e; }
+#playlist .playlist-cell.active { z-index: auto !important; }
+#playlist .playlist-cell .pattern-block {
+    pointer-events: none;
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: calc(4 * 26px);
+    height: 100%;
+    z-index: 1;
+    background: rgba(0,0,0,.42);
+    border: 0;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
 }
-#playlist .playlist-cell.active:not(.bar-shade-alt) {
-    background: #33444e;
-}
+#playlist .playlist-cell .pattern-block-title { height: 16px; font-size: 10px; padding: 0 4px; }
 #playlist .playlist-cell.playing {
     box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.55);
 }
@@ -1267,6 +1328,132 @@ body { background:#242424; }
     border-bottom: 1px solid #000 !important;
 }
 
+
+/* Playlist polish: taller tracks, wider bars, subtle four-beat divisions, and clean full-bar blocks. */
+#playlist .titlebar { display: none !important; }
+#playlist .playlist-status { display: none !important; }
+#playlist .playlist-grid {
+  grid-template-columns: repeat(var(--playlist-beats), 26px) !important;
+  grid-template-rows: repeat(50, 64px) !important;
+  gap: 0 !important; padding: 0 !important;
+}
+#playlist .playlist-cell { width: 26px !important; height: 64px !important; border: 0 !important; border-right: 1px solid rgba(190,205,215,.18) !important; border-bottom: 1px solid rgba(0,0,0,.48) !important; }
+#playlist .playlist-cell.beat-line { border-right: 1px solid rgba(0,0,0,.38) !important; }
+#playlist .playlist-cell.bar-line { border-right: 1px solid rgba(0,0,0,.78) !important; }
+#playlist .playlist-cell { position: relative !important; overflow: visible !important; }
+#playlist .playlist-cell .pattern-block {
+  position: absolute !important; left: 0 !important; top: 0 !important; right: auto !important; bottom: 0 !important;
+  width: 104px !important; min-width: 104px !important; max-width: none !important; height: 100% !important;
+  box-sizing: border-box !important; background: rgba(0,0,0,.34) !important; border: 0 !important;
+  box-shadow: none !important; pointer-events: none !important; z-index: 20 !important; overflow: hidden !important;
+}
+#playlist .playlist-cell .pattern-block-title { border: 0 !important; }
+
+/* Track labels and stable pattern blocks: no hover-induced stacking/visibility changes. */
+#playlist .playlist-grid {
+  grid-template-columns: 100px repeat(var(--playlist-beats), 26px) !important;
+  grid-auto-flow: row !important;
+}
+#playlist .playlist-track-label {
+  position: sticky;
+  left: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 7px 0 0 6px;
+  box-sizing: border-box;
+  width: 100px;
+  height: 64px;
+  color: #c8c8c8;
+  background: #707070;
+  border-right: 1px solid #4b4b4b;
+  border-bottom: 1px solid rgba(0,0,0,.48);
+  font-size: 12px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+#playlist .playlist-cell,
+#playlist .playlist-cell.active,
+#playlist .playlist-cell.bar-shade-alt {
+  filter: none !important;
+  transition: none !important;
+}
+#playlist .playlist-cell:hover {
+  filter: none !important;
+  background-color: inherit !important;
+  box-shadow: none !important;
+}
+#playlist .playlist-cell.playing {
+  filter: none !important;
+  box-shadow: none !important;
+}
+#playlist .playlist-cell .pattern-block {
+  width: 104px !important;
+  min-width: 104px !important;
+  max-width: 104px !important;
+  z-index: 40 !important;
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+/* Playlist ruler, thicker synchronized scrollbars, and shared-style playhead. */
+#playlist .playlist-content { display:flex !important; flex-direction:column !important; position:relative !important; overflow:hidden !important; }
+#playlistTopScrollbar { height:28px; flex:0 0 28px; overflow-x:auto; overflow-y:hidden; margin-left:100px; background:#202c33; border-bottom:1px solid rgba(0,0,0,.65); }
+#playlistTopScrollbar::-webkit-scrollbar { height:28px; }
+#playlistTopScrollbar::-webkit-scrollbar-track { background:#111; }
+#playlistTopScrollbar::-webkit-scrollbar-thumb { background:#606a70; border:3px solid #111; }
+#playlistTopScrollbarInner { height:1px; }
+#playlistRulerViewport { height:25px; flex:0 0 25px; overflow:hidden; margin-left:0; background:#263943; border-bottom:1px solid rgba(0,0,0,.8); }
+#playlistRulerContent { display:flex; height:25px; will-change:transform; }
+#playlistRulerSpacer { flex:0 0 100px; width:100px; background:#707070; border-right:1px solid #4b4b4b; }
+#playlistRulerBeats { display:flex; height:25px; width:max-content; will-change:transform; }
+.playlist-ruler-beat { width:104px; min-width:104px; height:25px; display:flex; align-items:center; justify-content:flex-start; padding-left:5px; box-sizing:border-box; color:#b6c1c8; font-size:11px; font-weight:400; border-right:1px solid rgba(0,0,0,.34); }
+.playlist-ruler-beat.bar-start { border-left:1px solid rgba(0,0,0,.8); color:#e0e5e8; }
+#playlistScroll { flex:1 1 auto !important; min-height:0 !important; overflow:auto !important; }
+#playlistScroll::-webkit-scrollbar { width:28px; height:28px; }
+#playlistScroll::-webkit-scrollbar-track { background:#111; }
+#playlistScroll::-webkit-scrollbar-thumb { background:#606a70; border:3px solid #111; }
+#playlistPlayheadViewport { position:absolute; left:100px; right:0; top:53px; bottom:0; z-index:80; overflow:hidden; pointer-events:none; }
+#playlistPlayhead { position:absolute; top:0; bottom:0; left:0; width:3px; display:none; background:#ffd52a; box-shadow:0 0 5px rgba(255,213,42,.8); pointer-events:auto; cursor:ew-resize; touch-action:none; }
+#playlistPlayhead::before { content:""; position:absolute; top:0; left:50%; transform:translateX(-50%); width:0; height:0; border-left:9px solid transparent; border-right:9px solid transparent; border-top:12px solid #ffd52a; filter:drop-shadow(0 1px 2px #000); }
+#playlistPlayhead::after { content:""; position:absolute; top:0; left:-8px; width:19px; height:100%; background:transparent; cursor:ew-resize; }
+</style>
+
+<style>
+/* Playlist corner fill and full-height vertical scrollbar */
+#rackTitlebar .menu-area { margin-right:0 !important; flex:0 0 auto; }
+#rackTitlebar .pattern-area, #rackTitlebar .controls { flex:0 0 auto; position:relative; z-index:12; }
+#playlist .playlist-content { position:relative !important; overflow:hidden !important; }
+#playlistTopScrollbar {
+  position:relative !important; z-index:101 !important;
+  margin-left:100px !important; margin-right:28px !important;
+  background:#707070 !important;
+}
+#playlistTopScrollbar::after {
+  content:""; position:absolute; right:-28px; top:0; width:28px; height:28px;
+  background:#707070; z-index:105; pointer-events:none;
+}
+#playlistRulerViewport {
+  position:relative !important; z-index:90 !important;
+  margin-right:28px !important; background:#202026 !important;
+  border:0 !important;
+}
+#playlistRulerContent, #playlistRulerBeats,
+.playlist-ruler-beat, .playlist-ruler-beat.bar-start {
+  background:#202026 !important; border:0 !important; outline:0 !important;
+}
+#playlistScroll {
+  position:absolute !important; top:53px !important; left:0 !important; right:0 !important; bottom:0 !important;
+  padding-top:0 !important; padding-right:0 !important;
+  overflow-x:auto !important; overflow-y:auto !important;
+  z-index:2 !important; min-height:0 !important;
+}
+#playlistScroll::-webkit-scrollbar { width:28px !important; height:0 !important; }
+#playlistScroll::-webkit-scrollbar:horizontal { display:none !important; height:0 !important; }
+#playlistScroll::-webkit-scrollbar-track { background:#111 !important; }
+#playlistScroll::-webkit-scrollbar-thumb { background:#606a70 !important; border:3px solid #111 !important; }
+#playlistPlayheadViewport { z-index:95 !important; }
 </style>
 </head>
 
@@ -1279,8 +1466,6 @@ body { background:#242424; }
 <div class="window" id="rack" style="z-index: 319; transform: none; left: 337px; top: 84px;">
 
 <div class="titlebar" id="rackTitlebar">
-
-    <div class="title">piano roll</div>
 
     <div class="menu-area">
 
@@ -1383,7 +1568,9 @@ body { background:#242424; }
     </div>
 
     <div class="playlist-content">
-        <div class="playlist-status" id="playlistStatus">playlist</div>
+        <div id="playlistTopScrollbar" aria-label="Playlist horizontal scrollbar"><div id="playlistTopScrollbarInner"></div></div>
+        <div id="playlistRulerViewport"><div id="playlistRulerContent"><div id="playlistRulerSpacer"></div><div id="playlistRulerBeats"></div></div></div>
+        <div id="playlistPlayheadViewport"><div id="playlistPlayhead"></div></div>
         <div class="playlist-scroll" id="playlistScroll">
             <div class="playlist-grid" id="playlistGrid" style="--playlist-columns: 32;"><div class="playlist-label" data-pattern="0">Pattern 1</div><div class="playlist-cell" data-pattern="0" data-column="0"></div><div class="playlist-cell" data-pattern="0" data-column="1"></div><div class="playlist-cell" data-pattern="0" data-column="2"></div><div class="playlist-cell" data-pattern="0" data-column="3"></div><div class="playlist-cell" data-pattern="0" data-column="4"></div><div class="playlist-cell" data-pattern="0" data-column="5"></div><div class="playlist-cell" data-pattern="0" data-column="6"></div><div class="playlist-cell" data-pattern="0" data-column="7"></div><div class="playlist-cell" data-pattern="0" data-column="8"></div><div class="playlist-cell" data-pattern="0" data-column="9"></div><div class="playlist-cell" data-pattern="0" data-column="10"></div><div class="playlist-cell" data-pattern="0" data-column="11"></div><div class="playlist-cell" data-pattern="0" data-column="12"></div><div class="playlist-cell" data-pattern="0" data-column="13"></div><div class="playlist-cell" data-pattern="0" data-column="14"></div><div class="playlist-cell" data-pattern="0" data-column="15"></div><div class="playlist-cell" data-pattern="0" data-column="16"></div><div class="playlist-cell" data-pattern="0" data-column="17"></div><div class="playlist-cell" data-pattern="0" data-column="18"></div><div class="playlist-cell" data-pattern="0" data-column="19"></div><div class="playlist-cell" data-pattern="0" data-column="20"></div><div class="playlist-cell" data-pattern="0" data-column="21"></div><div class="playlist-cell" data-pattern="0" data-column="22"></div><div class="playlist-cell" data-pattern="0" data-column="23"></div><div class="playlist-cell" data-pattern="0" data-column="24"></div><div class="playlist-cell" data-pattern="0" data-column="25"></div><div class="playlist-cell" data-pattern="0" data-column="26"></div><div class="playlist-cell" data-pattern="0" data-column="27"></div><div class="playlist-cell" data-pattern="0" data-column="28"></div><div class="playlist-cell" data-pattern="0" data-column="29"></div><div class="playlist-cell" data-pattern="0" data-column="30"></div><div class="playlist-cell" data-pattern="0" data-column="31"></div><div class="playlist-label" data-pattern="1">Pattern 2</div><div class="playlist-cell" data-pattern="1" data-column="0"></div><div class="playlist-cell" data-pattern="1" data-column="1"></div><div class="playlist-cell" data-pattern="1" data-column="2"></div><div class="playlist-cell" data-pattern="1" data-column="3"></div><div class="playlist-cell" data-pattern="1" data-column="4"></div><div class="playlist-cell" data-pattern="1" data-column="5"></div><div class="playlist-cell" data-pattern="1" data-column="6"></div><div class="playlist-cell" data-pattern="1" data-column="7"></div><div class="playlist-cell" data-pattern="1" data-column="8"></div><div class="playlist-cell" data-pattern="1" data-column="9"></div><div class="playlist-cell" data-pattern="1" data-column="10"></div><div class="playlist-cell" data-pattern="1" data-column="11"></div><div class="playlist-cell" data-pattern="1" data-column="12"></div><div class="playlist-cell" data-pattern="1" data-column="13"></div><div class="playlist-cell" data-pattern="1" data-column="14"></div><div class="playlist-cell" data-pattern="1" data-column="15"></div><div class="playlist-cell" data-pattern="1" data-column="16"></div><div class="playlist-cell" data-pattern="1" data-column="17"></div><div class="playlist-cell" data-pattern="1" data-column="18"></div><div class="playlist-cell" data-pattern="1" data-column="19"></div><div class="playlist-cell" data-pattern="1" data-column="20"></div><div class="playlist-cell" data-pattern="1" data-column="21"></div><div class="playlist-cell" data-pattern="1" data-column="22"></div><div class="playlist-cell" data-pattern="1" data-column="23"></div><div class="playlist-cell" data-pattern="1" data-column="24"></div><div class="playlist-cell" data-pattern="1" data-column="25"></div><div class="playlist-cell" data-pattern="1" data-column="26"></div><div class="playlist-cell" data-pattern="1" data-column="27"></div><div class="playlist-cell" data-pattern="1" data-column="28"></div><div class="playlist-cell" data-pattern="1" data-column="29"></div><div class="playlist-cell" data-pattern="1" data-column="30"></div><div class="playlist-cell" data-pattern="1" data-column="31"></div><div class="playlist-label" data-pattern="2">Pattern 3</div><div class="playlist-cell" data-pattern="2" data-column="0"></div><div class="playlist-cell" data-pattern="2" data-column="1"></div><div class="playlist-cell" data-pattern="2" data-column="2"></div><div class="playlist-cell" data-pattern="2" data-column="3"></div><div class="playlist-cell" data-pattern="2" data-column="4"></div><div class="playlist-cell" data-pattern="2" data-column="5"></div><div class="playlist-cell" data-pattern="2" data-column="6"></div><div class="playlist-cell" data-pattern="2" data-column="7"></div><div class="playlist-cell" data-pattern="2" data-column="8"></div><div class="playlist-cell" data-pattern="2" data-column="9"></div><div class="playlist-cell" data-pattern="2" data-column="10"></div><div class="playlist-cell" data-pattern="2" data-column="11"></div><div class="playlist-cell" data-pattern="2" data-column="12"></div><div class="playlist-cell" data-pattern="2" data-column="13"></div><div class="playlist-cell" data-pattern="2" data-column="14"></div><div class="playlist-cell" data-pattern="2" data-column="15"></div><div class="playlist-cell" data-pattern="2" data-column="16"></div><div class="playlist-cell" data-pattern="2" data-column="17"></div><div class="playlist-cell" data-pattern="2" data-column="18"></div><div class="playlist-cell" data-pattern="2" data-column="19"></div><div class="playlist-cell" data-pattern="2" data-column="20"></div><div class="playlist-cell" data-pattern="2" data-column="21"></div><div class="playlist-cell" data-pattern="2" data-column="22"></div><div class="playlist-cell" data-pattern="2" data-column="23"></div><div class="playlist-cell" data-pattern="2" data-column="24"></div><div class="playlist-cell" data-pattern="2" data-column="25"></div><div class="playlist-cell" data-pattern="2" data-column="26"></div><div class="playlist-cell" data-pattern="2" data-column="27"></div><div class="playlist-cell" data-pattern="2" data-column="28"></div><div class="playlist-cell" data-pattern="2" data-column="29"></div><div class="playlist-cell" data-pattern="2" data-column="30"></div><div class="playlist-cell" data-pattern="2" data-column="31"></div><div class="playlist-label" data-pattern="3">Pattern 4</div><div class="playlist-cell" data-pattern="3" data-column="0"></div><div class="playlist-cell" data-pattern="3" data-column="1"></div><div class="playlist-cell" data-pattern="3" data-column="2"></div><div class="playlist-cell" data-pattern="3" data-column="3"></div><div class="playlist-cell" data-pattern="3" data-column="4"></div><div class="playlist-cell" data-pattern="3" data-column="5"></div><div class="playlist-cell" data-pattern="3" data-column="6"></div><div class="playlist-cell" data-pattern="3" data-column="7"></div><div class="playlist-cell" data-pattern="3" data-column="8"></div><div class="playlist-cell" data-pattern="3" data-column="9"></div><div class="playlist-cell" data-pattern="3" data-column="10"></div><div class="playlist-cell" data-pattern="3" data-column="11"></div><div class="playlist-cell" data-pattern="3" data-column="12"></div><div class="playlist-cell" data-pattern="3" data-column="13"></div><div class="playlist-cell" data-pattern="3" data-column="14"></div><div class="playlist-cell" data-pattern="3" data-column="15"></div><div class="playlist-cell" data-pattern="3" data-column="16"></div><div class="playlist-cell" data-pattern="3" data-column="17"></div><div class="playlist-cell" data-pattern="3" data-column="18"></div><div class="playlist-cell" data-pattern="3" data-column="19"></div><div class="playlist-cell" data-pattern="3" data-column="20"></div><div class="playlist-cell" data-pattern="3" data-column="21"></div><div class="playlist-cell" data-pattern="3" data-column="22"></div><div class="playlist-cell" data-pattern="3" data-column="23"></div><div class="playlist-cell" data-pattern="3" data-column="24"></div><div class="playlist-cell" data-pattern="3" data-column="25"></div><div class="playlist-cell" data-pattern="3" data-column="26"></div><div class="playlist-cell" data-pattern="3" data-column="27"></div><div class="playlist-cell" data-pattern="3" data-column="28"></div><div class="playlist-cell" data-pattern="3" data-column="29"></div><div class="playlist-cell" data-pattern="3" data-column="30"></div><div class="playlist-cell" data-pattern="3" data-column="31"></div><div class="playlist-label" data-pattern="4">Pattern 5</div><div class="playlist-cell" data-pattern="4" data-column="0"></div><div class="playlist-cell" data-pattern="4" data-column="1"></div><div class="playlist-cell" data-pattern="4" data-column="2"></div><div class="playlist-cell" data-pattern="4" data-column="3"></div><div class="playlist-cell" data-pattern="4" data-column="4"></div><div class="playlist-cell" data-pattern="4" data-column="5"></div><div class="playlist-cell" data-pattern="4" data-column="6"></div><div class="playlist-cell" data-pattern="4" data-column="7"></div><div class="playlist-cell" data-pattern="4" data-column="8"></div><div class="playlist-cell" data-pattern="4" data-column="9"></div><div class="playlist-cell" data-pattern="4" data-column="10"></div><div class="playlist-cell" data-pattern="4" data-column="11"></div><div class="playlist-cell" data-pattern="4" data-column="12"></div><div class="playlist-cell" data-pattern="4" data-column="13"></div><div class="playlist-cell" data-pattern="4" data-column="14"></div><div class="playlist-cell" data-pattern="4" data-column="15"></div><div class="playlist-cell" data-pattern="4" data-column="16"></div><div class="playlist-cell" data-pattern="4" data-column="17"></div><div class="playlist-cell" data-pattern="4" data-column="18"></div><div class="playlist-cell" data-pattern="4" data-column="19"></div><div class="playlist-cell" data-pattern="4" data-column="20"></div><div class="playlist-cell" data-pattern="4" data-column="21"></div><div class="playlist-cell" data-pattern="4" data-column="22"></div><div class="playlist-cell" data-pattern="4" data-column="23"></div><div class="playlist-cell" data-pattern="4" data-column="24"></div><div class="playlist-cell" data-pattern="4" data-column="25"></div><div class="playlist-cell" data-pattern="4" data-column="26"></div><div class="playlist-cell" data-pattern="4" data-column="27"></div><div class="playlist-cell" data-pattern="4" data-column="28"></div><div class="playlist-cell" data-pattern="4" data-column="29"></div><div class="playlist-cell" data-pattern="4" data-column="30"></div><div class="playlist-cell" data-pattern="4" data-column="31"></div><div class="playlist-label" data-pattern="5">Pattern 6</div><div class="playlist-cell" data-pattern="5" data-column="0"></div><div class="playlist-cell" data-pattern="5" data-column="1"></div><div class="playlist-cell" data-pattern="5" data-column="2"></div><div class="playlist-cell" data-pattern="5" data-column="3"></div><div class="playlist-cell" data-pattern="5" data-column="4"></div><div class="playlist-cell" data-pattern="5" data-column="5"></div><div class="playlist-cell" data-pattern="5" data-column="6"></div><div class="playlist-cell" data-pattern="5" data-column="7"></div><div class="playlist-cell" data-pattern="5" data-column="8"></div><div class="playlist-cell" data-pattern="5" data-column="9"></div><div class="playlist-cell" data-pattern="5" data-column="10"></div><div class="playlist-cell" data-pattern="5" data-column="11"></div><div class="playlist-cell" data-pattern="5" data-column="12"></div><div class="playlist-cell" data-pattern="5" data-column="13"></div><div class="playlist-cell" data-pattern="5" data-column="14"></div><div class="playlist-cell" data-pattern="5" data-column="15"></div><div class="playlist-cell" data-pattern="5" data-column="16"></div><div class="playlist-cell" data-pattern="5" data-column="17"></div><div class="playlist-cell" data-pattern="5" data-column="18"></div><div class="playlist-cell" data-pattern="5" data-column="19"></div><div class="playlist-cell" data-pattern="5" data-column="20"></div><div class="playlist-cell" data-pattern="5" data-column="21"></div><div class="playlist-cell" data-pattern="5" data-column="22"></div><div class="playlist-cell" data-pattern="5" data-column="23"></div><div class="playlist-cell" data-pattern="5" data-column="24"></div><div class="playlist-cell" data-pattern="5" data-column="25"></div><div class="playlist-cell" data-pattern="5" data-column="26"></div><div class="playlist-cell" data-pattern="5" data-column="27"></div><div class="playlist-cell" data-pattern="5" data-column="28"></div><div class="playlist-cell" data-pattern="5" data-column="29"></div><div class="playlist-cell" data-pattern="5" data-column="30"></div><div class="playlist-cell" data-pattern="5" data-column="31"></div><div class="playlist-label" data-pattern="6">Pattern 7</div><div class="playlist-cell" data-pattern="6" data-column="0"></div><div class="playlist-cell" data-pattern="6" data-column="1"></div><div class="playlist-cell" data-pattern="6" data-column="2"></div><div class="playlist-cell" data-pattern="6" data-column="3"></div><div class="playlist-cell" data-pattern="6" data-column="4"></div><div class="playlist-cell" data-pattern="6" data-column="5"></div><div class="playlist-cell" data-pattern="6" data-column="6"></div><div class="playlist-cell" data-pattern="6" data-column="7"></div><div class="playlist-cell" data-pattern="6" data-column="8"></div><div class="playlist-cell" data-pattern="6" data-column="9"></div><div class="playlist-cell" data-pattern="6" data-column="10"></div><div class="playlist-cell" data-pattern="6" data-column="11"></div><div class="playlist-cell" data-pattern="6" data-column="12"></div><div class="playlist-cell" data-pattern="6" data-column="13"></div><div class="playlist-cell" data-pattern="6" data-column="14"></div><div class="playlist-cell" data-pattern="6" data-column="15"></div><div class="playlist-cell" data-pattern="6" data-column="16"></div><div class="playlist-cell" data-pattern="6" data-column="17"></div><div class="playlist-cell" data-pattern="6" data-column="18"></div><div class="playlist-cell" data-pattern="6" data-column="19"></div><div class="playlist-cell" data-pattern="6" data-column="20"></div><div class="playlist-cell" data-pattern="6" data-column="21"></div><div class="playlist-cell" data-pattern="6" data-column="22"></div><div class="playlist-cell" data-pattern="6" data-column="23"></div><div class="playlist-cell" data-pattern="6" data-column="24"></div><div class="playlist-cell" data-pattern="6" data-column="25"></div><div class="playlist-cell" data-pattern="6" data-column="26"></div><div class="playlist-cell" data-pattern="6" data-column="27"></div><div class="playlist-cell" data-pattern="6" data-column="28"></div><div class="playlist-cell" data-pattern="6" data-column="29"></div><div class="playlist-cell" data-pattern="6" data-column="30"></div><div class="playlist-cell" data-pattern="6" data-column="31"></div><div class="playlist-label" data-pattern="7">Pattern 8</div><div class="playlist-cell" data-pattern="7" data-column="0"></div><div class="playlist-cell" data-pattern="7" data-column="1"></div><div class="playlist-cell" data-pattern="7" data-column="2"></div><div class="playlist-cell" data-pattern="7" data-column="3"></div><div class="playlist-cell" data-pattern="7" data-column="4"></div><div class="playlist-cell" data-pattern="7" data-column="5"></div><div class="playlist-cell" data-pattern="7" data-column="6"></div><div class="playlist-cell" data-pattern="7" data-column="7"></div><div class="playlist-cell" data-pattern="7" data-column="8"></div><div class="playlist-cell" data-pattern="7" data-column="9"></div><div class="playlist-cell" data-pattern="7" data-column="10"></div><div class="playlist-cell" data-pattern="7" data-column="11"></div><div class="playlist-cell" data-pattern="7" data-column="12"></div><div class="playlist-cell" data-pattern="7" data-column="13"></div><div class="playlist-cell" data-pattern="7" data-column="14"></div><div class="playlist-cell" data-pattern="7" data-column="15"></div><div class="playlist-cell" data-pattern="7" data-column="16"></div><div class="playlist-cell" data-pattern="7" data-column="17"></div><div class="playlist-cell" data-pattern="7" data-column="18"></div><div class="playlist-cell" data-pattern="7" data-column="19"></div><div class="playlist-cell" data-pattern="7" data-column="20"></div><div class="playlist-cell" data-pattern="7" data-column="21"></div><div class="playlist-cell" data-pattern="7" data-column="22"></div><div class="playlist-cell" data-pattern="7" data-column="23"></div><div class="playlist-cell" data-pattern="7" data-column="24"></div><div class="playlist-cell" data-pattern="7" data-column="25"></div><div class="playlist-cell" data-pattern="7" data-column="26"></div><div class="playlist-cell" data-pattern="7" data-column="27"></div><div class="playlist-cell" data-pattern="7" data-column="28"></div><div class="playlist-cell" data-pattern="7" data-column="29"></div><div class="playlist-cell" data-pattern="7" data-column="30"></div><div class="playlist-cell" data-pattern="7" data-column="31"></div><div class="playlist-label" data-pattern="8">Pattern 9</div><div class="playlist-cell" data-pattern="8" data-column="0"></div><div class="playlist-cell" data-pattern="8" data-column="1"></div><div class="playlist-cell" data-pattern="8" data-column="2"></div><div class="playlist-cell" data-pattern="8" data-column="3"></div><div class="playlist-cell" data-pattern="8" data-column="4"></div><div class="playlist-cell" data-pattern="8" data-column="5"></div><div class="playlist-cell" data-pattern="8" data-column="6"></div><div class="playlist-cell" data-pattern="8" data-column="7"></div><div class="playlist-cell" data-pattern="8" data-column="8"></div><div class="playlist-cell" data-pattern="8" data-column="9"></div><div class="playlist-cell" data-pattern="8" data-column="10"></div><div class="playlist-cell" data-pattern="8" data-column="11"></div><div class="playlist-cell" data-pattern="8" data-column="12"></div><div class="playlist-cell" data-pattern="8" data-column="13"></div><div class="playlist-cell" data-pattern="8" data-column="14"></div><div class="playlist-cell" data-pattern="8" data-column="15"></div><div class="playlist-cell" data-pattern="8" data-column="16"></div><div class="playlist-cell" data-pattern="8" data-column="17"></div><div class="playlist-cell" data-pattern="8" data-column="18"></div><div class="playlist-cell" data-pattern="8" data-column="19"></div><div class="playlist-cell" data-pattern="8" data-column="20"></div><div class="playlist-cell" data-pattern="8" data-column="21"></div><div class="playlist-cell" data-pattern="8" data-column="22"></div><div class="playlist-cell" data-pattern="8" data-column="23"></div><div class="playlist-cell" data-pattern="8" data-column="24"></div><div class="playlist-cell" data-pattern="8" data-column="25"></div><div class="playlist-cell" data-pattern="8" data-column="26"></div><div class="playlist-cell" data-pattern="8" data-column="27"></div><div class="playlist-cell" data-pattern="8" data-column="28"></div><div class="playlist-cell" data-pattern="8" data-column="29"></div><div class="playlist-cell" data-pattern="8" data-column="30"></div><div class="playlist-cell" data-pattern="8" data-column="31"></div><div class="playlist-label" data-pattern="9">Pattern 10</div><div class="playlist-cell" data-pattern="9" data-column="0"></div><div class="playlist-cell" data-pattern="9" data-column="1"></div><div class="playlist-cell" data-pattern="9" data-column="2"></div><div class="playlist-cell" data-pattern="9" data-column="3"></div><div class="playlist-cell" data-pattern="9" data-column="4"></div><div class="playlist-cell" data-pattern="9" data-column="5"></div><div class="playlist-cell" data-pattern="9" data-column="6"></div><div class="playlist-cell" data-pattern="9" data-column="7"></div><div class="playlist-cell" data-pattern="9" data-column="8"></div><div class="playlist-cell" data-pattern="9" data-column="9"></div><div class="playlist-cell" data-pattern="9" data-column="10"></div><div class="playlist-cell" data-pattern="9" data-column="11"></div><div class="playlist-cell" data-pattern="9" data-column="12"></div><div class="playlist-cell" data-pattern="9" data-column="13"></div><div class="playlist-cell" data-pattern="9" data-column="14"></div><div class="playlist-cell" data-pattern="9" data-column="15"></div><div class="playlist-cell" data-pattern="9" data-column="16"></div><div class="playlist-cell" data-pattern="9" data-column="17"></div><div class="playlist-cell" data-pattern="9" data-column="18"></div><div class="playlist-cell" data-pattern="9" data-column="19"></div><div class="playlist-cell" data-pattern="9" data-column="20"></div><div class="playlist-cell" data-pattern="9" data-column="21"></div><div class="playlist-cell" data-pattern="9" data-column="22"></div><div class="playlist-cell" data-pattern="9" data-column="23"></div><div class="playlist-cell" data-pattern="9" data-column="24"></div><div class="playlist-cell" data-pattern="9" data-column="25"></div><div class="playlist-cell" data-pattern="9" data-column="26"></div><div class="playlist-cell" data-pattern="9" data-column="27"></div><div class="playlist-cell" data-pattern="9" data-column="28"></div><div class="playlist-cell" data-pattern="9" data-column="29"></div><div class="playlist-cell" data-pattern="9" data-column="30"></div><div class="playlist-cell" data-pattern="9" data-column="31"></div><div class="playlist-label" data-pattern="10">Pattern 11</div><div class="playlist-cell" data-pattern="10" data-column="0"></div><div class="playlist-cell" data-pattern="10" data-column="1"></div><div class="playlist-cell" data-pattern="10" data-column="2"></div><div class="playlist-cell" data-pattern="10" data-column="3"></div><div class="playlist-cell" data-pattern="10" data-column="4"></div><div class="playlist-cell" data-pattern="10" data-column="5"></div><div class="playlist-cell" data-pattern="10" data-column="6"></div><div class="playlist-cell" data-pattern="10" data-column="7"></div><div class="playlist-cell" data-pattern="10" data-column="8"></div><div class="playlist-cell" data-pattern="10" data-column="9"></div><div class="playlist-cell" data-pattern="10" data-column="10"></div><div class="playlist-cell" data-pattern="10" data-column="11"></div><div class="playlist-cell" data-pattern="10" data-column="12"></div><div class="playlist-cell" data-pattern="10" data-column="13"></div><div class="playlist-cell" data-pattern="10" data-column="14"></div><div class="playlist-cell" data-pattern="10" data-column="15"></div><div class="playlist-cell" data-pattern="10" data-column="16"></div><div class="playlist-cell" data-pattern="10" data-column="17"></div><div class="playlist-cell" data-pattern="10" data-column="18"></div><div class="playlist-cell" data-pattern="10" data-column="19"></div><div class="playlist-cell" data-pattern="10" data-column="20"></div><div class="playlist-cell" data-pattern="10" data-column="21"></div><div class="playlist-cell" data-pattern="10" data-column="22"></div><div class="playlist-cell" data-pattern="10" data-column="23"></div><div class="playlist-cell" data-pattern="10" data-column="24"></div><div class="playlist-cell" data-pattern="10" data-column="25"></div><div class="playlist-cell" data-pattern="10" data-column="26"></div><div class="playlist-cell" data-pattern="10" data-column="27"></div><div class="playlist-cell" data-pattern="10" data-column="28"></div><div class="playlist-cell" data-pattern="10" data-column="29"></div><div class="playlist-cell" data-pattern="10" data-column="30"></div><div class="playlist-cell" data-pattern="10" data-column="31"></div><div class="playlist-label" data-pattern="11">Pattern 12</div><div class="playlist-cell" data-pattern="11" data-column="0"></div><div class="playlist-cell" data-pattern="11" data-column="1"></div><div class="playlist-cell" data-pattern="11" data-column="2"></div><div class="playlist-cell" data-pattern="11" data-column="3"></div><div class="playlist-cell" data-pattern="11" data-column="4"></div><div class="playlist-cell" data-pattern="11" data-column="5"></div><div class="playlist-cell" data-pattern="11" data-column="6"></div><div class="playlist-cell" data-pattern="11" data-column="7"></div><div class="playlist-cell" data-pattern="11" data-column="8"></div><div class="playlist-cell" data-pattern="11" data-column="9"></div><div class="playlist-cell" data-pattern="11" data-column="10"></div><div class="playlist-cell" data-pattern="11" data-column="11"></div><div class="playlist-cell" data-pattern="11" data-column="12"></div><div class="playlist-cell" data-pattern="11" data-column="13"></div><div class="playlist-cell" data-pattern="11" data-column="14"></div><div class="playlist-cell" data-pattern="11" data-column="15"></div><div class="playlist-cell" data-pattern="11" data-column="16"></div><div class="playlist-cell" data-pattern="11" data-column="17"></div><div class="playlist-cell" data-pattern="11" data-column="18"></div><div class="playlist-cell" data-pattern="11" data-column="19"></div><div class="playlist-cell" data-pattern="11" data-column="20"></div><div class="playlist-cell" data-pattern="11" data-column="21"></div><div class="playlist-cell" data-pattern="11" data-column="22"></div><div class="playlist-cell" data-pattern="11" data-column="23"></div><div class="playlist-cell" data-pattern="11" data-column="24"></div><div class="playlist-cell" data-pattern="11" data-column="25"></div><div class="playlist-cell" data-pattern="11" data-column="26"></div><div class="playlist-cell" data-pattern="11" data-column="27"></div><div class="playlist-cell" data-pattern="11" data-column="28"></div><div class="playlist-cell" data-pattern="11" data-column="29"></div><div class="playlist-cell" data-pattern="11" data-column="30"></div><div class="playlist-cell" data-pattern="11" data-column="31"></div><div class="playlist-label" data-pattern="12">Pattern 13</div><div class="playlist-cell" data-pattern="12" data-column="0"></div><div class="playlist-cell" data-pattern="12" data-column="1"></div><div class="playlist-cell" data-pattern="12" data-column="2"></div><div class="playlist-cell" data-pattern="12" data-column="3"></div><div class="playlist-cell" data-pattern="12" data-column="4"></div><div class="playlist-cell" data-pattern="12" data-column="5"></div><div class="playlist-cell" data-pattern="12" data-column="6"></div><div class="playlist-cell" data-pattern="12" data-column="7"></div><div class="playlist-cell" data-pattern="12" data-column="8"></div><div class="playlist-cell" data-pattern="12" data-column="9"></div><div class="playlist-cell" data-pattern="12" data-column="10"></div><div class="playlist-cell" data-pattern="12" data-column="11"></div><div class="playlist-cell" data-pattern="12" data-column="12"></div><div class="playlist-cell" data-pattern="12" data-column="13"></div><div class="playlist-cell" data-pattern="12" data-column="14"></div><div class="playlist-cell" data-pattern="12" data-column="15"></div><div class="playlist-cell" data-pattern="12" data-column="16"></div><div class="playlist-cell" data-pattern="12" data-column="17"></div><div class="playlist-cell" data-pattern="12" data-column="18"></div><div class="playlist-cell" data-pattern="12" data-column="19"></div><div class="playlist-cell" data-pattern="12" data-column="20"></div><div class="playlist-cell" data-pattern="12" data-column="21"></div><div class="playlist-cell" data-pattern="12" data-column="22"></div><div class="playlist-cell" data-pattern="12" data-column="23"></div><div class="playlist-cell" data-pattern="12" data-column="24"></div><div class="playlist-cell" data-pattern="12" data-column="25"></div><div class="playlist-cell" data-pattern="12" data-column="26"></div><div class="playlist-cell" data-pattern="12" data-column="27"></div><div class="playlist-cell" data-pattern="12" data-column="28"></div><div class="playlist-cell" data-pattern="12" data-column="29"></div><div class="playlist-cell" data-pattern="12" data-column="30"></div><div class="playlist-cell" data-pattern="12" data-column="31"></div><div class="playlist-label" data-pattern="13">Pattern 14</div><div class="playlist-cell" data-pattern="13" data-column="0"></div><div class="playlist-cell" data-pattern="13" data-column="1"></div><div class="playlist-cell" data-pattern="13" data-column="2"></div><div class="playlist-cell" data-pattern="13" data-column="3"></div><div class="playlist-cell" data-pattern="13" data-column="4"></div><div class="playlist-cell" data-pattern="13" data-column="5"></div><div class="playlist-cell" data-pattern="13" data-column="6"></div><div class="playlist-cell" data-pattern="13" data-column="7"></div><div class="playlist-cell" data-pattern="13" data-column="8"></div><div class="playlist-cell" data-pattern="13" data-column="9"></div><div class="playlist-cell" data-pattern="13" data-column="10"></div><div class="playlist-cell" data-pattern="13" data-column="11"></div><div class="playlist-cell" data-pattern="13" data-column="12"></div><div class="playlist-cell" data-pattern="13" data-column="13"></div><div class="playlist-cell" data-pattern="13" data-column="14"></div><div class="playlist-cell" data-pattern="13" data-column="15"></div><div class="playlist-cell" data-pattern="13" data-column="16"></div><div class="playlist-cell" data-pattern="13" data-column="17"></div><div class="playlist-cell" data-pattern="13" data-column="18"></div><div class="playlist-cell" data-pattern="13" data-column="19"></div><div class="playlist-cell" data-pattern="13" data-column="20"></div><div class="playlist-cell" data-pattern="13" data-column="21"></div><div class="playlist-cell" data-pattern="13" data-column="22"></div><div class="playlist-cell" data-pattern="13" data-column="23"></div><div class="playlist-cell" data-pattern="13" data-column="24"></div><div class="playlist-cell" data-pattern="13" data-column="25"></div><div class="playlist-cell" data-pattern="13" data-column="26"></div><div class="playlist-cell" data-pattern="13" data-column="27"></div><div class="playlist-cell" data-pattern="13" data-column="28"></div><div class="playlist-cell" data-pattern="13" data-column="29"></div><div class="playlist-cell" data-pattern="13" data-column="30"></div><div class="playlist-cell" data-pattern="13" data-column="31"></div><div class="playlist-label" data-pattern="14">Pattern 15</div><div class="playlist-cell" data-pattern="14" data-column="0"></div><div class="playlist-cell" data-pattern="14" data-column="1"></div><div class="playlist-cell" data-pattern="14" data-column="2"></div><div class="playlist-cell" data-pattern="14" data-column="3"></div><div class="playlist-cell" data-pattern="14" data-column="4"></div><div class="playlist-cell" data-pattern="14" data-column="5"></div><div class="playlist-cell" data-pattern="14" data-column="6"></div><div class="playlist-cell" data-pattern="14" data-column="7"></div><div class="playlist-cell" data-pattern="14" data-column="8"></div><div class="playlist-cell" data-pattern="14" data-column="9"></div><div class="playlist-cell" data-pattern="14" data-column="10"></div><div class="playlist-cell" data-pattern="14" data-column="11"></div><div class="playlist-cell" data-pattern="14" data-column="12"></div><div class="playlist-cell" data-pattern="14" data-column="13"></div><div class="playlist-cell" data-pattern="14" data-column="14"></div><div class="playlist-cell" data-pattern="14" data-column="15"></div><div class="playlist-cell" data-pattern="14" data-column="16"></div><div class="playlist-cell" data-pattern="14" data-column="17"></div><div class="playlist-cell" data-pattern="14" data-column="18"></div><div class="playlist-cell" data-pattern="14" data-column="19"></div><div class="playlist-cell" data-pattern="14" data-column="20"></div><div class="playlist-cell" data-pattern="14" data-column="21"></div><div class="playlist-cell" data-pattern="14" data-column="22"></div><div class="playlist-cell" data-pattern="14" data-column="23"></div><div class="playlist-cell" data-pattern="14" data-column="24"></div><div class="playlist-cell" data-pattern="14" data-column="25"></div><div class="playlist-cell" data-pattern="14" data-column="26"></div><div class="playlist-cell" data-pattern="14" data-column="27"></div><div class="playlist-cell" data-pattern="14" data-column="28"></div><div class="playlist-cell" data-pattern="14" data-column="29"></div><div class="playlist-cell" data-pattern="14" data-column="30"></div><div class="playlist-cell" data-pattern="14" data-column="31"></div><div class="playlist-label" data-pattern="15">Pattern 16</div><div class="playlist-cell" data-pattern="15" data-column="0"></div><div class="playlist-cell" data-pattern="15" data-column="1"></div><div class="playlist-cell" data-pattern="15" data-column="2"></div><div class="playlist-cell" data-pattern="15" data-column="3"></div><div class="playlist-cell" data-pattern="15" data-column="4"></div><div class="playlist-cell" data-pattern="15" data-column="5"></div><div class="playlist-cell" data-pattern="15" data-column="6"></div><div class="playlist-cell" data-pattern="15" data-column="7"></div><div class="playlist-cell" data-pattern="15" data-column="8"></div><div class="playlist-cell" data-pattern="15" data-column="9"></div><div class="playlist-cell" data-pattern="15" data-column="10"></div><div class="playlist-cell" data-pattern="15" data-column="11"></div><div class="playlist-cell" data-pattern="15" data-column="12"></div><div class="playlist-cell" data-pattern="15" data-column="13"></div><div class="playlist-cell" data-pattern="15" data-column="14"></div><div class="playlist-cell" data-pattern="15" data-column="15"></div><div class="playlist-cell" data-pattern="15" data-column="16"></div><div class="playlist-cell" data-pattern="15" data-column="17"></div><div class="playlist-cell" data-pattern="15" data-column="18"></div><div class="playlist-cell" data-pattern="15" data-column="19"></div><div class="playlist-cell" data-pattern="15" data-column="20"></div><div class="playlist-cell" data-pattern="15" data-column="21"></div><div class="playlist-cell" data-pattern="15" data-column="22"></div><div class="playlist-cell" data-pattern="15" data-column="23"></div><div class="playlist-cell" data-pattern="15" data-column="24"></div><div class="playlist-cell" data-pattern="15" data-column="25"></div><div class="playlist-cell" data-pattern="15" data-column="26"></div><div class="playlist-cell" data-pattern="15" data-column="27"></div><div class="playlist-cell" data-pattern="15" data-column="28"></div><div class="playlist-cell" data-pattern="15" data-column="29"></div><div class="playlist-cell" data-pattern="15" data-column="30"></div><div class="playlist-cell" data-pattern="15" data-column="31"></div><div class="playlist-label" data-pattern="16">Pattern 17</div><div class="playlist-cell" data-pattern="16" data-column="0"></div><div class="playlist-cell" data-pattern="16" data-column="1"></div><div class="playlist-cell" data-pattern="16" data-column="2"></div><div class="playlist-cell" data-pattern="16" data-column="3"></div><div class="playlist-cell" data-pattern="16" data-column="4"></div><div class="playlist-cell" data-pattern="16" data-column="5"></div><div class="playlist-cell" data-pattern="16" data-column="6"></div><div class="playlist-cell" data-pattern="16" data-column="7"></div><div class="playlist-cell" data-pattern="16" data-column="8"></div><div class="playlist-cell" data-pattern="16" data-column="9"></div><div class="playlist-cell" data-pattern="16" data-column="10"></div><div class="playlist-cell" data-pattern="16" data-column="11"></div><div class="playlist-cell" data-pattern="16" data-column="12"></div><div class="playlist-cell" data-pattern="16" data-column="13"></div><div class="playlist-cell" data-pattern="16" data-column="14"></div><div class="playlist-cell" data-pattern="16" data-column="15"></div><div class="playlist-cell" data-pattern="16" data-column="16"></div><div class="playlist-cell" data-pattern="16" data-column="17"></div><div class="playlist-cell" data-pattern="16" data-column="18"></div><div class="playlist-cell" data-pattern="16" data-column="19"></div><div class="playlist-cell" data-pattern="16" data-column="20"></div><div class="playlist-cell" data-pattern="16" data-column="21"></div><div class="playlist-cell" data-pattern="16" data-column="22"></div><div class="playlist-cell" data-pattern="16" data-column="23"></div><div class="playlist-cell" data-pattern="16" data-column="24"></div><div class="playlist-cell" data-pattern="16" data-column="25"></div><div class="playlist-cell" data-pattern="16" data-column="26"></div><div class="playlist-cell" data-pattern="16" data-column="27"></div><div class="playlist-cell" data-pattern="16" data-column="28"></div><div class="playlist-cell" data-pattern="16" data-column="29"></div><div class="playlist-cell" data-pattern="16" data-column="30"></div><div class="playlist-cell" data-pattern="16" data-column="31"></div><div class="playlist-label" data-pattern="17">Pattern 18</div><div class="playlist-cell" data-pattern="17" data-column="0"></div><div class="playlist-cell" data-pattern="17" data-column="1"></div><div class="playlist-cell" data-pattern="17" data-column="2"></div><div class="playlist-cell" data-pattern="17" data-column="3"></div><div class="playlist-cell" data-pattern="17" data-column="4"></div><div class="playlist-cell" data-pattern="17" data-column="5"></div><div class="playlist-cell" data-pattern="17" data-column="6"></div><div class="playlist-cell" data-pattern="17" data-column="7"></div><div class="playlist-cell" data-pattern="17" data-column="8"></div><div class="playlist-cell" data-pattern="17" data-column="9"></div><div class="playlist-cell" data-pattern="17" data-column="10"></div><div class="playlist-cell" data-pattern="17" data-column="11"></div><div class="playlist-cell" data-pattern="17" data-column="12"></div><div class="playlist-cell" data-pattern="17" data-column="13"></div><div class="playlist-cell" data-pattern="17" data-column="14"></div><div class="playlist-cell" data-pattern="17" data-column="15"></div><div class="playlist-cell" data-pattern="17" data-column="16"></div><div class="playlist-cell" data-pattern="17" data-column="17"></div><div class="playlist-cell" data-pattern="17" data-column="18"></div><div class="playlist-cell" data-pattern="17" data-column="19"></div><div class="playlist-cell" data-pattern="17" data-column="20"></div><div class="playlist-cell" data-pattern="17" data-column="21"></div><div class="playlist-cell" data-pattern="17" data-column="22"></div><div class="playlist-cell" data-pattern="17" data-column="23"></div><div class="playlist-cell" data-pattern="17" data-column="24"></div><div class="playlist-cell" data-pattern="17" data-column="25"></div><div class="playlist-cell" data-pattern="17" data-column="26"></div><div class="playlist-cell" data-pattern="17" data-column="27"></div><div class="playlist-cell" data-pattern="17" data-column="28"></div><div class="playlist-cell" data-pattern="17" data-column="29"></div><div class="playlist-cell" data-pattern="17" data-column="30"></div><div class="playlist-cell" data-pattern="17" data-column="31"></div><div class="playlist-label" data-pattern="18">Pattern 19</div><div class="playlist-cell" data-pattern="18" data-column="0"></div><div class="playlist-cell" data-pattern="18" data-column="1"></div><div class="playlist-cell" data-pattern="18" data-column="2"></div><div class="playlist-cell" data-pattern="18" data-column="3"></div><div class="playlist-cell" data-pattern="18" data-column="4"></div><div class="playlist-cell" data-pattern="18" data-column="5"></div><div class="playlist-cell" data-pattern="18" data-column="6"></div><div class="playlist-cell" data-pattern="18" data-column="7"></div><div class="playlist-cell" data-pattern="18" data-column="8"></div><div class="playlist-cell" data-pattern="18" data-column="9"></div><div class="playlist-cell" data-pattern="18" data-column="10"></div><div class="playlist-cell" data-pattern="18" data-column="11"></div><div class="playlist-cell" data-pattern="18" data-column="12"></div><div class="playlist-cell" data-pattern="18" data-column="13"></div><div class="playlist-cell" data-pattern="18" data-column="14"></div><div class="playlist-cell" data-pattern="18" data-column="15"></div><div class="playlist-cell" data-pattern="18" data-column="16"></div><div class="playlist-cell" data-pattern="18" data-column="17"></div><div class="playlist-cell" data-pattern="18" data-column="18"></div><div class="playlist-cell" data-pattern="18" data-column="19"></div><div class="playlist-cell" data-pattern="18" data-column="20"></div><div class="playlist-cell" data-pattern="18" data-column="21"></div><div class="playlist-cell" data-pattern="18" data-column="22"></div><div class="playlist-cell" data-pattern="18" data-column="23"></div><div class="playlist-cell" data-pattern="18" data-column="24"></div><div class="playlist-cell" data-pattern="18" data-column="25"></div><div class="playlist-cell" data-pattern="18" data-column="26"></div><div class="playlist-cell" data-pattern="18" data-column="27"></div><div class="playlist-cell" data-pattern="18" data-column="28"></div><div class="playlist-cell" data-pattern="18" data-column="29"></div><div class="playlist-cell" data-pattern="18" data-column="30"></div><div class="playlist-cell" data-pattern="18" data-column="31"></div><div class="playlist-label" data-pattern="19">Pattern 20</div><div class="playlist-cell" data-pattern="19" data-column="0"></div><div class="playlist-cell" data-pattern="19" data-column="1"></div><div class="playlist-cell" data-pattern="19" data-column="2"></div><div class="playlist-cell" data-pattern="19" data-column="3"></div><div class="playlist-cell" data-pattern="19" data-column="4"></div><div class="playlist-cell" data-pattern="19" data-column="5"></div><div class="playlist-cell" data-pattern="19" data-column="6"></div><div class="playlist-cell" data-pattern="19" data-column="7"></div><div class="playlist-cell" data-pattern="19" data-column="8"></div><div class="playlist-cell" data-pattern="19" data-column="9"></div><div class="playlist-cell" data-pattern="19" data-column="10"></div><div class="playlist-cell" data-pattern="19" data-column="11"></div><div class="playlist-cell" data-pattern="19" data-column="12"></div><div class="playlist-cell" data-pattern="19" data-column="13"></div><div class="playlist-cell" data-pattern="19" data-column="14"></div><div class="playlist-cell" data-pattern="19" data-column="15"></div><div class="playlist-cell" data-pattern="19" data-column="16"></div><div class="playlist-cell" data-pattern="19" data-column="17"></div><div class="playlist-cell" data-pattern="19" data-column="18"></div><div class="playlist-cell" data-pattern="19" data-column="19"></div><div class="playlist-cell" data-pattern="19" data-column="20"></div><div class="playlist-cell" data-pattern="19" data-column="21"></div><div class="playlist-cell" data-pattern="19" data-column="22"></div><div class="playlist-cell" data-pattern="19" data-column="23"></div><div class="playlist-cell" data-pattern="19" data-column="24"></div><div class="playlist-cell" data-pattern="19" data-column="25"></div><div class="playlist-cell" data-pattern="19" data-column="26"></div><div class="playlist-cell" data-pattern="19" data-column="27"></div><div class="playlist-cell" data-pattern="19" data-column="28"></div><div class="playlist-cell" data-pattern="19" data-column="29"></div><div class="playlist-cell" data-pattern="19" data-column="30"></div><div class="playlist-cell" data-pattern="19" data-column="31"></div><div class="playlist-label" data-pattern="20">Pattern 21</div><div class="playlist-cell" data-pattern="20" data-column="0"></div><div class="playlist-cell" data-pattern="20" data-column="1"></div><div class="playlist-cell" data-pattern="20" data-column="2"></div><div class="playlist-cell" data-pattern="20" data-column="3"></div><div class="playlist-cell" data-pattern="20" data-column="4"></div><div class="playlist-cell" data-pattern="20" data-column="5"></div><div class="playlist-cell" data-pattern="20" data-column="6"></div><div class="playlist-cell" data-pattern="20" data-column="7"></div><div class="playlist-cell" data-pattern="20" data-column="8"></div><div class="playlist-cell" data-pattern="20" data-column="9"></div><div class="playlist-cell" data-pattern="20" data-column="10"></div><div class="playlist-cell" data-pattern="20" data-column="11"></div><div class="playlist-cell" data-pattern="20" data-column="12"></div><div class="playlist-cell" data-pattern="20" data-column="13"></div><div class="playlist-cell" data-pattern="20" data-column="14"></div><div class="playlist-cell" data-pattern="20" data-column="15"></div><div class="playlist-cell" data-pattern="20" data-column="16"></div><div class="playlist-cell" data-pattern="20" data-column="17"></div><div class="playlist-cell" data-pattern="20" data-column="18"></div><div class="playlist-cell" data-pattern="20" data-column="19"></div><div class="playlist-cell" data-pattern="20" data-column="20"></div><div class="playlist-cell" data-pattern="20" data-column="21"></div><div class="playlist-cell" data-pattern="20" data-column="22"></div><div class="playlist-cell" data-pattern="20" data-column="23"></div><div class="playlist-cell" data-pattern="20" data-column="24"></div><div class="playlist-cell" data-pattern="20" data-column="25"></div><div class="playlist-cell" data-pattern="20" data-column="26"></div><div class="playlist-cell" data-pattern="20" data-column="27"></div><div class="playlist-cell" data-pattern="20" data-column="28"></div><div class="playlist-cell" data-pattern="20" data-column="29"></div><div class="playlist-cell" data-pattern="20" data-column="30"></div><div class="playlist-cell" data-pattern="20" data-column="31"></div><div class="playlist-label" data-pattern="21">Pattern 22</div><div class="playlist-cell" data-pattern="21" data-column="0"></div><div class="playlist-cell" data-pattern="21" data-column="1"></div><div class="playlist-cell" data-pattern="21" data-column="2"></div><div class="playlist-cell" data-pattern="21" data-column="3"></div><div class="playlist-cell" data-pattern="21" data-column="4"></div><div class="playlist-cell" data-pattern="21" data-column="5"></div><div class="playlist-cell" data-pattern="21" data-column="6"></div><div class="playlist-cell" data-pattern="21" data-column="7"></div><div class="playlist-cell" data-pattern="21" data-column="8"></div><div class="playlist-cell" data-pattern="21" data-column="9"></div><div class="playlist-cell" data-pattern="21" data-column="10"></div><div class="playlist-cell" data-pattern="21" data-column="11"></div><div class="playlist-cell" data-pattern="21" data-column="12"></div><div class="playlist-cell" data-pattern="21" data-column="13"></div><div class="playlist-cell" data-pattern="21" data-column="14"></div><div class="playlist-cell" data-pattern="21" data-column="15"></div><div class="playlist-cell" data-pattern="21" data-column="16"></div><div class="playlist-cell" data-pattern="21" data-column="17"></div><div class="playlist-cell" data-pattern="21" data-column="18"></div><div class="playlist-cell" data-pattern="21" data-column="19"></div><div class="playlist-cell" data-pattern="21" data-column="20"></div><div class="playlist-cell" data-pattern="21" data-column="21"></div><div class="playlist-cell" data-pattern="21" data-column="22"></div><div class="playlist-cell" data-pattern="21" data-column="23"></div><div class="playlist-cell" data-pattern="21" data-column="24"></div><div class="playlist-cell" data-pattern="21" data-column="25"></div><div class="playlist-cell" data-pattern="21" data-column="26"></div><div class="playlist-cell" data-pattern="21" data-column="27"></div><div class="playlist-cell" data-pattern="21" data-column="28"></div><div class="playlist-cell" data-pattern="21" data-column="29"></div><div class="playlist-cell" data-pattern="21" data-column="30"></div><div class="playlist-cell" data-pattern="21" data-column="31"></div><div class="playlist-label" data-pattern="22">Pattern 23</div><div class="playlist-cell" data-pattern="22" data-column="0"></div><div class="playlist-cell" data-pattern="22" data-column="1"></div><div class="playlist-cell" data-pattern="22" data-column="2"></div><div class="playlist-cell" data-pattern="22" data-column="3"></div><div class="playlist-cell" data-pattern="22" data-column="4"></div><div class="playlist-cell" data-pattern="22" data-column="5"></div><div class="playlist-cell" data-pattern="22" data-column="6"></div><div class="playlist-cell" data-pattern="22" data-column="7"></div><div class="playlist-cell" data-pattern="22" data-column="8"></div><div class="playlist-cell" data-pattern="22" data-column="9"></div><div class="playlist-cell" data-pattern="22" data-column="10"></div><div class="playlist-cell" data-pattern="22" data-column="11"></div><div class="playlist-cell" data-pattern="22" data-column="12"></div><div class="playlist-cell" data-pattern="22" data-column="13"></div><div class="playlist-cell" data-pattern="22" data-column="14"></div><div class="playlist-cell" data-pattern="22" data-column="15"></div><div class="playlist-cell" data-pattern="22" data-column="16"></div><div class="playlist-cell" data-pattern="22" data-column="17"></div><div class="playlist-cell" data-pattern="22" data-column="18"></div><div class="playlist-cell" data-pattern="22" data-column="19"></div><div class="playlist-cell" data-pattern="22" data-column="20"></div><div class="playlist-cell" data-pattern="22" data-column="21"></div><div class="playlist-cell" data-pattern="22" data-column="22"></div><div class="playlist-cell" data-pattern="22" data-column="23"></div><div class="playlist-cell" data-pattern="22" data-column="24"></div><div class="playlist-cell" data-pattern="22" data-column="25"></div><div class="playlist-cell" data-pattern="22" data-column="26"></div><div class="playlist-cell" data-pattern="22" data-column="27"></div><div class="playlist-cell" data-pattern="22" data-column="28"></div><div class="playlist-cell" data-pattern="22" data-column="29"></div><div class="playlist-cell" data-pattern="22" data-column="30"></div><div class="playlist-cell" data-pattern="22" data-column="31"></div><div class="playlist-label" data-pattern="23">Pattern 24</div><div class="playlist-cell" data-pattern="23" data-column="0"></div><div class="playlist-cell" data-pattern="23" data-column="1"></div><div class="playlist-cell" data-pattern="23" data-column="2"></div><div class="playlist-cell" data-pattern="23" data-column="3"></div><div class="playlist-cell" data-pattern="23" data-column="4"></div><div class="playlist-cell" data-pattern="23" data-column="5"></div><div class="playlist-cell" data-pattern="23" data-column="6"></div><div class="playlist-cell" data-pattern="23" data-column="7"></div><div class="playlist-cell" data-pattern="23" data-column="8"></div><div class="playlist-cell" data-pattern="23" data-column="9"></div><div class="playlist-cell" data-pattern="23" data-column="10"></div><div class="playlist-cell" data-pattern="23" data-column="11"></div><div class="playlist-cell" data-pattern="23" data-column="12"></div><div class="playlist-cell" data-pattern="23" data-column="13"></div><div class="playlist-cell" data-pattern="23" data-column="14"></div><div class="playlist-cell" data-pattern="23" data-column="15"></div><div class="playlist-cell" data-pattern="23" data-column="16"></div><div class="playlist-cell" data-pattern="23" data-column="17"></div><div class="playlist-cell" data-pattern="23" data-column="18"></div><div class="playlist-cell" data-pattern="23" data-column="19"></div><div class="playlist-cell" data-pattern="23" data-column="20"></div><div class="playlist-cell" data-pattern="23" data-column="21"></div><div class="playlist-cell" data-pattern="23" data-column="22"></div><div class="playlist-cell" data-pattern="23" data-column="23"></div><div class="playlist-cell" data-pattern="23" data-column="24"></div><div class="playlist-cell" data-pattern="23" data-column="25"></div><div class="playlist-cell" data-pattern="23" data-column="26"></div><div class="playlist-cell" data-pattern="23" data-column="27"></div><div class="playlist-cell" data-pattern="23" data-column="28"></div><div class="playlist-cell" data-pattern="23" data-column="29"></div><div class="playlist-cell" data-pattern="23" data-column="30"></div><div class="playlist-cell" data-pattern="23" data-column="31"></div><div class="playlist-label" data-pattern="24">Pattern 25</div><div class="playlist-cell" data-pattern="24" data-column="0"></div><div class="playlist-cell" data-pattern="24" data-column="1"></div><div class="playlist-cell" data-pattern="24" data-column="2"></div><div class="playlist-cell" data-pattern="24" data-column="3"></div><div class="playlist-cell" data-pattern="24" data-column="4"></div><div class="playlist-cell" data-pattern="24" data-column="5"></div><div class="playlist-cell" data-pattern="24" data-column="6"></div><div class="playlist-cell" data-pattern="24" data-column="7"></div><div class="playlist-cell" data-pattern="24" data-column="8"></div><div class="playlist-cell" data-pattern="24" data-column="9"></div><div class="playlist-cell" data-pattern="24" data-column="10"></div><div class="playlist-cell" data-pattern="24" data-column="11"></div><div class="playlist-cell" data-pattern="24" data-column="12"></div><div class="playlist-cell" data-pattern="24" data-column="13"></div><div class="playlist-cell" data-pattern="24" data-column="14"></div><div class="playlist-cell" data-pattern="24" data-column="15"></div><div class="playlist-cell" data-pattern="24" data-column="16"></div><div class="playlist-cell" data-pattern="24" data-column="17"></div><div class="playlist-cell" data-pattern="24" data-column="18"></div><div class="playlist-cell" data-pattern="24" data-column="19"></div><div class="playlist-cell" data-pattern="24" data-column="20"></div><div class="playlist-cell" data-pattern="24" data-column="21"></div><div class="playlist-cell" data-pattern="24" data-column="22"></div><div class="playlist-cell" data-pattern="24" data-column="23"></div><div class="playlist-cell" data-pattern="24" data-column="24"></div><div class="playlist-cell" data-pattern="24" data-column="25"></div><div class="playlist-cell" data-pattern="24" data-column="26"></div><div class="playlist-cell" data-pattern="24" data-column="27"></div><div class="playlist-cell" data-pattern="24" data-column="28"></div><div class="playlist-cell" data-pattern="24" data-column="29"></div><div class="playlist-cell" data-pattern="24" data-column="30"></div><div class="playlist-cell" data-pattern="24" data-column="31"></div><div class="playlist-label" data-pattern="25">Pattern 26</div><div class="playlist-cell" data-pattern="25" data-column="0"></div><div class="playlist-cell" data-pattern="25" data-column="1"></div><div class="playlist-cell" data-pattern="25" data-column="2"></div><div class="playlist-cell" data-pattern="25" data-column="3"></div><div class="playlist-cell" data-pattern="25" data-column="4"></div><div class="playlist-cell" data-pattern="25" data-column="5"></div><div class="playlist-cell" data-pattern="25" data-column="6"></div><div class="playlist-cell" data-pattern="25" data-column="7"></div><div class="playlist-cell" data-pattern="25" data-column="8"></div><div class="playlist-cell" data-pattern="25" data-column="9"></div><div class="playlist-cell" data-pattern="25" data-column="10"></div><div class="playlist-cell" data-pattern="25" data-column="11"></div><div class="playlist-cell" data-pattern="25" data-column="12"></div><div class="playlist-cell" data-pattern="25" data-column="13"></div><div class="playlist-cell" data-pattern="25" data-column="14"></div><div class="playlist-cell" data-pattern="25" data-column="15"></div><div class="playlist-cell" data-pattern="25" data-column="16"></div><div class="playlist-cell" data-pattern="25" data-column="17"></div><div class="playlist-cell" data-pattern="25" data-column="18"></div><div class="playlist-cell" data-pattern="25" data-column="19"></div><div class="playlist-cell" data-pattern="25" data-column="20"></div><div class="playlist-cell" data-pattern="25" data-column="21"></div><div class="playlist-cell" data-pattern="25" data-column="22"></div><div class="playlist-cell" data-pattern="25" data-column="23"></div><div class="playlist-cell" data-pattern="25" data-column="24"></div><div class="playlist-cell" data-pattern="25" data-column="25"></div><div class="playlist-cell" data-pattern="25" data-column="26"></div><div class="playlist-cell" data-pattern="25" data-column="27"></div><div class="playlist-cell" data-pattern="25" data-column="28"></div><div class="playlist-cell" data-pattern="25" data-column="29"></div><div class="playlist-cell" data-pattern="25" data-column="30"></div><div class="playlist-cell" data-pattern="25" data-column="31"></div><div class="playlist-label" data-pattern="26">Pattern 27</div><div class="playlist-cell" data-pattern="26" data-column="0"></div><div class="playlist-cell" data-pattern="26" data-column="1"></div><div class="playlist-cell" data-pattern="26" data-column="2"></div><div class="playlist-cell" data-pattern="26" data-column="3"></div><div class="playlist-cell" data-pattern="26" data-column="4"></div><div class="playlist-cell" data-pattern="26" data-column="5"></div><div class="playlist-cell" data-pattern="26" data-column="6"></div><div class="playlist-cell" data-pattern="26" data-column="7"></div><div class="playlist-cell" data-pattern="26" data-column="8"></div><div class="playlist-cell" data-pattern="26" data-column="9"></div><div class="playlist-cell" data-pattern="26" data-column="10"></div><div class="playlist-cell" data-pattern="26" data-column="11"></div><div class="playlist-cell" data-pattern="26" data-column="12"></div><div class="playlist-cell" data-pattern="26" data-column="13"></div><div class="playlist-cell" data-pattern="26" data-column="14"></div><div class="playlist-cell" data-pattern="26" data-column="15"></div><div class="playlist-cell" data-pattern="26" data-column="16"></div><div class="playlist-cell" data-pattern="26" data-column="17"></div><div class="playlist-cell" data-pattern="26" data-column="18"></div><div class="playlist-cell" data-pattern="26" data-column="19"></div><div class="playlist-cell" data-pattern="26" data-column="20"></div><div class="playlist-cell" data-pattern="26" data-column="21"></div><div class="playlist-cell" data-pattern="26" data-column="22"></div><div class="playlist-cell" data-pattern="26" data-column="23"></div><div class="playlist-cell" data-pattern="26" data-column="24"></div><div class="playlist-cell" data-pattern="26" data-column="25"></div><div class="playlist-cell" data-pattern="26" data-column="26"></div><div class="playlist-cell" data-pattern="26" data-column="27"></div><div class="playlist-cell" data-pattern="26" data-column="28"></div><div class="playlist-cell" data-pattern="26" data-column="29"></div><div class="playlist-cell" data-pattern="26" data-column="30"></div><div class="playlist-cell" data-pattern="26" data-column="31"></div><div class="playlist-label" data-pattern="27">Pattern 28</div><div class="playlist-cell" data-pattern="27" data-column="0"></div><div class="playlist-cell" data-pattern="27" data-column="1"></div><div class="playlist-cell" data-pattern="27" data-column="2"></div><div class="playlist-cell" data-pattern="27" data-column="3"></div><div class="playlist-cell" data-pattern="27" data-column="4"></div><div class="playlist-cell" data-pattern="27" data-column="5"></div><div class="playlist-cell" data-pattern="27" data-column="6"></div><div class="playlist-cell" data-pattern="27" data-column="7"></div><div class="playlist-cell" data-pattern="27" data-column="8"></div><div class="playlist-cell" data-pattern="27" data-column="9"></div><div class="playlist-cell" data-pattern="27" data-column="10"></div><div class="playlist-cell" data-pattern="27" data-column="11"></div><div class="playlist-cell" data-pattern="27" data-column="12"></div><div class="playlist-cell" data-pattern="27" data-column="13"></div><div class="playlist-cell" data-pattern="27" data-column="14"></div><div class="playlist-cell" data-pattern="27" data-column="15"></div><div class="playlist-cell" data-pattern="27" data-column="16"></div><div class="playlist-cell" data-pattern="27" data-column="17"></div><div class="playlist-cell" data-pattern="27" data-column="18"></div><div class="playlist-cell" data-pattern="27" data-column="19"></div><div class="playlist-cell" data-pattern="27" data-column="20"></div><div class="playlist-cell" data-pattern="27" data-column="21"></div><div class="playlist-cell" data-pattern="27" data-column="22"></div><div class="playlist-cell" data-pattern="27" data-column="23"></div><div class="playlist-cell" data-pattern="27" data-column="24"></div><div class="playlist-cell" data-pattern="27" data-column="25"></div><div class="playlist-cell" data-pattern="27" data-column="26"></div><div class="playlist-cell" data-pattern="27" data-column="27"></div><div class="playlist-cell" data-pattern="27" data-column="28"></div><div class="playlist-cell" data-pattern="27" data-column="29"></div><div class="playlist-cell" data-pattern="27" data-column="30"></div><div class="playlist-cell" data-pattern="27" data-column="31"></div><div class="playlist-label" data-pattern="28">Pattern 29</div><div class="playlist-cell" data-pattern="28" data-column="0"></div><div class="playlist-cell" data-pattern="28" data-column="1"></div><div class="playlist-cell" data-pattern="28" data-column="2"></div><div class="playlist-cell" data-pattern="28" data-column="3"></div><div class="playlist-cell" data-pattern="28" data-column="4"></div><div class="playlist-cell" data-pattern="28" data-column="5"></div><div class="playlist-cell" data-pattern="28" data-column="6"></div><div class="playlist-cell" data-pattern="28" data-column="7"></div><div class="playlist-cell" data-pattern="28" data-column="8"></div><div class="playlist-cell" data-pattern="28" data-column="9"></div><div class="playlist-cell" data-pattern="28" data-column="10"></div><div class="playlist-cell" data-pattern="28" data-column="11"></div><div class="playlist-cell" data-pattern="28" data-column="12"></div><div class="playlist-cell" data-pattern="28" data-column="13"></div><div class="playlist-cell" data-pattern="28" data-column="14"></div><div class="playlist-cell" data-pattern="28" data-column="15"></div><div class="playlist-cell" data-pattern="28" data-column="16"></div><div class="playlist-cell" data-pattern="28" data-column="17"></div><div class="playlist-cell" data-pattern="28" data-column="18"></div><div class="playlist-cell" data-pattern="28" data-column="19"></div><div class="playlist-cell" data-pattern="28" data-column="20"></div><div class="playlist-cell" data-pattern="28" data-column="21"></div><div class="playlist-cell" data-pattern="28" data-column="22"></div><div class="playlist-cell" data-pattern="28" data-column="23"></div><div class="playlist-cell" data-pattern="28" data-column="24"></div><div class="playlist-cell" data-pattern="28" data-column="25"></div><div class="playlist-cell" data-pattern="28" data-column="26"></div><div class="playlist-cell" data-pattern="28" data-column="27"></div><div class="playlist-cell" data-pattern="28" data-column="28"></div><div class="playlist-cell" data-pattern="28" data-column="29"></div><div class="playlist-cell" data-pattern="28" data-column="30"></div><div class="playlist-cell" data-pattern="28" data-column="31"></div><div class="playlist-label" data-pattern="29">Pattern 30</div><div class="playlist-cell" data-pattern="29" data-column="0"></div><div class="playlist-cell" data-pattern="29" data-column="1"></div><div class="playlist-cell" data-pattern="29" data-column="2"></div><div class="playlist-cell" data-pattern="29" data-column="3"></div><div class="playlist-cell" data-pattern="29" data-column="4"></div><div class="playlist-cell" data-pattern="29" data-column="5"></div><div class="playlist-cell" data-pattern="29" data-column="6"></div><div class="playlist-cell" data-pattern="29" data-column="7"></div><div class="playlist-cell" data-pattern="29" data-column="8"></div><div class="playlist-cell" data-pattern="29" data-column="9"></div><div class="playlist-cell" data-pattern="29" data-column="10"></div><div class="playlist-cell" data-pattern="29" data-column="11"></div><div class="playlist-cell" data-pattern="29" data-column="12"></div><div class="playlist-cell" data-pattern="29" data-column="13"></div><div class="playlist-cell" data-pattern="29" data-column="14"></div><div class="playlist-cell" data-pattern="29" data-column="15"></div><div class="playlist-cell" data-pattern="29" data-column="16"></div><div class="playlist-cell" data-pattern="29" data-column="17"></div><div class="playlist-cell" data-pattern="29" data-column="18"></div><div class="playlist-cell" data-pattern="29" data-column="19"></div><div class="playlist-cell" data-pattern="29" data-column="20"></div><div class="playlist-cell" data-pattern="29" data-column="21"></div><div class="playlist-cell" data-pattern="29" data-column="22"></div><div class="playlist-cell" data-pattern="29" data-column="23"></div><div class="playlist-cell" data-pattern="29" data-column="24"></div><div class="playlist-cell" data-pattern="29" data-column="25"></div><div class="playlist-cell" data-pattern="29" data-column="26"></div><div class="playlist-cell" data-pattern="29" data-column="27"></div><div class="playlist-cell" data-pattern="29" data-column="28"></div><div class="playlist-cell" data-pattern="29" data-column="29"></div><div class="playlist-cell" data-pattern="29" data-column="30"></div><div class="playlist-cell" data-pattern="29" data-column="31"></div><div class="playlist-label" data-pattern="30">Pattern 31</div><div class="playlist-cell" data-pattern="30" data-column="0"></div><div class="playlist-cell" data-pattern="30" data-column="1"></div><div class="playlist-cell" data-pattern="30" data-column="2"></div><div class="playlist-cell" data-pattern="30" data-column="3"></div><div class="playlist-cell" data-pattern="30" data-column="4"></div><div class="playlist-cell" data-pattern="30" data-column="5"></div><div class="playlist-cell" data-pattern="30" data-column="6"></div><div class="playlist-cell" data-pattern="30" data-column="7"></div><div class="playlist-cell" data-pattern="30" data-column="8"></div><div class="playlist-cell" data-pattern="30" data-column="9"></div><div class="playlist-cell" data-pattern="30" data-column="10"></div><div class="playlist-cell" data-pattern="30" data-column="11"></div><div class="playlist-cell" data-pattern="30" data-column="12"></div><div class="playlist-cell" data-pattern="30" data-column="13"></div><div class="playlist-cell" data-pattern="30" data-column="14"></div><div class="playlist-cell" data-pattern="30" data-column="15"></div><div class="playlist-cell" data-pattern="30" data-column="16"></div><div class="playlist-cell" data-pattern="30" data-column="17"></div><div class="playlist-cell" data-pattern="30" data-column="18"></div><div class="playlist-cell" data-pattern="30" data-column="19"></div><div class="playlist-cell" data-pattern="30" data-column="20"></div><div class="playlist-cell" data-pattern="30" data-column="21"></div><div class="playlist-cell" data-pattern="30" data-column="22"></div><div class="playlist-cell" data-pattern="30" data-column="23"></div><div class="playlist-cell" data-pattern="30" data-column="24"></div><div class="playlist-cell" data-pattern="30" data-column="25"></div><div class="playlist-cell" data-pattern="30" data-column="26"></div><div class="playlist-cell" data-pattern="30" data-column="27"></div><div class="playlist-cell" data-pattern="30" data-column="28"></div><div class="playlist-cell" data-pattern="30" data-column="29"></div><div class="playlist-cell" data-pattern="30" data-column="30"></div><div class="playlist-cell" data-pattern="30" data-column="31"></div><div class="playlist-label" data-pattern="31">Pattern 32</div><div class="playlist-cell" data-pattern="31" data-column="0"></div><div class="playlist-cell" data-pattern="31" data-column="1"></div><div class="playlist-cell" data-pattern="31" data-column="2"></div><div class="playlist-cell" data-pattern="31" data-column="3"></div><div class="playlist-cell" data-pattern="31" data-column="4"></div><div class="playlist-cell" data-pattern="31" data-column="5"></div><div class="playlist-cell" data-pattern="31" data-column="6"></div><div class="playlist-cell" data-pattern="31" data-column="7"></div><div class="playlist-cell" data-pattern="31" data-column="8"></div><div class="playlist-cell" data-pattern="31" data-column="9"></div><div class="playlist-cell" data-pattern="31" data-column="10"></div><div class="playlist-cell" data-pattern="31" data-column="11"></div><div class="playlist-cell" data-pattern="31" data-column="12"></div><div class="playlist-cell" data-pattern="31" data-column="13"></div><div class="playlist-cell" data-pattern="31" data-column="14"></div><div class="playlist-cell" data-pattern="31" data-column="15"></div><div class="playlist-cell" data-pattern="31" data-column="16"></div><div class="playlist-cell" data-pattern="31" data-column="17"></div><div class="playlist-cell" data-pattern="31" data-column="18"></div><div class="playlist-cell" data-pattern="31" data-column="19"></div><div class="playlist-cell" data-pattern="31" data-column="20"></div><div class="playlist-cell" data-pattern="31" data-column="21"></div><div class="playlist-cell" data-pattern="31" data-column="22"></div><div class="playlist-cell" data-pattern="31" data-column="23"></div><div class="playlist-cell" data-pattern="31" data-column="24"></div><div class="playlist-cell" data-pattern="31" data-column="25"></div><div class="playlist-cell" data-pattern="31" data-column="26"></div><div class="playlist-cell" data-pattern="31" data-column="27"></div><div class="playlist-cell" data-pattern="31" data-column="28"></div><div class="playlist-cell" data-pattern="31" data-column="29"></div><div class="playlist-cell" data-pattern="31" data-column="30"></div><div class="playlist-cell" data-pattern="31" data-column="31"></div><div class="playlist-label" data-pattern="32">Pattern 33</div><div class="playlist-cell" data-pattern="32" data-column="0"></div><div class="playlist-cell" data-pattern="32" data-column="1"></div><div class="playlist-cell" data-pattern="32" data-column="2"></div><div class="playlist-cell" data-pattern="32" data-column="3"></div><div class="playlist-cell" data-pattern="32" data-column="4"></div><div class="playlist-cell" data-pattern="32" data-column="5"></div><div class="playlist-cell" data-pattern="32" data-column="6"></div><div class="playlist-cell" data-pattern="32" data-column="7"></div><div class="playlist-cell" data-pattern="32" data-column="8"></div><div class="playlist-cell" data-pattern="32" data-column="9"></div><div class="playlist-cell" data-pattern="32" data-column="10"></div><div class="playlist-cell" data-pattern="32" data-column="11"></div><div class="playlist-cell" data-pattern="32" data-column="12"></div><div class="playlist-cell" data-pattern="32" data-column="13"></div><div class="playlist-cell" data-pattern="32" data-column="14"></div><div class="playlist-cell" data-pattern="32" data-column="15"></div><div class="playlist-cell" data-pattern="32" data-column="16"></div><div class="playlist-cell" data-pattern="32" data-column="17"></div><div class="playlist-cell" data-pattern="32" data-column="18"></div><div class="playlist-cell" data-pattern="32" data-column="19"></div><div class="playlist-cell" data-pattern="32" data-column="20"></div><div class="playlist-cell" data-pattern="32" data-column="21"></div><div class="playlist-cell" data-pattern="32" data-column="22"></div><div class="playlist-cell" data-pattern="32" data-column="23"></div><div class="playlist-cell" data-pattern="32" data-column="24"></div><div class="playlist-cell" data-pattern="32" data-column="25"></div><div class="playlist-cell" data-pattern="32" data-column="26"></div><div class="playlist-cell" data-pattern="32" data-column="27"></div><div class="playlist-cell" data-pattern="32" data-column="28"></div><div class="playlist-cell" data-pattern="32" data-column="29"></div><div class="playlist-cell" data-pattern="32" data-column="30"></div><div class="playlist-cell" data-pattern="32" data-column="31"></div><div class="playlist-label" data-pattern="33">Pattern 34</div><div class="playlist-cell" data-pattern="33" data-column="0"></div><div class="playlist-cell" data-pattern="33" data-column="1"></div><div class="playlist-cell" data-pattern="33" data-column="2"></div><div class="playlist-cell" data-pattern="33" data-column="3"></div><div class="playlist-cell" data-pattern="33" data-column="4"></div><div class="playlist-cell" data-pattern="33" data-column="5"></div><div class="playlist-cell" data-pattern="33" data-column="6"></div><div class="playlist-cell" data-pattern="33" data-column="7"></div><div class="playlist-cell" data-pattern="33" data-column="8"></div><div class="playlist-cell" data-pattern="33" data-column="9"></div><div class="playlist-cell" data-pattern="33" data-column="10"></div><div class="playlist-cell" data-pattern="33" data-column="11"></div><div class="playlist-cell" data-pattern="33" data-column="12"></div><div class="playlist-cell" data-pattern="33" data-column="13"></div><div class="playlist-cell" data-pattern="33" data-column="14"></div><div class="playlist-cell" data-pattern="33" data-column="15"></div><div class="playlist-cell" data-pattern="33" data-column="16"></div><div class="playlist-cell" data-pattern="33" data-column="17"></div><div class="playlist-cell" data-pattern="33" data-column="18"></div><div class="playlist-cell" data-pattern="33" data-column="19"></div><div class="playlist-cell" data-pattern="33" data-column="20"></div><div class="playlist-cell" data-pattern="33" data-column="21"></div><div class="playlist-cell" data-pattern="33" data-column="22"></div><div class="playlist-cell" data-pattern="33" data-column="23"></div><div class="playlist-cell" data-pattern="33" data-column="24"></div><div class="playlist-cell" data-pattern="33" data-column="25"></div><div class="playlist-cell" data-pattern="33" data-column="26"></div><div class="playlist-cell" data-pattern="33" data-column="27"></div><div class="playlist-cell" data-pattern="33" data-column="28"></div><div class="playlist-cell" data-pattern="33" data-column="29"></div><div class="playlist-cell" data-pattern="33" data-column="30"></div><div class="playlist-cell" data-pattern="33" data-column="31"></div><div class="playlist-label" data-pattern="34">Pattern 35</div><div class="playlist-cell" data-pattern="34" data-column="0"></div><div class="playlist-cell" data-pattern="34" data-column="1"></div><div class="playlist-cell" data-pattern="34" data-column="2"></div><div class="playlist-cell" data-pattern="34" data-column="3"></div><div class="playlist-cell" data-pattern="34" data-column="4"></div><div class="playlist-cell" data-pattern="34" data-column="5"></div><div class="playlist-cell" data-pattern="34" data-column="6"></div><div class="playlist-cell" data-pattern="34" data-column="7"></div><div class="playlist-cell" data-pattern="34" data-column="8"></div><div class="playlist-cell" data-pattern="34" data-column="9"></div><div class="playlist-cell" data-pattern="34" data-column="10"></div><div class="playlist-cell" data-pattern="34" data-column="11"></div><div class="playlist-cell" data-pattern="34" data-column="12"></div><div class="playlist-cell" data-pattern="34" data-column="13"></div><div class="playlist-cell" data-pattern="34" data-column="14"></div><div class="playlist-cell" data-pattern="34" data-column="15"></div><div class="playlist-cell" data-pattern="34" data-column="16"></div><div class="playlist-cell" data-pattern="34" data-column="17"></div><div class="playlist-cell" data-pattern="34" data-column="18"></div><div class="playlist-cell" data-pattern="34" data-column="19"></div><div class="playlist-cell" data-pattern="34" data-column="20"></div><div class="playlist-cell" data-pattern="34" data-column="21"></div><div class="playlist-cell" data-pattern="34" data-column="22"></div><div class="playlist-cell" data-pattern="34" data-column="23"></div><div class="playlist-cell" data-pattern="34" data-column="24"></div><div class="playlist-cell" data-pattern="34" data-column="25"></div><div class="playlist-cell" data-pattern="34" data-column="26"></div><div class="playlist-cell" data-pattern="34" data-column="27"></div><div class="playlist-cell" data-pattern="34" data-column="28"></div><div class="playlist-cell" data-pattern="34" data-column="29"></div><div class="playlist-cell" data-pattern="34" data-column="30"></div><div class="playlist-cell" data-pattern="34" data-column="31"></div><div class="playlist-label" data-pattern="35">Pattern 36</div><div class="playlist-cell" data-pattern="35" data-column="0"></div><div class="playlist-cell" data-pattern="35" data-column="1"></div><div class="playlist-cell" data-pattern="35" data-column="2"></div><div class="playlist-cell" data-pattern="35" data-column="3"></div><div class="playlist-cell" data-pattern="35" data-column="4"></div><div class="playlist-cell" data-pattern="35" data-column="5"></div><div class="playlist-cell" data-pattern="35" data-column="6"></div><div class="playlist-cell" data-pattern="35" data-column="7"></div><div class="playlist-cell" data-pattern="35" data-column="8"></div><div class="playlist-cell" data-pattern="35" data-column="9"></div><div class="playlist-cell" data-pattern="35" data-column="10"></div><div class="playlist-cell" data-pattern="35" data-column="11"></div><div class="playlist-cell" data-pattern="35" data-column="12"></div><div class="playlist-cell" data-pattern="35" data-column="13"></div><div class="playlist-cell" data-pattern="35" data-column="14"></div><div class="playlist-cell" data-pattern="35" data-column="15"></div><div class="playlist-cell" data-pattern="35" data-column="16"></div><div class="playlist-cell" data-pattern="35" data-column="17"></div><div class="playlist-cell" data-pattern="35" data-column="18"></div><div class="playlist-cell" data-pattern="35" data-column="19"></div><div class="playlist-cell" data-pattern="35" data-column="20"></div><div class="playlist-cell" data-pattern="35" data-column="21"></div><div class="playlist-cell" data-pattern="35" data-column="22"></div><div class="playlist-cell" data-pattern="35" data-column="23"></div><div class="playlist-cell" data-pattern="35" data-column="24"></div><div class="playlist-cell" data-pattern="35" data-column="25"></div><div class="playlist-cell" data-pattern="35" data-column="26"></div><div class="playlist-cell" data-pattern="35" data-column="27"></div><div class="playlist-cell" data-pattern="35" data-column="28"></div><div class="playlist-cell" data-pattern="35" data-column="29"></div><div class="playlist-cell" data-pattern="35" data-column="30"></div><div class="playlist-cell" data-pattern="35" data-column="31"></div><div class="playlist-label" data-pattern="36">Pattern 37</div><div class="playlist-cell" data-pattern="36" data-column="0"></div><div class="playlist-cell" data-pattern="36" data-column="1"></div><div class="playlist-cell" data-pattern="36" data-column="2"></div><div class="playlist-cell" data-pattern="36" data-column="3"></div><div class="playlist-cell" data-pattern="36" data-column="4"></div><div class="playlist-cell" data-pattern="36" data-column="5"></div><div class="playlist-cell" data-pattern="36" data-column="6"></div><div class="playlist-cell" data-pattern="36" data-column="7"></div><div class="playlist-cell" data-pattern="36" data-column="8"></div><div class="playlist-cell" data-pattern="36" data-column="9"></div><div class="playlist-cell" data-pattern="36" data-column="10"></div><div class="playlist-cell" data-pattern="36" data-column="11"></div><div class="playlist-cell" data-pattern="36" data-column="12"></div><div class="playlist-cell" data-pattern="36" data-column="13"></div><div class="playlist-cell" data-pattern="36" data-column="14"></div><div class="playlist-cell" data-pattern="36" data-column="15"></div><div class="playlist-cell" data-pattern="36" data-column="16"></div><div class="playlist-cell" data-pattern="36" data-column="17"></div><div class="playlist-cell" data-pattern="36" data-column="18"></div><div class="playlist-cell" data-pattern="36" data-column="19"></div><div class="playlist-cell" data-pattern="36" data-column="20"></div><div class="playlist-cell" data-pattern="36" data-column="21"></div><div class="playlist-cell" data-pattern="36" data-column="22"></div><div class="playlist-cell" data-pattern="36" data-column="23"></div><div class="playlist-cell" data-pattern="36" data-column="24"></div><div class="playlist-cell" data-pattern="36" data-column="25"></div><div class="playlist-cell" data-pattern="36" data-column="26"></div><div class="playlist-cell" data-pattern="36" data-column="27"></div><div class="playlist-cell" data-pattern="36" data-column="28"></div><div class="playlist-cell" data-pattern="36" data-column="29"></div><div class="playlist-cell" data-pattern="36" data-column="30"></div><div class="playlist-cell" data-pattern="36" data-column="31"></div><div class="playlist-label" data-pattern="37">Pattern 38</div><div class="playlist-cell" data-pattern="37" data-column="0"></div><div class="playlist-cell" data-pattern="37" data-column="1"></div><div class="playlist-cell" data-pattern="37" data-column="2"></div><div class="playlist-cell" data-pattern="37" data-column="3"></div><div class="playlist-cell" data-pattern="37" data-column="4"></div><div class="playlist-cell" data-pattern="37" data-column="5"></div><div class="playlist-cell" data-pattern="37" data-column="6"></div><div class="playlist-cell" data-pattern="37" data-column="7"></div><div class="playlist-cell" data-pattern="37" data-column="8"></div><div class="playlist-cell" data-pattern="37" data-column="9"></div><div class="playlist-cell" data-pattern="37" data-column="10"></div><div class="playlist-cell" data-pattern="37" data-column="11"></div><div class="playlist-cell" data-pattern="37" data-column="12"></div><div class="playlist-cell" data-pattern="37" data-column="13"></div><div class="playlist-cell" data-pattern="37" data-column="14"></div><div class="playlist-cell" data-pattern="37" data-column="15"></div><div class="playlist-cell" data-pattern="37" data-column="16"></div><div class="playlist-cell" data-pattern="37" data-column="17"></div><div class="playlist-cell" data-pattern="37" data-column="18"></div><div class="playlist-cell" data-pattern="37" data-column="19"></div><div class="playlist-cell" data-pattern="37" data-column="20"></div><div class="playlist-cell" data-pattern="37" data-column="21"></div><div class="playlist-cell" data-pattern="37" data-column="22"></div><div class="playlist-cell" data-pattern="37" data-column="23"></div><div class="playlist-cell" data-pattern="37" data-column="24"></div><div class="playlist-cell" data-pattern="37" data-column="25"></div><div class="playlist-cell" data-pattern="37" data-column="26"></div><div class="playlist-cell" data-pattern="37" data-column="27"></div><div class="playlist-cell" data-pattern="37" data-column="28"></div><div class="playlist-cell" data-pattern="37" data-column="29"></div><div class="playlist-cell" data-pattern="37" data-column="30"></div><div class="playlist-cell" data-pattern="37" data-column="31"></div><div class="playlist-label" data-pattern="38">Pattern 39</div><div class="playlist-cell" data-pattern="38" data-column="0"></div><div class="playlist-cell" data-pattern="38" data-column="1"></div><div class="playlist-cell" data-pattern="38" data-column="2"></div><div class="playlist-cell" data-pattern="38" data-column="3"></div><div class="playlist-cell" data-pattern="38" data-column="4"></div><div class="playlist-cell" data-pattern="38" data-column="5"></div><div class="playlist-cell" data-pattern="38" data-column="6"></div><div class="playlist-cell" data-pattern="38" data-column="7"></div><div class="playlist-cell" data-pattern="38" data-column="8"></div><div class="playlist-cell" data-pattern="38" data-column="9"></div><div class="playlist-cell" data-pattern="38" data-column="10"></div><div class="playlist-cell" data-pattern="38" data-column="11"></div><div class="playlist-cell" data-pattern="38" data-column="12"></div><div class="playlist-cell" data-pattern="38" data-column="13"></div><div class="playlist-cell" data-pattern="38" data-column="14"></div><div class="playlist-cell" data-pattern="38" data-column="15"></div><div class="playlist-cell" data-pattern="38" data-column="16"></div><div class="playlist-cell" data-pattern="38" data-column="17"></div><div class="playlist-cell" data-pattern="38" data-column="18"></div><div class="playlist-cell" data-pattern="38" data-column="19"></div><div class="playlist-cell" data-pattern="38" data-column="20"></div><div class="playlist-cell" data-pattern="38" data-column="21"></div><div class="playlist-cell" data-pattern="38" data-column="22"></div><div class="playlist-cell" data-pattern="38" data-column="23"></div><div class="playlist-cell" data-pattern="38" data-column="24"></div><div class="playlist-cell" data-pattern="38" data-column="25"></div><div class="playlist-cell" data-pattern="38" data-column="26"></div><div class="playlist-cell" data-pattern="38" data-column="27"></div><div class="playlist-cell" data-pattern="38" data-column="28"></div><div class="playlist-cell" data-pattern="38" data-column="29"></div><div class="playlist-cell" data-pattern="38" data-column="30"></div><div class="playlist-cell" data-pattern="38" data-column="31"></div><div class="playlist-label" data-pattern="39">Pattern 40</div><div class="playlist-cell" data-pattern="39" data-column="0"></div><div class="playlist-cell" data-pattern="39" data-column="1"></div><div class="playlist-cell" data-pattern="39" data-column="2"></div><div class="playlist-cell" data-pattern="39" data-column="3"></div><div class="playlist-cell" data-pattern="39" data-column="4"></div><div class="playlist-cell" data-pattern="39" data-column="5"></div><div class="playlist-cell" data-pattern="39" data-column="6"></div><div class="playlist-cell" data-pattern="39" data-column="7"></div><div class="playlist-cell" data-pattern="39" data-column="8"></div><div class="playlist-cell" data-pattern="39" data-column="9"></div><div class="playlist-cell" data-pattern="39" data-column="10"></div><div class="playlist-cell" data-pattern="39" data-column="11"></div><div class="playlist-cell" data-pattern="39" data-column="12"></div><div class="playlist-cell" data-pattern="39" data-column="13"></div><div class="playlist-cell" data-pattern="39" data-column="14"></div><div class="playlist-cell" data-pattern="39" data-column="15"></div><div class="playlist-cell" data-pattern="39" data-column="16"></div><div class="playlist-cell" data-pattern="39" data-column="17"></div><div class="playlist-cell" data-pattern="39" data-column="18"></div><div class="playlist-cell" data-pattern="39" data-column="19"></div><div class="playlist-cell" data-pattern="39" data-column="20"></div><div class="playlist-cell" data-pattern="39" data-column="21"></div><div class="playlist-cell" data-pattern="39" data-column="22"></div><div class="playlist-cell" data-pattern="39" data-column="23"></div><div class="playlist-cell" data-pattern="39" data-column="24"></div><div class="playlist-cell" data-pattern="39" data-column="25"></div><div class="playlist-cell" data-pattern="39" data-column="26"></div><div class="playlist-cell" data-pattern="39" data-column="27"></div><div class="playlist-cell" data-pattern="39" data-column="28"></div><div class="playlist-cell" data-pattern="39" data-column="29"></div><div class="playlist-cell" data-pattern="39" data-column="30"></div><div class="playlist-cell" data-pattern="39" data-column="31"></div><div class="playlist-label" data-pattern="40">Pattern 41</div><div class="playlist-cell" data-pattern="40" data-column="0"></div><div class="playlist-cell" data-pattern="40" data-column="1"></div><div class="playlist-cell" data-pattern="40" data-column="2"></div><div class="playlist-cell" data-pattern="40" data-column="3"></div><div class="playlist-cell" data-pattern="40" data-column="4"></div><div class="playlist-cell" data-pattern="40" data-column="5"></div><div class="playlist-cell" data-pattern="40" data-column="6"></div><div class="playlist-cell" data-pattern="40" data-column="7"></div><div class="playlist-cell" data-pattern="40" data-column="8"></div><div class="playlist-cell" data-pattern="40" data-column="9"></div><div class="playlist-cell" data-pattern="40" data-column="10"></div><div class="playlist-cell" data-pattern="40" data-column="11"></div><div class="playlist-cell" data-pattern="40" data-column="12"></div><div class="playlist-cell" data-pattern="40" data-column="13"></div><div class="playlist-cell" data-pattern="40" data-column="14"></div><div class="playlist-cell" data-pattern="40" data-column="15"></div><div class="playlist-cell" data-pattern="40" data-column="16"></div><div class="playlist-cell" data-pattern="40" data-column="17"></div><div class="playlist-cell" data-pattern="40" data-column="18"></div><div class="playlist-cell" data-pattern="40" data-column="19"></div><div class="playlist-cell" data-pattern="40" data-column="20"></div><div class="playlist-cell" data-pattern="40" data-column="21"></div><div class="playlist-cell" data-pattern="40" data-column="22"></div><div class="playlist-cell" data-pattern="40" data-column="23"></div><div class="playlist-cell" data-pattern="40" data-column="24"></div><div class="playlist-cell" data-pattern="40" data-column="25"></div><div class="playlist-cell" data-pattern="40" data-column="26"></div><div class="playlist-cell" data-pattern="40" data-column="27"></div><div class="playlist-cell" data-pattern="40" data-column="28"></div><div class="playlist-cell" data-pattern="40" data-column="29"></div><div class="playlist-cell" data-pattern="40" data-column="30"></div><div class="playlist-cell" data-pattern="40" data-column="31"></div><div class="playlist-label" data-pattern="41">Pattern 42</div><div class="playlist-cell" data-pattern="41" data-column="0"></div><div class="playlist-cell" data-pattern="41" data-column="1"></div><div class="playlist-cell" data-pattern="41" data-column="2"></div><div class="playlist-cell" data-pattern="41" data-column="3"></div><div class="playlist-cell" data-pattern="41" data-column="4"></div><div class="playlist-cell" data-pattern="41" data-column="5"></div><div class="playlist-cell" data-pattern="41" data-column="6"></div><div class="playlist-cell" data-pattern="41" data-column="7"></div><div class="playlist-cell" data-pattern="41" data-column="8"></div><div class="playlist-cell" data-pattern="41" data-column="9"></div><div class="playlist-cell" data-pattern="41" data-column="10"></div><div class="playlist-cell" data-pattern="41" data-column="11"></div><div class="playlist-cell" data-pattern="41" data-column="12"></div><div class="playlist-cell" data-pattern="41" data-column="13"></div><div class="playlist-cell" data-pattern="41" data-column="14"></div><div class="playlist-cell" data-pattern="41" data-column="15"></div><div class="playlist-cell" data-pattern="41" data-column="16"></div><div class="playlist-cell" data-pattern="41" data-column="17"></div><div class="playlist-cell" data-pattern="41" data-column="18"></div><div class="playlist-cell" data-pattern="41" data-column="19"></div><div class="playlist-cell" data-pattern="41" data-column="20"></div><div class="playlist-cell" data-pattern="41" data-column="21"></div><div class="playlist-cell" data-pattern="41" data-column="22"></div><div class="playlist-cell" data-pattern="41" data-column="23"></div><div class="playlist-cell" data-pattern="41" data-column="24"></div><div class="playlist-cell" data-pattern="41" data-column="25"></div><div class="playlist-cell" data-pattern="41" data-column="26"></div><div class="playlist-cell" data-pattern="41" data-column="27"></div><div class="playlist-cell" data-pattern="41" data-column="28"></div><div class="playlist-cell" data-pattern="41" data-column="29"></div><div class="playlist-cell" data-pattern="41" data-column="30"></div><div class="playlist-cell" data-pattern="41" data-column="31"></div><div class="playlist-label" data-pattern="42">Pattern 43</div><div class="playlist-cell" data-pattern="42" data-column="0"></div><div class="playlist-cell" data-pattern="42" data-column="1"></div><div class="playlist-cell" data-pattern="42" data-column="2"></div><div class="playlist-cell" data-pattern="42" data-column="3"></div><div class="playlist-cell" data-pattern="42" data-column="4"></div><div class="playlist-cell" data-pattern="42" data-column="5"></div><div class="playlist-cell" data-pattern="42" data-column="6"></div><div class="playlist-cell" data-pattern="42" data-column="7"></div><div class="playlist-cell" data-pattern="42" data-column="8"></div><div class="playlist-cell" data-pattern="42" data-column="9"></div><div class="playlist-cell" data-pattern="42" data-column="10"></div><div class="playlist-cell" data-pattern="42" data-column="11"></div><div class="playlist-cell" data-pattern="42" data-column="12"></div><div class="playlist-cell" data-pattern="42" data-column="13"></div><div class="playlist-cell" data-pattern="42" data-column="14"></div><div class="playlist-cell" data-pattern="42" data-column="15"></div><div class="playlist-cell" data-pattern="42" data-column="16"></div><div class="playlist-cell" data-pattern="42" data-column="17"></div><div class="playlist-cell" data-pattern="42" data-column="18"></div><div class="playlist-cell" data-pattern="42" data-column="19"></div><div class="playlist-cell" data-pattern="42" data-column="20"></div><div class="playlist-cell" data-pattern="42" data-column="21"></div><div class="playlist-cell" data-pattern="42" data-column="22"></div><div class="playlist-cell" data-pattern="42" data-column="23"></div><div class="playlist-cell" data-pattern="42" data-column="24"></div><div class="playlist-cell" data-pattern="42" data-column="25"></div><div class="playlist-cell" data-pattern="42" data-column="26"></div><div class="playlist-cell" data-pattern="42" data-column="27"></div><div class="playlist-cell" data-pattern="42" data-column="28"></div><div class="playlist-cell" data-pattern="42" data-column="29"></div><div class="playlist-cell" data-pattern="42" data-column="30"></div><div class="playlist-cell" data-pattern="42" data-column="31"></div><div class="playlist-label" data-pattern="43">Pattern 44</div><div class="playlist-cell" data-pattern="43" data-column="0"></div><div class="playlist-cell" data-pattern="43" data-column="1"></div><div class="playlist-cell" data-pattern="43" data-column="2"></div><div class="playlist-cell" data-pattern="43" data-column="3"></div><div class="playlist-cell" data-pattern="43" data-column="4"></div><div class="playlist-cell" data-pattern="43" data-column="5"></div><div class="playlist-cell" data-pattern="43" data-column="6"></div><div class="playlist-cell" data-pattern="43" data-column="7"></div><div class="playlist-cell" data-pattern="43" data-column="8"></div><div class="playlist-cell" data-pattern="43" data-column="9"></div><div class="playlist-cell" data-pattern="43" data-column="10"></div><div class="playlist-cell" data-pattern="43" data-column="11"></div><div class="playlist-cell" data-pattern="43" data-column="12"></div><div class="playlist-cell" data-pattern="43" data-column="13"></div><div class="playlist-cell" data-pattern="43" data-column="14"></div><div class="playlist-cell" data-pattern="43" data-column="15"></div><div class="playlist-cell" data-pattern="43" data-column="16"></div><div class="playlist-cell" data-pattern="43" data-column="17"></div><div class="playlist-cell" data-pattern="43" data-column="18"></div><div class="playlist-cell" data-pattern="43" data-column="19"></div><div class="playlist-cell" data-pattern="43" data-column="20"></div><div class="playlist-cell" data-pattern="43" data-column="21"></div><div class="playlist-cell" data-pattern="43" data-column="22"></div><div class="playlist-cell" data-pattern="43" data-column="23"></div><div class="playlist-cell" data-pattern="43" data-column="24"></div><div class="playlist-cell" data-pattern="43" data-column="25"></div><div class="playlist-cell" data-pattern="43" data-column="26"></div><div class="playlist-cell" data-pattern="43" data-column="27"></div><div class="playlist-cell" data-pattern="43" data-column="28"></div><div class="playlist-cell" data-pattern="43" data-column="29"></div><div class="playlist-cell" data-pattern="43" data-column="30"></div><div class="playlist-cell" data-pattern="43" data-column="31"></div><div class="playlist-label" data-pattern="44">Pattern 45</div><div class="playlist-cell" data-pattern="44" data-column="0"></div><div class="playlist-cell" data-pattern="44" data-column="1"></div><div class="playlist-cell" data-pattern="44" data-column="2"></div><div class="playlist-cell" data-pattern="44" data-column="3"></div><div class="playlist-cell" data-pattern="44" data-column="4"></div><div class="playlist-cell" data-pattern="44" data-column="5"></div><div class="playlist-cell" data-pattern="44" data-column="6"></div><div class="playlist-cell" data-pattern="44" data-column="7"></div><div class="playlist-cell" data-pattern="44" data-column="8"></div><div class="playlist-cell" data-pattern="44" data-column="9"></div><div class="playlist-cell" data-pattern="44" data-column="10"></div><div class="playlist-cell" data-pattern="44" data-column="11"></div><div class="playlist-cell" data-pattern="44" data-column="12"></div><div class="playlist-cell" data-pattern="44" data-column="13"></div><div class="playlist-cell" data-pattern="44" data-column="14"></div><div class="playlist-cell" data-pattern="44" data-column="15"></div><div class="playlist-cell" data-pattern="44" data-column="16"></div><div class="playlist-cell" data-pattern="44" data-column="17"></div><div class="playlist-cell" data-pattern="44" data-column="18"></div><div class="playlist-cell" data-pattern="44" data-column="19"></div><div class="playlist-cell" data-pattern="44" data-column="20"></div><div class="playlist-cell" data-pattern="44" data-column="21"></div><div class="playlist-cell" data-pattern="44" data-column="22"></div><div class="playlist-cell" data-pattern="44" data-column="23"></div><div class="playlist-cell" data-pattern="44" data-column="24"></div><div class="playlist-cell" data-pattern="44" data-column="25"></div><div class="playlist-cell" data-pattern="44" data-column="26"></div><div class="playlist-cell" data-pattern="44" data-column="27"></div><div class="playlist-cell" data-pattern="44" data-column="28"></div><div class="playlist-cell" data-pattern="44" data-column="29"></div><div class="playlist-cell" data-pattern="44" data-column="30"></div><div class="playlist-cell" data-pattern="44" data-column="31"></div><div class="playlist-label" data-pattern="45">Pattern 46</div><div class="playlist-cell" data-pattern="45" data-column="0"></div><div class="playlist-cell" data-pattern="45" data-column="1"></div><div class="playlist-cell" data-pattern="45" data-column="2"></div><div class="playlist-cell" data-pattern="45" data-column="3"></div><div class="playlist-cell" data-pattern="45" data-column="4"></div><div class="playlist-cell" data-pattern="45" data-column="5"></div><div class="playlist-cell" data-pattern="45" data-column="6"></div><div class="playlist-cell" data-pattern="45" data-column="7"></div><div class="playlist-cell" data-pattern="45" data-column="8"></div><div class="playlist-cell" data-pattern="45" data-column="9"></div><div class="playlist-cell" data-pattern="45" data-column="10"></div><div class="playlist-cell" data-pattern="45" data-column="11"></div><div class="playlist-cell" data-pattern="45" data-column="12"></div><div class="playlist-cell" data-pattern="45" data-column="13"></div><div class="playlist-cell" data-pattern="45" data-column="14"></div><div class="playlist-cell" data-pattern="45" data-column="15"></div><div class="playlist-cell" data-pattern="45" data-column="16"></div><div class="playlist-cell" data-pattern="45" data-column="17"></div><div class="playlist-cell" data-pattern="45" data-column="18"></div><div class="playlist-cell" data-pattern="45" data-column="19"></div><div class="playlist-cell" data-pattern="45" data-column="20"></div><div class="playlist-cell" data-pattern="45" data-column="21"></div><div class="playlist-cell" data-pattern="45" data-column="22"></div><div class="playlist-cell" data-pattern="45" data-column="23"></div><div class="playlist-cell" data-pattern="45" data-column="24"></div><div class="playlist-cell" data-pattern="45" data-column="25"></div><div class="playlist-cell" data-pattern="45" data-column="26"></div><div class="playlist-cell" data-pattern="45" data-column="27"></div><div class="playlist-cell" data-pattern="45" data-column="28"></div><div class="playlist-cell" data-pattern="45" data-column="29"></div><div class="playlist-cell" data-pattern="45" data-column="30"></div><div class="playlist-cell" data-pattern="45" data-column="31"></div><div class="playlist-label" data-pattern="46">Pattern 47</div><div class="playlist-cell" data-pattern="46" data-column="0"></div><div class="playlist-cell" data-pattern="46" data-column="1"></div><div class="playlist-cell" data-pattern="46" data-column="2"></div><div class="playlist-cell" data-pattern="46" data-column="3"></div><div class="playlist-cell" data-pattern="46" data-column="4"></div><div class="playlist-cell" data-pattern="46" data-column="5"></div><div class="playlist-cell" data-pattern="46" data-column="6"></div><div class="playlist-cell" data-pattern="46" data-column="7"></div><div class="playlist-cell" data-pattern="46" data-column="8"></div><div class="playlist-cell" data-pattern="46" data-column="9"></div><div class="playlist-cell" data-pattern="46" data-column="10"></div><div class="playlist-cell" data-pattern="46" data-column="11"></div><div class="playlist-cell" data-pattern="46" data-column="12"></div><div class="playlist-cell" data-pattern="46" data-column="13"></div><div class="playlist-cell" data-pattern="46" data-column="14"></div><div class="playlist-cell" data-pattern="46" data-column="15"></div><div class="playlist-cell" data-pattern="46" data-column="16"></div><div class="playlist-cell" data-pattern="46" data-column="17"></div><div class="playlist-cell" data-pattern="46" data-column="18"></div><div class="playlist-cell" data-pattern="46" data-column="19"></div><div class="playlist-cell" data-pattern="46" data-column="20"></div><div class="playlist-cell" data-pattern="46" data-column="21"></div><div class="playlist-cell" data-pattern="46" data-column="22"></div><div class="playlist-cell" data-pattern="46" data-column="23"></div><div class="playlist-cell" data-pattern="46" data-column="24"></div><div class="playlist-cell" data-pattern="46" data-column="25"></div><div class="playlist-cell" data-pattern="46" data-column="26"></div><div class="playlist-cell" data-pattern="46" data-column="27"></div><div class="playlist-cell" data-pattern="46" data-column="28"></div><div class="playlist-cell" data-pattern="46" data-column="29"></div><div class="playlist-cell" data-pattern="46" data-column="30"></div><div class="playlist-cell" data-pattern="46" data-column="31"></div><div class="playlist-label" data-pattern="47">Pattern 48</div><div class="playlist-cell" data-pattern="47" data-column="0"></div><div class="playlist-cell" data-pattern="47" data-column="1"></div><div class="playlist-cell" data-pattern="47" data-column="2"></div><div class="playlist-cell" data-pattern="47" data-column="3"></div><div class="playlist-cell" data-pattern="47" data-column="4"></div><div class="playlist-cell" data-pattern="47" data-column="5"></div><div class="playlist-cell" data-pattern="47" data-column="6"></div><div class="playlist-cell" data-pattern="47" data-column="7"></div><div class="playlist-cell" data-pattern="47" data-column="8"></div><div class="playlist-cell" data-pattern="47" data-column="9"></div><div class="playlist-cell" data-pattern="47" data-column="10"></div><div class="playlist-cell" data-pattern="47" data-column="11"></div><div class="playlist-cell" data-pattern="47" data-column="12"></div><div class="playlist-cell" data-pattern="47" data-column="13"></div><div class="playlist-cell" data-pattern="47" data-column="14"></div><div class="playlist-cell" data-pattern="47" data-column="15"></div><div class="playlist-cell" data-pattern="47" data-column="16"></div><div class="playlist-cell" data-pattern="47" data-column="17"></div><div class="playlist-cell" data-pattern="47" data-column="18"></div><div class="playlist-cell" data-pattern="47" data-column="19"></div><div class="playlist-cell" data-pattern="47" data-column="20"></div><div class="playlist-cell" data-pattern="47" data-column="21"></div><div class="playlist-cell" data-pattern="47" data-column="22"></div><div class="playlist-cell" data-pattern="47" data-column="23"></div><div class="playlist-cell" data-pattern="47" data-column="24"></div><div class="playlist-cell" data-pattern="47" data-column="25"></div><div class="playlist-cell" data-pattern="47" data-column="26"></div><div class="playlist-cell" data-pattern="47" data-column="27"></div><div class="playlist-cell" data-pattern="47" data-column="28"></div><div class="playlist-cell" data-pattern="47" data-column="29"></div><div class="playlist-cell" data-pattern="47" data-column="30"></div><div class="playlist-cell" data-pattern="47" data-column="31"></div><div class="playlist-label" data-pattern="48">Pattern 49</div><div class="playlist-cell" data-pattern="48" data-column="0"></div><div class="playlist-cell" data-pattern="48" data-column="1"></div><div class="playlist-cell" data-pattern="48" data-column="2"></div><div class="playlist-cell" data-pattern="48" data-column="3"></div><div class="playlist-cell" data-pattern="48" data-column="4"></div><div class="playlist-cell" data-pattern="48" data-column="5"></div><div class="playlist-cell" data-pattern="48" data-column="6"></div><div class="playlist-cell" data-pattern="48" data-column="7"></div><div class="playlist-cell" data-pattern="48" data-column="8"></div><div class="playlist-cell" data-pattern="48" data-column="9"></div><div class="playlist-cell" data-pattern="48" data-column="10"></div><div class="playlist-cell" data-pattern="48" data-column="11"></div><div class="playlist-cell" data-pattern="48" data-column="12"></div><div class="playlist-cell" data-pattern="48" data-column="13"></div><div class="playlist-cell" data-pattern="48" data-column="14"></div><div class="playlist-cell" data-pattern="48" data-column="15"></div><div class="playlist-cell" data-pattern="48" data-column="16"></div><div class="playlist-cell" data-pattern="48" data-column="17"></div><div class="playlist-cell" data-pattern="48" data-column="18"></div><div class="playlist-cell" data-pattern="48" data-column="19"></div><div class="playlist-cell" data-pattern="48" data-column="20"></div><div class="playlist-cell" data-pattern="48" data-column="21"></div><div class="playlist-cell" data-pattern="48" data-column="22"></div><div class="playlist-cell" data-pattern="48" data-column="23"></div><div class="playlist-cell" data-pattern="48" data-column="24"></div><div class="playlist-cell" data-pattern="48" data-column="25"></div><div class="playlist-cell" data-pattern="48" data-column="26"></div><div class="playlist-cell" data-pattern="48" data-column="27"></div><div class="playlist-cell" data-pattern="48" data-column="28"></div><div class="playlist-cell" data-pattern="48" data-column="29"></div><div class="playlist-cell" data-pattern="48" data-column="30"></div><div class="playlist-cell" data-pattern="48" data-column="31"></div><div class="playlist-label" data-pattern="49">Pattern 50</div><div class="playlist-cell" data-pattern="49" data-column="0"></div><div class="playlist-cell" data-pattern="49" data-column="1"></div><div class="playlist-cell" data-pattern="49" data-column="2"></div><div class="playlist-cell" data-pattern="49" data-column="3"></div><div class="playlist-cell" data-pattern="49" data-column="4"></div><div class="playlist-cell" data-pattern="49" data-column="5"></div><div class="playlist-cell" data-pattern="49" data-column="6"></div><div class="playlist-cell" data-pattern="49" data-column="7"></div><div class="playlist-cell" data-pattern="49" data-column="8"></div><div class="playlist-cell" data-pattern="49" data-column="9"></div><div class="playlist-cell" data-pattern="49" data-column="10"></div><div class="playlist-cell" data-pattern="49" data-column="11"></div><div class="playlist-cell" data-pattern="49" data-column="12"></div><div class="playlist-cell" data-pattern="49" data-column="13"></div><div class="playlist-cell" data-pattern="49" data-column="14"></div><div class="playlist-cell" data-pattern="49" data-column="15"></div><div class="playlist-cell" data-pattern="49" data-column="16"></div><div class="playlist-cell" data-pattern="49" data-column="17"></div><div class="playlist-cell" data-pattern="49" data-column="18"></div><div class="playlist-cell" data-pattern="49" data-column="19"></div><div class="playlist-cell" data-pattern="49" data-column="20"></div><div class="playlist-cell" data-pattern="49" data-column="21"></div><div class="playlist-cell" data-pattern="49" data-column="22"></div><div class="playlist-cell" data-pattern="49" data-column="23"></div><div class="playlist-cell" data-pattern="49" data-column="24"></div><div class="playlist-cell" data-pattern="49" data-column="25"></div><div class="playlist-cell" data-pattern="49" data-column="26"></div><div class="playlist-cell" data-pattern="49" data-column="27"></div><div class="playlist-cell" data-pattern="49" data-column="28"></div><div class="playlist-cell" data-pattern="49" data-column="29"></div><div class="playlist-cell" data-pattern="49" data-column="30"></div><div class="playlist-cell" data-pattern="49" data-column="31"></div></div>
         </div>
@@ -1477,7 +1664,10 @@ body { background:#242424; }
  const controls = content.querySelector('.controls');
  const toolbar = document.getElementById('pianoToolbar');
  const pianoWrap = document.getElementById('pianoRollWrap');
- titlebar.append(patternArea, controls);
+ // Keep all toolbar controls grouped on the left, immediately after File/Edit/View.
+ const toggleRack = document.getElementById('toggleRack');
+ titlebar.insertBefore(patternArea, toggleRack);
+ titlebar.insertBefore(controls, toggleRack);
  const viewMenu = document.getElementById('viewMenu');
  const viewItem = document.getElementById('pianoRollView');
  if (viewItem) viewMenu.style.right = '32px';
@@ -1827,29 +2017,98 @@ const playlistRows = Array.from(
 const playlistGrid = document.getElementById("playlistGrid");
 const playlistScroll = document.getElementById("playlistScroll");
 const playlistStatus = document.getElementById("playlistStatus");
+const playlistTopScrollbar = document.getElementById("playlistTopScrollbar");
+const playlistTopScrollbarInner = document.getElementById("playlistTopScrollbarInner");
+const playlistRulerContent = document.getElementById("playlistRulerContent");
+const playlistRulerBeats = document.getElementById("playlistRulerBeats");
+const playlistPlayhead = document.getElementById("playlistPlayhead");
+let playlistPlayheadAnimationFrame = null;
+let playlistStartBeat = 0;
+let playlistPlayheadDragging = false;
+
+function renderPlaylistRuler() {
+    playlistRulerBeats.innerHTML = "";
+    for (let bar = 0; bar < playlistColumnCount; bar++) {
+        const label = document.createElement("div");
+        label.className = "playlist-ruler-beat bar-start";
+        label.textContent = String(bar + 1);
+        label.style.width = "104px";
+        label.style.minWidth = "104px";
+        label.title = "Bar " + (bar + 1);
+        playlistRulerBeats.appendChild(label);
+    }
+    const fullWidth = 100 + playlistColumnCount * 104;
+    playlistTopScrollbarInner.style.width = Math.max(0, fullWidth - 100) + "px";
+    playlistRulerContent.style.width = fullWidth + "px";
+    syncPlaylistTopScroll();
+}
+
+function syncPlaylistTopScroll() {
+    if (!playlistTopScrollbar || !playlistScroll) return;
+    playlistScroll.scrollLeft = playlistTopScrollbar.scrollLeft;
+    playlistRulerBeats.style.transform = `translateX(${-playlistScroll.scrollLeft}px)`;
+    if (playlistPlayheadViewport) playlistPlayheadViewport.style.setProperty("--playlist-scroll-left", playlistScroll.scrollLeft + "px");
+}
+
+playlistTopScrollbar.addEventListener("scroll", () => {
+    if (playlistScroll.scrollLeft !== playlistTopScrollbar.scrollLeft) playlistScroll.scrollLeft = playlistTopScrollbar.scrollLeft;
+    playlistRulerBeats.style.transform = `translateX(${-playlistTopScrollbar.scrollLeft}px)`;
+    if (!playing && playInPlaylist) setPlaylistPlayheadFromBeat(playlistStartBeat);
+});
+
+// Click or click-and-drag anywhere in the ruler to position the playhead.
+// Dragging begins immediately on pointerdown, even when the playhead was elsewhere.
+const playlistRulerViewport = document.getElementById("playlistRulerViewport");
+function playlistBeatFromPointer(event) {
+    const rect = playlistRulerViewport.getBoundingClientRect();
+    const timelineX = event.clientX - rect.left - 100 + playlistScroll.scrollLeft;
+    return Math.max(0, Math.round(timelineX / 26));
+}
+if (playlistRulerViewport) {
+    playlistRulerViewport.addEventListener("pointerdown", event => {
+        if (!playInPlaylist || event.button !== 0 || playing) return;
+        event.preventDefault();
+        playlistPlayheadDragging = true;
+        setPlaylistPlayheadFromBeat(playlistBeatFromPointer(event));
+        try { playlistRulerViewport.setPointerCapture(event.pointerId); } catch (_) {}
+    });
+    playlistRulerViewport.addEventListener("pointermove", event => {
+        if (!playlistPlayheadDragging || !playInPlaylist || playing) return;
+        setPlaylistPlayheadFromBeat(playlistBeatFromPointer(event));
+    });
+    const stopRulerPlayheadDrag = () => { playlistPlayheadDragging = false; };
+    playlistRulerViewport.addEventListener("pointerup", stopRulerPlayheadDrag);
+    playlistRulerViewport.addEventListener("pointercancel", stopRulerPlayheadDrag);
+    playlistRulerViewport.addEventListener("lostpointercapture", stopRulerPlayheadDrag);
+}
+playlistScroll.addEventListener("scroll", () => {
+    if (playlistTopScrollbar.scrollLeft !== playlistScroll.scrollLeft) playlistTopScrollbar.scrollLeft = playlistScroll.scrollLeft;
+    playlistRulerBeats.style.transform = `translateX(${-playlistScroll.scrollLeft}px)`;
+    if (!playing && playInPlaylist) setPlaylistPlayheadFromBeat(playlistStartBeat);
+});
 
 function renderPlaylistColumns() {
     const savedScrollLeft = playlistScroll.scrollLeft;
     const savedScrollTop = playlistScroll.scrollTop;
-
-    playlistGrid.style.setProperty("--playlist-columns", playlistColumnCount);
+    playlistGrid.style.setProperty("--playlist-beats", playlistColumnCount * 4);
     playlistGrid.innerHTML = "";
-
     for (let track = 0; track < 50; track++) {
         const label = document.createElement("div");
-        label.className = "playlist-label";
+        label.className = "playlist-track-label";
         label.textContent = "Track " + (track + 1);
         label.dataset.track = track;
         playlistGrid.appendChild(label);
-
-        for (let column = 0; column < playlistColumnCount; column++) {
+        for (let slot = 0; slot < playlistColumnCount * 4; slot++) {
+            const bar = Math.floor(slot / 4);
+            const beat = slot % 4;
             const cell = document.createElement("div");
             cell.className = "playlist-cell";
-            // Alternate the timeline background every four bars: bars 1-4, 9-12, ... are the base shade.
-            if (Math.floor(column / 4) % 2 === 1) cell.classList.add("bar-shade-alt");
+            if (Math.floor(bar / 4) % 2 === 1) cell.classList.add("bar-shade-alt");
+            if (beat < 3) cell.classList.add("beat-line");
+            if (beat === 3) cell.classList.add("bar-line");
             cell.dataset.track = track;
-            cell.dataset.column = column;
-            const pattern = playlistRows[track].get(column);
+            cell.dataset.column = slot;
+            const pattern = playlistRows[track].get(slot);
             if (pattern !== undefined) {
                 cell.classList.add("active");
                 const block = document.createElement("div");
@@ -1863,25 +2122,20 @@ function renderPlaylistColumns() {
             playlistGrid.appendChild(cell);
         }
     }
-
+    renderPlaylistRuler();
     requestAnimationFrame(() => {
         playlistScroll.scrollLeft = Math.max(0, savedScrollLeft);
+        playlistTopScrollbar.scrollLeft = Math.max(0, savedScrollLeft);
+        playlistRulerBeats.style.transform = `translateX(${-Math.max(0, savedScrollLeft)}px)`;
         playlistScroll.scrollTop = Math.max(0, savedScrollTop);
     });
 }
 
 function setPlaylistCell(track, column, pattern) {
     if (track < 0 || track >= 50 || column < 0) return;
-
-    if (pattern === null || pattern === undefined) {
-        playlistRows[track].delete(column);
-    } else {
-        playlistRows[track].set(column, pattern);
-    }
-
-    const cell = playlistGrid.querySelector(
-        '.playlist-cell[data-track="' + track + '"][data-column="' + column + '"]'
-    );
+    if (pattern === null || pattern === undefined) playlistRows[track].delete(column);
+    else playlistRows[track].set(column, pattern);
+    const cell = playlistGrid.querySelector('.playlist-cell[data-track="' + track + '"][data-column="' + column + '"]');
     if (cell) {
         cell.classList.toggle("active", pattern !== null && pattern !== undefined);
         cell.innerHTML = "";
@@ -1898,13 +2152,9 @@ function setPlaylistCell(track, column, pattern) {
 }
 
 function getPlaylistLength() {
-    let lastColumn = -1;
-    playlistRows.forEach(track => {
-        track.forEach((pattern, column) => {
-            if (column > lastColumn) lastColumn = column;
-        });
-    });
-    return Math.max(1, lastColumn + 1);
+    let lastSlot = -1;
+    playlistRows.forEach(track => track.forEach((pattern, slot) => { if (slot > lastSlot) lastSlot = slot; }));
+    return Math.max(1, Math.floor(lastSlot / 4) + 1);
 }
 
 function clearPlaylist() {
@@ -1913,7 +2163,7 @@ function clearPlaylist() {
 }
 
 function ensurePlaylistColumns(column) {
-    if (column < playlistColumnCount - 8) return;
+    if (Math.floor(column / 4) < playlistColumnCount - 8) return;
     playlistColumnCount += PLAYLIST_COLUMN_CHUNK;
     renderPlaylistColumns();
 }
@@ -1926,6 +2176,14 @@ let playlistPointerOrigin = null;
 let playlistDidDrag = false;
 let playlistMovingPattern = null;
 
+function getPlaylistPatternStart(track, slot) {
+    // A pattern visually spans four beats, but is stored at its starting beat.
+    for (let start = slot; start >= Math.max(0, slot - 3); start--) {
+        if (playlistRows[track]?.has(start)) return start;
+    }
+    return -1;
+}
+
 function paintPlaylistCell(cell) {
     if (!cell) return;
     const track = Number(cell.dataset.track);
@@ -1934,7 +2192,8 @@ function paintPlaylistCell(cell) {
     if (key === lastPaintedPlaylistCell) return;
 
     if (playlistPaintMode === "erase") {
-        setPlaylistCell(track, column, null);
+        const start = getPlaylistPatternStart(track, column);
+        if (start >= 0) setPlaylistCell(track, start, null);
     }
     lastPaintedPlaylistCell = key;
 }
@@ -1947,6 +2206,8 @@ playlistGrid.addEventListener("pointerdown", event => {
 
     const track = Number(cell.dataset.track);
     const column = Number(cell.dataset.column);
+    const patternStart = getPlaylistPatternStart(track, column);
+    const patternColumn = patternStart >= 0 ? patternStart : column;
     playlistPainting = true;
     lastPaintedPlaylistCell = "";
     playlistPointerOrigin = { x: event.clientX, y: event.clientY, cell };
@@ -1960,16 +2221,16 @@ playlistGrid.addEventListener("pointerdown", event => {
     }
 
     playlistPaintMode = "move";
-    const existingPattern = playlistRows[track].get(column);
+    const existingPattern = patternStart >= 0 ? playlistRows[track].get(patternStart) : undefined;
     if (existingPattern !== undefined) {
-        // An existing block only moves after the pointer is dragged, leaving
-        // stationary clicks available for the double-click-to-open behavior.
-        playlistMovingPattern = { pattern: existingPattern, track, column, placed: false };
+        // Clicking anywhere inside a four-beat pattern selects its true start.
+        // Keep the grabbed beat offset while dragging it to another beat.
+        playlistMovingPattern = { pattern: existingPattern, track, column: patternColumn, grabOffset: column - patternColumn, placed: false };
     } else {
         // Place immediately, then let this same gesture move the new block.
         setPlaylistCell(track, column, currentPattern);
         ensurePlaylistColumns(column);
-        playlistMovingPattern = { pattern: currentPattern, track, column, placed: true };
+        playlistMovingPattern = { pattern: currentPattern, track, column, grabOffset: 0, placed: true };
     }
 });
 
@@ -1990,7 +2251,7 @@ playlistGrid.addEventListener("pointermove", event => {
         const target = document.elementFromPoint(event.clientX, event.clientY)?.closest(".playlist-cell");
         if (!target || !playlistGrid.contains(target)) return;
         const targetTrack = Number(target.dataset.track);
-        const targetColumn = Number(target.dataset.column);
+        const targetColumn = Math.max(0, Number(target.dataset.column) - (playlistMovingPattern.grabOffset || 0));
         if (targetTrack === playlistMovingPattern.track && targetColumn === playlistMovingPattern.column) return;
 
         // Move the same pattern block instead of painting more copies.
@@ -2026,7 +2287,10 @@ playlistGrid.addEventListener("contextmenu", event => {
     const cell = event.target.closest(".playlist-cell");
     if (!cell) return;
     event.preventDefault();
-    setPlaylistCell(Number(cell.dataset.track), Number(cell.dataset.column), null);
+    const track = Number(cell.dataset.track);
+    const column = Number(cell.dataset.column);
+    const start = getPlaylistPatternStart(track, column);
+    if (start >= 0) setPlaylistCell(track, start, null);
 });
 
 // Double-clicking a placed pattern selects it in the topbar and opens its roll.
@@ -2035,7 +2299,11 @@ playlistGrid.addEventListener("dblclick", event => {
     if (!cell) return;
     const track = Number(cell.dataset.track);
     const column = Number(cell.dataset.column);
-    const pattern = playlistRows[track].get(column);
+    // The visible four-beat block is anchored at its start beat, but it can
+    // be double-clicked anywhere across its full width.
+    const patternStart = getPlaylistPatternStart(track, column);
+    if (patternStart < 0) return;
+    const pattern = playlistRows[track].get(patternStart);
     if (pattern === undefined) return;
 
     if (playlistClickTimer) clearTimeout(playlistClickTimer);
@@ -3551,23 +3819,71 @@ function startSmoothPlayhead() {
 }
 
 function updatePlaylistPlayhead(column, step) {
-    if (step !== 0) {
-        return;
-    }
-
-    playlistGrid
-        .querySelectorAll(".playlist-cell.playing")
-        .forEach(cell => cell.classList.remove("playing"));
-
-    playlistGrid
-        .querySelectorAll(
-            '.playlist-cell[data-column="' + column + '"].active'
-        )
-        .forEach(cell => cell.classList.add("playing"));
-
-    playlistStatus.textContent =
-        "column " + (column + 1);
+    if (playlistStatus) playlistStatus.textContent = "bar " + (column + 1);
 }
+
+function setPlaylistPlayheadFromBeat(beat) {
+    playlistStartBeat = Math.max(0, Math.round(beat));
+    const maxBeat = Math.max(0, playlistColumnCount * 4 - 1);
+    playlistStartBeat = Math.min(playlistStartBeat, maxBeat);
+    const x = playlistStartBeat * 26 - playlistScroll.scrollLeft;
+    if (playlistPlayhead) {
+        playlistPlayhead.style.left = x + "px";
+        playlistPlayhead.style.display = playInPlaylist ? "block" : "none";
+    }
+    if (playlistStatus) playlistStatus.textContent = "bar " + (Math.floor(playlistStartBeat / 4) + 1);
+}
+
+function startPlaylistPlayhead() {
+    if (playlistPlayheadAnimationFrame !== null) cancelAnimationFrame(playlistPlayheadAnimationFrame);
+    if (!playlistPlayhead) return;
+    playlistPlayhead.style.display = "block";
+    const animate = () => {
+        if (!playing || !playInPlaylist) {
+            playlistPlayheadAnimationFrame = null;
+            setPlaylistPlayheadFromBeat(playlistStartBeat);
+            return;
+        }
+        const elapsed = Math.max(0, getAudioContext().currentTime - playbackStartTime);
+        const beatDuration = getStepDuration() * 4;
+        const totalBeats = Math.max(4, getPlaylistLength() * 4, (Math.floor(playlistStartBeat / 4) + 1) * 4);
+        const totalPosition = (playlistStartBeat + elapsed / beatDuration) % totalBeats;
+        const x = totalPosition * 26 - playlistScroll.scrollLeft;
+        playlistPlayhead.style.left = x + "px";
+        playlistPlayhead.style.display = "block";
+        playlistPlayheadAnimationFrame = requestAnimationFrame(animate);
+    };
+    playlistPlayheadAnimationFrame = requestAnimationFrame(animate);
+}
+
+// Drag the yellow playhead to choose a beat to begin playback from.
+if (playlistPlayhead) {
+    playlistPlayhead.addEventListener("pointerdown", event => {
+        if (!playInPlaylist || event.button !== 0) return;
+        event.preventDefault();
+        event.stopPropagation();
+        playlistPlayheadDragging = true;
+        playlistPlayhead.setPointerCapture?.(event.pointerId);
+        const viewport = document.getElementById("playlistPlayheadViewport");
+        const updateFromPointer = pointerEvent => {
+            const rect = viewport.getBoundingClientRect();
+            const beat = (pointerEvent.clientX - rect.left + playlistScroll.scrollLeft) / 26;
+            setPlaylistPlayheadFromBeat(beat);
+        };
+        updateFromPointer(event);
+        const move = pointerEvent => { if (playlistPlayheadDragging) updateFromPointer(pointerEvent); };
+        const end = () => {
+            playlistPlayheadDragging = false;
+            window.removeEventListener("pointermove", move);
+            window.removeEventListener("pointerup", end);
+            window.removeEventListener("pointercancel", end);
+        };
+        window.addEventListener("pointermove", move);
+        window.addEventListener("pointerup", end);
+        window.addEventListener("pointercancel", end);
+    });
+}
+
 
 /* ==========================================================
    SCHEDULE
@@ -3647,7 +3963,7 @@ function scheduler() {
         SCHEDULE_AHEAD_TIME
     ) {
         if (playInPlaylist) {
-            const playlistLength = getPlaylistLength();
+            const playlistLength = Math.max(getPlaylistLength(), Math.floor(playlistStartBeat / 4) + 1);
 
             schedulePlaylistStep(
                 currentPlaylistColumn,
@@ -3694,8 +4010,13 @@ async function startSequencer() {
     }
 
     playing = true;
-    currentStep = 0;
-    currentPlaylistColumn = 0;
+    if (playInPlaylist) {
+        currentPlaylistColumn = Math.floor(playlistStartBeat / 4);
+        currentStep = (playlistStartBeat % 4) * 4;
+    } else {
+        currentStep = 0;
+        currentPlaylistColumn = 0;
+    }
 
     nextStepTime =
         context.currentTime +
@@ -3704,10 +4025,14 @@ async function startSequencer() {
 
     playButton.textContent = "■";
     playButton.title = "Stop";
-    if (!playInPlaylist) updateRackPlayhead(0);
-
-    if (playInPlaylist) {
-        playlistStatus.textContent = "column 1";
+    if (!playInPlaylist) {
+        updateRackPlayhead(0);
+        if (playlistPlayhead) playlistPlayhead.style.display = "none";
+    } else {
+        const pianoPlayhead = document.getElementById("pianoPlayhead");
+        if (pianoPlayhead) pianoPlayhead.style.display = "none";
+        if (playlistStatus) playlistStatus.textContent = "bar " + (Math.floor(playlistStartBeat / 4) + 1);
+        startPlaylistPlayhead();
     }
 
     schedulerTimer = setInterval(
@@ -3745,7 +4070,13 @@ function stopSequencer() {
     }
     const pianoPlayhead = document.getElementById("pianoPlayhead");
     if (pianoPlayhead) { pianoPlayhead.style.left = "0px"; pianoPlayhead.style.display = "none"; }
-    playlistStatus.textContent = "playlist";
+    if (playlistPlayheadAnimationFrame !== null) cancelAnimationFrame(playlistPlayheadAnimationFrame);
+    playlistPlayheadAnimationFrame = null;
+    if (playlistPlayhead) {
+        playlistPlayhead.style.left = (playlistStartBeat * 26 - playlistScroll.scrollLeft) + "px";
+        playlistPlayhead.style.display = playInPlaylist ? "block" : "none";
+    }
+    if (playlistStatus) playlistStatus.textContent = playInPlaylist ? ("bar " + (Math.floor(playlistStartBeat / 4) + 1)) : "playlist";
 }
 
 /* ==========================================================
@@ -3820,6 +4151,10 @@ playlistButton.addEventListener(
 
         if (playing) {
             stopSequencer();
+        }
+        if (playlistPlayhead) {
+            playlistPlayhead.style.display = playInPlaylist ? "block" : "none";
+            if (playInPlaylist) setPlaylistPlayheadFromBeat(playlistStartBeat);
         }
     }
 );
@@ -4780,6 +5115,11 @@ document.addEventListener(
 .piano-note-block.black-row{background:#5687a5}
 .piano-note-handle{position:absolute;right:-2px;top:-1px;bottom:-1px;width:6px;background:rgba(240,250,255,.65);cursor:ew-resize;z-index:6}
 .piano-note-block:hover .piano-note-handle{background:#fff}
+.vst-window-content{height:calc(100% - 30px);padding:14px;background:#151515;color:#ddd;font-size:12px;font-weight:bold}
+.vst-finetune-label{margin:0 0 8px 2px;color:#ddd;text-transform:lowercase}
+.vst-finetune-row{height:76px;display:flex;align-items:center;gap:14px;background:#0b0b0b;border:2px solid #292929;padding:7px 10px}
+.vst-finetune-slider{height:60px;width:24px}
+.vst-finetune-readout{width:auto;min-width:90px}
 </style>
 <script>
 (() => {
@@ -4826,7 +5166,26 @@ document.addEventListener(
     const close = document.createElement('button'); close.className = 'window-button'; close.textContent = '×'; close.title = 'Close';
     close.addEventListener('click', e => { e.stopPropagation(); win.hidden = true; });
     bar.append(title, close);
-    const body = document.createElement('div'); body.className = 'vst-window-content'; body.textContent = 'VST';
+    const body = document.createElement('div'); body.className = 'vst-window-content';
+    body.innerHTML = '<div class="vst-finetune-label">fine tune</div><div class="vst-finetune-row"><input class="pitch-slider vst-finetune-slider" type="range" min="-200" max="200" value="0" step="1"><div class="pitch-readout vst-finetune-readout">0 cents</div></div>';
+    const fineSlider = body.querySelector('.vst-finetune-slider');
+    const fineReadout = body.querySelector('.vst-finetune-readout');
+    const refreshFineReadout = () => { const v=Number(fineSlider.value)||0; fineReadout.textContent=(v>0?'+':'')+v+' cents'; };
+    fineSlider.addEventListener('input', () => {
+      const cents=Math.max(-200,Math.min(200,Number(fineSlider.value)||0));
+      channels.forEach(channel => { if (channel.instrument && channel.instrument.name === 'spark_keys') channel.pitchCents=cents; });
+      refreshFineReadout();
+    });
+    fineSlider.addEventListener('contextmenu', e => {
+      e.preventDefault(); e.stopPropagation();
+      const current=Number(fineSlider.value)||0;
+      const typed=prompt('Enter fine tune in cents (-200 to +200):', current>=0?'+'+current:String(current));
+      if(typed===null)return;
+      const value=Number(String(typed).trim()); if(!Number.isFinite(value))return;
+      fineSlider.value=String(Math.max(-200,Math.min(200,Math.round(value))));
+      fineSlider.dispatchEvent(new Event('input',{bubbles:true}));
+    });
+    refreshFineReadout();
     win.append(bar, body); document.body.appendChild(win);
     if (typeof setupWindowDrag === 'function') setupWindowDrag(win, bar, null);
     bar.addEventListener('pointerdown', () => { win.style.zIndex = String(++window.__sparkVstZ); });
@@ -4847,7 +5206,7 @@ document.addEventListener(
       e.dataTransfer.effectAllowed = 'copy';
     });
     vstTree.appendChild(row);
-    showVstSamples();
+    // Show only the instrument entry, not each individual sample file.
   }
   function showVstSamples() {
     vstFiles.forEach(file => {
@@ -4933,7 +5292,7 @@ document.addEventListener(
   // A note is resized by dragging its right edge. Left-clicking empty cells still adds one note.
   let resizing = null;
   function refreshNoteBlockWidths() {
-    const stepWidth = pianoGrid.clientWidth / 16;
+    const stepWidth = pianoGrid.clientWidth / 32;
     pianoGrid.querySelectorAll('.piano-note-block').forEach(block => {
       const duration = Number(block.dataset.duration || 1);
       block.style.width = Math.max(1, stepWidth * duration - 2) + 'px';
@@ -4946,9 +5305,10 @@ document.addEventListener(
       const key=document.createElement('div'); key.className='piano-key '+(pitchIsBlack(midi)?'black':'white');
       if (midi%12===0) { key.classList.add('c-note'); key.textContent=pitchName(midi); }
       pianoKeysInner.appendChild(key);
-      for (let step=0; step<16; step++) {
+      for (let step=0; step<32; step++) {
         const cell=document.createElement('div'); cell.className='piano-cell'+(pitchIsBlack(midi)?' black-row':'');
-        if(step%4===0)cell.classList.add(step===0?'bar-line':'beat-line');
+        if(step%8===0)cell.classList.add(step===0?'bar-line':'beat-line');
+        else if(step%2===0)cell.classList.add('subbeat-line');
         cell.dataset.pitch=midi; cell.dataset.step=step;
         const id=noteKey(selectedSound,midi,step);
         const note=pianoNotes[currentPattern].get(id);
@@ -4958,13 +5318,6 @@ document.addEventListener(
           block.dataset.noteKey=id; block.dataset.duration=String(note.duration || 1); block.title=pitchName(midi)+' · '+(note.duration||1)+' step'+((note.duration||1)===1?'':'s');
           const handle=document.createElement('div'); handle.className='piano-note-handle'; block.appendChild(handle); cell.appendChild(block);
         }
-        cell.addEventListener('mousedown', event => {
-          if (event.button===2) { pianoNotes[currentPattern].delete(id); renderPianoRoll(); return; }
-          if (event.button!==0) return;
-          if (pianoNotes[currentPattern].has(id)) return;
-          const newNote={channel:selectedSound,pitch:midi,step,duration:1};
-          pianoNotes[currentPattern].set(id,newNote); renderPianoRoll();
-        });
         cell.addEventListener('contextmenu',event=>event.preventDefault());
         pianoGrid.appendChild(cell);
       }
@@ -4975,36 +5328,135 @@ document.addEventListener(
     requestAnimationFrame(refreshNoteBlockWidths);
     if(playing && !playInPlaylist) updateRackPlayhead(currentStep);
   };
-  pianoGrid.addEventListener('mousedown', event => {
-    const block=event.target.closest('.piano-note-block');
-    if (!block || event.button!==0) return;
-    event.preventDefault(); event.stopPropagation();
-    const key=block.dataset.noteKey; const note=pianoNotes[currentPattern].get(key); if(!note)return;
-    const rect=block.getBoundingClientRect();
-    if (event.target.closest('.piano-note-handle') || event.clientX >= rect.right-7) {
-      const cellWidth=pianoGrid.clientWidth/16;
-      resizing={key,note,startX:event.clientX,startDuration:Number(note.duration||1),stepWidth:cellWidth,block};
-      document.body.style.cursor='ew-resize';
+  // Piano-roll editing: place, move in both directions, and resize from the right edge.
+  // New notes inherit the last duration used; the very first note is one cell long.
+  let lastPianoNoteDuration = 1;
+  let pianoNoteDrag = null;
+  function pianoCellAtPoint(x, y) {
+    const rect = pianoGrid.getBoundingClientRect();
+    if (x < rect.left || x >= rect.right || y < rect.top || y >= rect.bottom) return null;
+    const col = Math.max(0, Math.min(31, Math.floor((x - rect.left) / (rect.width / 32))));
+    const rowHeight = rect.height / 61; // MIDI 84 through 24, inclusive.
+    const row = Math.max(0, Math.min(60, Math.floor((y - rect.top) / rowHeight)));
+    return pianoGrid.querySelector('.piano-cell[data-step="' + col + '"][data-pitch="' + (84-row) + '"]');
+  }
+  function playPianoPitchPreview(note) {
+    const channel = channels[note.channel];
+    if (!channel) return;
+    try { playPianoVoice(channel, {...note, duration:1}, getAudioContext().currentTime + 0.012); } catch (_) {}
+  }
+  pianoGrid.addEventListener('pointerdown', event => {
+    if (event.button !== 0 && event.button !== 2) return;
+    const cell = event.target.closest('.piano-cell');
+    if (!cell) return;
+    const block = event.target.closest('.piano-note-block');
+    const pitch = Number(cell.dataset.pitch), step = Number(cell.dataset.step);
+    if (event.button === 2) {
+      event.preventDefault();
+      const key = block?.dataset.noteKey || noteKey(selectedSound, pitch, step);
+      pianoNotes[currentPattern].delete(key);
+      renderPianoRoll();
+      return;
     }
-  }, true);
-  document.addEventListener('mousemove', event => {
-    if (!resizing) return;
-    const maxDuration=Math.max(1,16-resizing.note.step);
-    const delta=Math.round((event.clientX-resizing.startX)/resizing.stepWidth);
-    resizing.note.duration=Math.max(1,Math.min(maxDuration,resizing.startDuration+delta));
-    resizing.block.dataset.duration=String(resizing.note.duration);
-    resizing.block.title=pitchName(resizing.note.pitch)+' · '+resizing.note.duration+' steps';
-    resizing.block.style.width=Math.max(1,resizing.stepWidth*resizing.note.duration-2)+'px';
+    event.preventDefault();
+    const cellWidth = pianoGrid.clientWidth / 32;
+    let key, note, mode = 'move', created = false;
+    if (block) {
+      key = block.dataset.noteKey;
+      note = pianoNotes[currentPattern].get(key);
+      if (!note) return;
+      lastPianoNoteDuration = Math.max(1, Number(note.duration) || 1);
+      const rect = block.getBoundingClientRect();
+      if (event.target.closest('.piano-note-handle') || event.clientX >= rect.right - 8) mode = 'resize';
+    } else {
+      key = noteKey(selectedSound, pitch, step);
+      note = pianoNotes[currentPattern].get(key);
+      if (!note) {
+        note = {channel:selectedSound, pitch, step, duration:lastPianoNoteDuration};
+        pianoNotes[currentPattern].set(key, note);
+        created = true;
+      } else {
+        lastPianoNoteDuration = Math.max(1, Number(note.duration) || 1);
+      }
+    }
+    pianoNoteDrag = {
+      pointerId:event.pointerId, note, key, mode,
+      startX:event.clientX, startY:event.clientY,
+      startStep:Number(note.step), startPitch:Number(note.pitch),
+      startDuration:Math.max(1, Number(note.duration)||1), cellWidth,
+      moved:false, created, lastPreviewPitch:Number(note.pitch)
+    };
+    try { pianoGrid.setPointerCapture(event.pointerId); } catch (_) {}
+    if (mode === 'resize') document.body.style.cursor = 'ew-resize';
+    // Do not rerender here: it would detach the active pointer target before dragging.
   });
-  document.addEventListener('mouseup', () => { if(resizing){resizing=null;document.body.style.cursor='';renderPianoRoll();} });
-  document.addEventListener('contextmenu', event => { if(event.target.closest('.piano-note-block'))event.preventDefault(); });
+  pianoGrid.addEventListener('pointermove', event => {
+    const drag = pianoNoteDrag;
+    if (!drag || event.pointerId !== drag.pointerId) return;
+    if (drag.mode === 'resize') {
+      const delta = Math.round((event.clientX - drag.startX) / drag.cellWidth);
+      const duration = Math.max(1, Math.min(32 - drag.note.step, drag.startDuration + delta));
+      if (duration !== drag.note.duration) {
+        drag.note.duration = duration;
+        lastPianoNoteDuration = duration;
+        drag.moved = true;
+        const block = pianoGrid.querySelector(`[data-note-key="${CSS.escape(drag.key)}"]`);
+        if (block) {
+          block.dataset.duration = String(duration);
+          block.title = pitchName(drag.note.pitch) + ' · ' + duration + ' step' + (duration===1?'':'s');
+          block.style.width = Math.max(1, drag.cellWidth * duration - 2) + 'px';
+        }
+      }
+      return;
+    }
+    const target = pianoCellAtPoint(event.clientX, event.clientY);
+    if (!target) return;
+    const nextPitch = Number(target.dataset.pitch), nextStep = Number(target.dataset.step);
+    if (nextPitch === drag.note.pitch && nextStep === drag.note.step) return;
+    const oldKey = drag.key;
+    const nextKey = noteKey(drag.note.channel, nextPitch, nextStep);
+    // Avoid overwriting another note already occupying the destination cell.
+    const occupied = pianoNotes[currentPattern].get(nextKey);
+    if (occupied && occupied !== drag.note) return;
+    pianoNotes[currentPattern].delete(oldKey);
+    drag.note.pitch = nextPitch;
+    drag.note.step = nextStep;
+    drag.key = nextKey;
+    pianoNotes[currentPattern].set(nextKey, drag.note);
+    drag.moved = true;
+    if (nextPitch !== drag.lastPreviewPitch) {
+      drag.lastPreviewPitch = nextPitch;
+      playPianoPitchPreview(drag.note);
+    }
+    renderPianoRoll();
+  });
+  function finishPianoNoteDrag(event) {
+    if (!pianoNoteDrag || (event && event.pointerId !== undefined && event.pointerId !== pianoNoteDrag.pointerId)) return;
+    const drag = pianoNoteDrag;
+    if (drag.mode === 'resize') lastPianoNoteDuration = Math.max(1, Number(drag.note.duration)||1);
+    else if (drag.note) lastPianoNoteDuration = Math.max(1, Number(drag.note.duration)||1);
+    pianoNoteDrag = null;
+    document.body.style.cursor = '';
+    if (drag.moved || drag.created) renderPianoRoll();
+  }
+  pianoGrid.addEventListener('pointerup', finishPianoNoteDrag);
+  pianoGrid.addEventListener('pointercancel', finishPianoNoteDrag);
+  window.addEventListener('pointerup', finishPianoNoteDrag);
+  pianoGrid.addEventListener('contextmenu', event => { if (event.target.closest('.piano-cell')) event.preventDefault(); });
 
   function playPianoVoice(channel, note, time) {
     const context=getAudioContext();
     let buffer=null; let cents=0;
     if (channel.instrument && channel.instrument.samples) {
-      buffer=channel.instrument.samples[note.pitch] || null;
-      cents=0;
+      // Octave 5: use the C5 sample and transpose it by semitones.
+      // C6 and every other octave keep their original sample mapping.
+      if (note.pitch >= 72 && note.pitch <= 83) {
+        buffer=channel.instrument.samples[72] || null;
+        cents=(note.pitch-72)*100+(Number(channel.pitchCents)||0);
+      } else {
+        buffer=channel.instrument.samples[note.pitch] || null;
+        cents=Number(channel.pitchCents)||0;
+      }
     } else if (channel.buffer) {
       buffer=getPlayableBuffer(channel.buffer, !!channel.reverse);
       cents=(Number(channel.pitchCents)||0)+(note.pitch-72)*100;
@@ -5012,23 +5464,32 @@ document.addEventListener(
     if(!buffer)return;
     const source=context.createBufferSource(); source.buffer=buffer; source.playbackRate.value=Math.pow(2,cents/1200);
     const gain=context.createGain(); source.connect(gain); gain.connect(context.destination);
-    const stepDuration=60/getBPM()/4; const duration=Math.max(1,Number(note.duration)||1)*stepDuration;
-    const end=time+duration; const release=Math.min(.32,Math.max(.12,stepDuration*.45));
-    gain.gain.setValueAtTime(0,time); gain.gain.linearRampToValueAtTime(1,time+.008);
-    const releaseStart=Math.max(time+.009,end-release);
-    gain.gain.setValueAtTime(1,releaseStart); gain.gain.linearRampToValueAtTime(0,end);
+    const stepDuration=60/getBPM()/4; const duration=Math.max(1,Number(note.duration)||1)*stepDuration/2;
+    const end=time+duration;
+    const release=Math.min(.28,Math.max(.16,stepDuration*.8));
+    gain.gain.setValueAtTime(1,time); // no artificial attack: start at the sample's natural level
+    gain.gain.setValueAtTime(1,end);
+    gain.gain.setTargetAtTime(0,end,release/3.5); // smooth, audible release after the note ends
     trackAudioVoice(source,gain,note.channel);
-    source.start(time); try { source.stop(end+.025); } catch(_) {}
+    source.start(time);
+    // Let short samples finish naturally; only stop a longer sample after its release tail.
+    try { source.stop(Math.min(time+buffer.duration/Math.pow(2,cents/1200),end+release*4)); } catch(_) {}
   }
   scheduleRackStep = function(step,time) {
     if(step%4===0)playMetronome(time,step===0);
-    pianoNotes[currentPattern].forEach(note=>{ if(note.step===step && channels[note.channel])playPianoVoice(channels[note.channel],note,time); });
+    pianoNotes[currentPattern].forEach(note=>{ if(Math.floor(note.step/2)===step && channels[note.channel])playPianoVoice(channels[note.channel],note,time+(note.step%2)*(60/getBPM()/8)); });
   };
   schedulePlaylistStep = function(column,step,time) {
     if(step%4===0)playMetronome(time,step===0);
     for(let track=0;track<playlistRows.length;track++) {
-      const pattern=playlistRows[track].get(column); if(pattern===undefined)continue;
-      pianoNotes[pattern].forEach(note=>{if(note.step===step && channels[note.channel])playPianoVoice(channels[note.channel],note,time);});
+      playlistRows[track].forEach((pattern,slot)=>{
+        const absolutePatternStart=Math.floor(slot/4)*16+(slot%4)*4;
+        pianoNotes[pattern].forEach(note=>{
+          const absoluteNoteStep=absolutePatternStart+Math.floor(note.step/2);
+          const fineOffset=(note.step%2)*(60/getBPM()/8);
+          if(absoluteNoteStep===column*16+step && channels[note.channel]) playPianoVoice(channels[note.channel],note,time+fineOffset);
+        });
+      });
     }
     const delay=Math.max(0,(time-getAudioContext().currentTime)*1000);
     setTimeout(()=>{if(playing&&playInPlaylist)updatePlaylistPlayhead(column,step);},delay);
@@ -5038,19 +5499,29 @@ document.addEventListener(
   exportPlaylistAsAudio = async function() {
     const bpm=getBPM(), stepDuration=60/bpm/4, barDuration=stepDuration*16, sampleRate=44100, placements=[];
     let renderDuration=barDuration;
-    playlistRows.forEach((track,trackIndex)=>track.forEach((patternIndex,column)=>{
+    playlistRows.forEach((track,trackIndex)=>track.forEach((patternIndex,slot)=>{
       if(!pianoNotes[patternIndex])return;
+      const column=Math.floor(slot/4), beatOffset=(slot%4)*barDuration/4;
       pianoNotes[patternIndex].forEach(note=>{
         const channel=channels[note.channel]; if(!channel)return;
         let buffer=null, cents=0;
-        if(channel.instrument?.samples) buffer=channel.instrument.samples[note.pitch]||null;
+        if(channel.instrument?.samples) {
+          // Match live playback: transpose the C5 sample across C5-B5 only.
+          if(note.pitch>=72 && note.pitch<=83) {
+            buffer=channel.instrument.samples[72]||null;
+            cents=(note.pitch-72)*100+(Number(channel.pitchCents)||0);
+          } else {
+            buffer=channel.instrument.samples[note.pitch]||null;
+            cents=Number(channel.pitchCents)||0;
+          }
+        }
         else if(channel.buffer){buffer=channel.buffer;cents=(Number(channel.pitchCents)||0)+(note.pitch-72)*100;}
         if(!buffer)return;
-        const rate=Math.pow(2,cents/1200), startTime=column*barDuration+note.step*stepDuration;
+        const rate=Math.pow(2,cents/1200), startTime=column*barDuration+beatOffset+note.step*(stepDuration/2);
         placements.push({note,channel,buffer,startTime,rate,trackIndex});
-        renderDuration=Math.max(renderDuration,startTime+Math.min(buffer.duration/rate,(Number(note.duration)||1)*stepDuration)+.15);
+        renderDuration=Math.max(renderDuration,startTime+Math.min(buffer.duration/rate,(Number(note.duration)||1)*stepDuration/2)+.65);
       });
-      if(track.has(column))renderDuration=Math.max(renderDuration,(column+1)*barDuration);
+      if(track.has(slot))renderDuration=Math.max(renderDuration,column*barDuration+beatOffset+barDuration);
     }));
     const renderLength=Math.max(1,Math.ceil(renderDuration*sampleRate));
     const offline=new OfflineAudioContext(2,renderLength,sampleRate);
@@ -5058,14 +5529,69 @@ document.addEventListener(
     for(const item of placements){
       const {note,buffer,startTime,rate}=item; const source=offline.createBufferSource(); source.buffer=buffer; source.playbackRate.value=rate;
       const gain=offline.createGain(); source.connect(gain); gain.connect(offline.destination);
-      const end=startTime+Math.max(1,Number(note.duration)||1)*stepDuration, release=Math.min(.32,Math.max(.12,stepDuration*.45));
-      gain.gain.setValueAtTime(0,startTime);gain.gain.linearRampToValueAtTime(1,startTime+.006);gain.gain.setValueAtTime(1,Math.max(startTime+.007,end-release));gain.gain.linearRampToValueAtTime(0,end);
-      source.start(startTime);try{source.stop(end+.025)}catch(_){}
+      const end=startTime+Math.max(1,Number(note.duration)||1)*stepDuration/2, release=Math.min(.28,Math.max(.16,stepDuration*.8));
+      gain.gain.setValueAtTime(1,startTime); gain.gain.setValueAtTime(1,end);
+      gain.gain.setTargetAtTime(0,end,release/3.5);
+      source.start(startTime);
+      try { source.stop(Math.min(startTime+buffer.duration/rate,end+release*4)); } catch(_) {}
     }
     const rendered=await offline.startRendering(), wavBlob=audioBufferToWav(rendered,renderLength), url=URL.createObjectURL(wavBlob), link=document.createElement('a');
     link.href=url;link.download='playlist-'+bpm+'bpm.wav';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
   };
   renderPianoRoll();
+})();
+</script>
+
+
+<style id="playlist-toolbar-scroll-final-fix">
+/* The corner is intentionally plain: no extra box above the track labels. */
+#playlistTopScrollbar::before { content:none !important; display:none !important; }
+#playlistTopScrollbar::after { background:#707070 !important; }
+/* Vertical scrolling begins exactly where the ruler ends and reaches the bottom. */
+#playlistScroll {
+  top:53px !important; bottom:0 !important; padding-top:0 !important;
+  overflow-x:auto !important; overflow-y:auto !important;
+  scrollbar-gutter:stable;
+}
+#playlistScroll::-webkit-scrollbar { width:28px !important; height:0 !important; }
+#playlistScroll::-webkit-scrollbar:horizontal { height:0 !important; display:none !important; }
+#playlistScroll::-webkit-scrollbar-track:horizontal,
+#playlistScroll::-webkit-scrollbar-thumb:horizontal { height:0 !important; display:none !important; }
+#rackTitlebar .menu-area { margin-right:0 !important; }
+#rackTitlebar .pattern-area { display:flex !important; flex-direction:row !important; align-items:center !important; gap:5px !important; height:28px !important; margin:0 5px 0 4px !important; padding:0 !important; }
+#rackTitlebar .pattern-control, #rackTitlebar .tempo-control { height:28px !important; flex-direction:row !important; align-items:center !important; gap:3px !important; margin:0 !important; }
+#rackTitlebar .pattern-title, #rackTitlebar .tempo-title { display:none !important; }
+#rackTitlebar .pattern-selector, #rackTitlebar .tempo-selector { height:25px !important; gap:2px !important; }
+#rackTitlebar .pattern-number, #rackTitlebar .tempo-number { width:38px !important; height:23px !important; font-size:13px !important; border-width:1px !important; }
+#rackTitlebar .pattern-arrow-buttons, #rackTitlebar .tempo-arrow-buttons { width:14px !important; height:23px !important; gap:1px !important; }
+#rackTitlebar .pattern-arrow, #rackTitlebar .tempo-arrow { border-width:1px !important; font-size:8px !important; }
+#rackTitlebar .controls { display:flex !important; align-items:center !important; gap:4px !important; height:28px !important; margin:0 4px 0 0 !important; }
+#rackTitlebar .controls button { height:23px !important; min-height:23px !important; }
+#rackTitlebar #toggleRack { margin-left:auto !important; flex:0 0 auto !important; }
+</style>
+<script>
+// Keep horizontal movement synchronized in both directions, including trackpad and Shift+wheel.
+(() => {
+  const area = document.getElementById('playlistScroll');
+  const top = document.getElementById('playlistTopScrollbar');
+  if (!area || !top) return;
+  let syncing = false;
+  const sync = (from, to) => {
+    if (syncing) return;
+    syncing = true;
+    to.scrollLeft = from.scrollLeft;
+    syncing = false;
+  };
+  area.addEventListener('scroll', () => sync(area, top), {passive:true});
+  top.addEventListener('scroll', () => sync(top, area), {passive:true});
+  area.addEventListener('wheel', event => {
+    const horizontal = event.deltaX || (event.shiftKey ? event.deltaY : 0);
+    if (horizontal) {
+      area.scrollLeft += horizontal;
+      top.scrollLeft = area.scrollLeft;
+      event.preventDefault();
+    }
+  }, {passive:false});
 })();
 </script>
 
